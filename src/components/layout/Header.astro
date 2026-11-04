@@ -14,27 +14,31 @@ const { transparent = false } = Astro.props;
   data-tone="light"
   class="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
 >
-  <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8">
-    <a href="/" class="text-2xl font-extrabold tracking-tight">{site.name}<span class="text-accent">.</span></a>
+  <!-- 로고(왼쪽) · 메뉴(가운데) · 견적 문의(오른쪽) -->
+  <div class="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto] items-center px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr] lg:h-20 lg:px-8">
+    <a href="/" class="justify-self-start text-2xl font-extrabold tracking-tight">{site.name}<span class="text-accent">.</span></a>
 
-    <nav class="hidden items-center gap-10 md:flex" aria-label="주요 메뉴">
+    <nav class="hidden items-center gap-8 md:flex lg:gap-12" aria-label="주요 메뉴">
       {nav.map((item) => (
         <a href={item.href} class="text-[15px] font-medium opacity-80 transition-opacity hover:opacity-100">
           {item.label}
         </a>
       ))}
+    </nav>
+
+    <div class="hidden justify-self-end md:block">
       <a
         href="/contact"
         class="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
       >
         견적 문의
       </a>
-    </nav>
+    </div>
 
     <button
       id="menu-toggle"
       type="button"
-      class="-mr-2 p-2 md:hidden"
+      class="-mr-2 justify-self-end p-2 md:hidden"
       aria-label="메뉴 열기"
       aria-expanded="false"
       aria-controls="mobile-menu"
@@ -79,9 +83,10 @@ const { transparent = false } = Astro.props;
   const hero = document.querySelector<HTMLElement>('[data-hero]');
   let menuOpen = false;
 
-  // 히어로가 있으면 히어로를 다 지나간 뒤에 흰 헤더로 바뀜
+  // 히어로가 있으면, 히어로 연출이 끝나 화면 위로 밀려 올라가기 시작할 때 흰 헤더로 바뀜
+  // (투명 헤더가 올라가는 제목 글씨와 겹치지 않게)
   const update = () => {
-    const passed = hero ? hero.getBoundingClientRect().bottom <= header.offsetHeight : window.scrollY > 40;
+    const passed = hero ? hero.getBoundingClientRect().bottom <= window.innerHeight + 1 : window.scrollY > 40;
     header.classList.toggle('is-solid', menuOpen || passed);
   };
 

@@ -1,46 +1,102 @@
 // 사이트 전반에서 쓰는 정보. 연락처나 링크가 바뀌면 여기만 고치면 됩니다.
 export const site = {
-  name: 'otban',
+  name: 'otbone',
+  // 한글 이름. 문장 안에서 "옷본은", "옷본과"처럼 씀
+  nameKo: '옷본',
   description:
-    'otban은 단체복, 아우터, OEM, 샘플 제작을 하는 의류 제작 회사입니다. 기획부터 생산까지 한 곳에서 맡겨보세요.',
+    '옷본은 단체복, 아우터, OEM, 샘플 제작을 하는 의류 제작 회사입니다. 기획부터 생산까지 한 곳에서 맡겨보세요.',
   email: 'hello@otban.kr',
   kakaoChannel: 'https://pf.kakao.com/_xxxxxx',
 
-  // 첫 화면 배경 영상. public/ 폴더의 파일을 같은 이름으로 바꾸면 바로 적용됩니다.
+  // 첫 화면 배경 영상. public/videos/hero.mp4 를 넣으면 바로 적용됩니다.
+  // 영상이 없거나 로딩 중일 땐 poster 사진(src/assets/factory/ 번호)이 보입니다.
   hero: {
     video: '/videos/hero.mp4',
-    poster: '/images/hero-poster.svg',
+    poster: 33,
   },
 };
 
+// 메뉴. '/#about' 처럼 #이 붙은 건 메인 화면의 해당 섹션으로 이동
 export const nav = [
-  { label: '서비스', href: '/services' },
-  { label: '포트폴리오', href: '/portfolio' },
-  { label: '회사 소개', href: '/about' },
-  { label: 'FAQ', href: '/faq' },
+  { label: '회사소개', href: '/#about' },
+  { label: '제작 기준', href: '/standards' },
+  { label: '생산 분야', href: '/#production' },
+  { label: '제작현황', href: '/#works' },
 ];
 
+// 회사 소개 섹션 문구. **굵게** 로 감싼 부분은 진하게 표시됩니다.
+export const about = {
+  eyebrow: 'MADE IN OUR FACTORY',
+  headline: [
+    '디자인이 **한 벌의 옷이 되기까지,**',
+    '모든 과정을 직접 책임지는 의류 제작 기업 **옷본**입니다.',
+  ],
+  body: [
+    '재단, 봉제, 세탁, 검수까지 생산 라인을 직접 운영합니다. 공정마다 사람이 직접 확인하기 때문에, 처음 약속한 품질과 납기를 지킬 수 있습니다.',
+    '소량 단체복부터 브랜드 시즌 생산까지, 수량과 일정에 맞춰 가장 알맞은 방식을 함께 찾아드립니다.',
+  ],
+};
+
+// 생산 분야. photo 는 src/assets/factory/factory-번호.jpg 의 번호
 export const services = [
   {
     title: '단체복',
     en: 'Team Wear',
     desc: '회사, 학교, 동아리, 행사용 티셔츠와 후드를 소량부터 대량까지 제작합니다.',
+    photo: 31,
   },
   {
     title: '아우터',
     en: 'Outerwear',
     desc: '바람막이, 점퍼, 플리스 등 원단 선택부터 부자재까지 맞춤으로 제작합니다.',
+    photo: 18,
   },
   {
     title: 'OEM',
     en: 'OEM Production',
     desc: '브랜드의 디자인을 받아 패턴, 원단, 생산, 검수까지 대신 진행합니다.',
+    photo: 15,
   },
   {
     title: '샘플 제작',
     en: 'Sampling',
     desc: '본 생산 전, 핏과 원단을 직접 확인할 수 있도록 샘플을 먼저 만들어 드립니다.',
+    photo: 9,
   },
+];
+
+// 제작현황(현장 사진) 두 줄. 번호 = src/assets/factory/factory-번호.jpg
+export const gallery = [
+  [
+    { photo: 4, alt: '봉제 작업장 전경' },
+    { photo: 21, alt: '산업용 세탁 설비' },
+    { photo: 3, alt: '재봉틀로 작업하는 모습' },
+    { photo: 17, alt: '봉제 라인 작업 모습' },
+    { photo: 22, alt: '대형 작업장 내부' },
+    { photo: 32, alt: '생산 라인 전경' },
+    { photo: 6, alt: '부자재 작업 모습' },
+    { photo: 24, alt: '마감 작업 공간' },
+  ],
+  [
+    { photo: 29, alt: '봉제 설비가 놓인 작업대' },
+    { photo: 5, alt: '포장 대기 중인 제품' },
+    { photo: 16, alt: '재봉틀 작업 라인' },
+    { photo: 33, alt: '생산 중인 원단과 제품' },
+    { photo: 34, alt: '샘플 검수 공간' },
+    { photo: 23, alt: '원단 정리 작업' },
+    { photo: 30, alt: '봉제 작업 모습' },
+    { photo: 14, alt: '완성품 정리 공간' },
+  ],
+];
+
+// 함께한 업체. logo 에 public/ 기준 이미지 경로를 적으면 로고가 나옵니다. (예: '/images/partners/abc.png')
+export const partners = [
+  { name: '', logo: '' },
+  { name: '', logo: '' },
+  { name: '', logo: '' },
+  { name: '', logo: '' },
+  { name: '', logo: '' },
+  { name: '', logo: '' },
 ];
 
 export const process = [

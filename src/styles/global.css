@@ -35,6 +35,21 @@ body {
   animation: reveal-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms) both;
 }
 
+/* 옆으로 흐르는 줄(data-drift). 왼쪽 끝을 본문 컨테이너(max-w-7xl)에 맞춤 */
+.drift-row {
+  --gutter: 1rem;
+  display: flex;
+  width: max-content;
+  padding-inline: max(var(--gutter), calc((100vw - 80rem) / 2 + var(--gutter)));
+}
+@media (min-width: 640px) { .drift-row { --gutter: 1.5rem; } }
+@media (min-width: 1024px) { .drift-row { --gutter: 2rem; } }
+/* 기본(움직임 없음): 손가락/트랙패드로 넘겨서 봄 */
+.drift-wrap { overflow-x: auto; scrollbar-width: none; }
+.drift-wrap::-webkit-scrollbar { display: none; }
+.motion .drift-wrap { overflow: visible; }
+.motion .drift-row { will-change: transform; }
+
 @keyframes reveal-up {
   from { opacity: 0; transform: translateY(40px); }
   to { opacity: 1; transform: none; }

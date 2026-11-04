@@ -1,6 +1,6 @@
-# otban
+# 옷본 (otbone)
 
-의류 제작 회사 otban의 소개 사이트 (Astro + Tailwind CSS, 정적 사이트)
+의류 제작 회사 옷본의 소개 사이트 (Astro + Tailwind CSS, 정적 사이트)
 
 ## 개발
 
