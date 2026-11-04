@@ -1,0 +1,26 @@
+---
+interface Props {
+  title: string;
+  category: string;
+  image?: string;
+}
+
+const { title, category, image } = Astro.props;
+---
+
+<article class="group">
+  <div class="relative aspect-[4/5] overflow-hidden rounded-lg bg-soft">
+    {image ? (
+      <img
+        src={image}
+        alt={title}
+        loading="lazy"
+        class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+    ) : (
+      <div class="flex h-full w-full items-center justify-center text-sm text-muted">이미지 준비 중</div>
+    )}
+  </div>
+  <p class="mt-4 text-xs font-semibold tracking-wide text-accent">{category}</p>
+  <h3 class="mt-1 text-lg font-semibold">{title}</h3>
+</article>

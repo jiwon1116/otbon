@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+
+  /* 포인트 컬러: 시그널 오렌지 */
+  --color-accent: #ff5a1f;
+  --color-accent-dark: #e04812;
+
+  --color-ink: #0a0a0a;
+  --color-paper: #ffffff;
+  --color-muted: #6b6b6b;
+  --color-line: #e5e5e5;
+  --color-soft: #f5f5f4;
+}
+
+html {
+  scroll-behavior: smooth;
+  word-break: keep-all;
+}
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
