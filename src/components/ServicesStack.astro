@@ -1,0 +1,76 @@
+---
+import { services } from '../data/site';
+
+// 카드마다 색을 다르게 해서 쌓일 때 구분되게 함
+const tones = [
+  'bg-ink text-white',
+  'bg-accent text-white',
+  'bg-soft text-ink',
+  'bg-paper text-ink border border-line',
+];
+---
+
+<!-- 서비스: 스크롤하면 카드가 위로 하나씩 쌓임 -->
+<section id="services" class="scroll-mt-20 bg-paper" data-services>
+  <div class="mx-auto grid max-w-7xl gap-12 px-4 py-24 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8 lg:py-32">
+    <div class="lg:col-span-4">
+      <div class="lg:sticky lg:top-32" data-reveal>
+        <p class="text-sm font-semibold tracking-[0.2em] text-accent">SERVICES</p>
+        <h2 class="mt-3 text-3xl font-bold sm:text-4xl lg:text-5xl lg:leading-tight">어떤 옷이든<br class="hidden lg:block" /> 만듭니다</h2>
+        <p class="mt-6 max-w-sm leading-relaxed text-muted">
+          티셔츠 몇십 장부터 브랜드 시즌 생산까지. 필요한 만큼, 필요한 방식으로 만듭니다.
+        </p>
+        <a href="/services" class="mt-8 inline-block text-sm font-semibold underline-offset-4 hover:underline">서비스 자세히 보기 →</a>
+      </div>
+    </div>
+
+    <ol class="services-stack flex flex-col gap-6 lg:col-span-8">
+      {services.map((s, i) => (
+        <li class="services-item sticky" style={`--i: ${i}`}>
+          <div class={`services-card flex min-h-[380px] flex-col justify-between rounded-3xl p-8 sm:min-h-[440px] sm:p-12 ${tones[i % tones.length]}`}>
+            <div class="flex items-start justify-between gap-6">
+              <span class="text-sm font-semibold opacity-60">0{i + 1} / 0{services.length}</span>
+              <span class="text-sm font-semibold tracking-[0.2em] opacity-60">{s.en.toUpperCase()}</span>
+            </div>
+            <div>
+              <h3 class="text-4xl font-bold sm:text-6xl">{s.title}</h3>
+              <p class="mt-6 max-w-md text-lg leading-relaxed opacity-80">{s.desc}</p>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style is:global>
+  /* 카드가 조금씩 아래에 붙어서 뒤 카드의 윗부분이 보이게 함 */
+  .services-item { top: calc(5.5rem + var(--i) * 1rem); }
+  @media (min-width: 1024px) {
+    .services-item { top: calc(8rem + var(--i) * 1.5rem); }
+  }
+  .services-card { transform-origin: 50% 0; }
+  .motion .services-card { will-change: transform; }
+</style>
+
+<script>
+  import { onScrollFrame, motionOn, clamp01 } from '../scripts/scroll';
+
+  const section = document.querySelector<HTMLElement>('[data-services]');
+  if (section && motionOn()) {
+    const items = [...section.querySelectorAll<HTMLElement>('.services-item')];
+    const cards = items.map((el) => el.querySelector<HTMLElement>('.services-card')!);
+
+    onScrollFrame(() => {
+      cards.forEach((card, i) => {
+        const next = items[i + 1];
+        if (!next) return;
+        // 다음 카드가 이 카드를 얼마나 덮었는지(0~1)만큼 살짝 작아지고 어두워짐
+        const gap = next.getBoundingClientRect().top - items[i].getBoundingClientRect().top;
+        const covered = clamp01(1 - gap / card.offsetHeight);
+        card.style.transform = `scale(${1 - 0.06 * covered})`;
+        card.style.filter = `brightness(${1 - 0.25 * covered})`;
+      });
+    });
+  }
+</script>

@@ -1,0 +1,87 @@
+---
+import { portfolio } from '../data/site';
+
+// 두 줄이 서로 반대로 흐르도록, 두 번째 줄은 순서를 뒤집어 씀
+const rows = [portfolio, [...portfolio].reverse()];
+---
+
+<!-- 포트폴리오: 스크롤하면 두 줄이 서로 반대 방향으로 흐름 -->
+<section class="overflow-hidden py-24 lg:py-32" data-portfolio>
+  <div class="mx-auto flex max-w-7xl flex-col justify-between gap-6 px-4 sm:px-6 md:flex-row md:items-end lg:px-8" data-reveal>
+    <div>
+      <p class="text-sm font-semibold tracking-[0.2em] text-accent">PORTFOLIO</p>
+      <h2 class="mt-3 text-3xl font-bold sm:text-4xl lg:text-5xl">최근 작업</h2>
+    </div>
+    <a href="/portfolio" class="text-sm font-semibold underline-offset-4 hover:underline">전체 포트폴리오 →</a>
+  </div>
+
+  <div class="mt-14 flex flex-col gap-4 sm:gap-6">
+    {rows.map((items, r) => (
+      <div class="portfolio-row-wrap" aria-hidden={r === 1 ? 'true' : undefined}>
+        <ul class="portfolio-row flex w-max gap-4 sm:gap-6" data-dir={r === 0 ? 'left' : 'right'}>
+          {items.map((item) => (
+            <li class="group w-[72vw] shrink-0 sm:w-[360px] lg:w-[440px]">
+              <div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-soft">
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={r === 0 ? item.title : ''}
+                    loading="lazy"
+                    class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <div class="flex h-full w-full items-center justify-center text-sm text-muted">이미지 준비 중</div>
+                )}
+              </div>
+              <div class="mt-4 flex items-baseline justify-between gap-4">
+                <h3 class="text-lg font-semibold">{item.title}</h3>
+                <span class="shrink-0 text-xs font-semibold tracking-wide text-accent">{item.category}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style is:global>
+  .portfolio-row {
+    --gutter: 1rem;
+    padding-inline: max(var(--gutter), calc((100vw - 80rem) / 2 + var(--gutter)));
+  }
+  @media (min-width: 640px) { .portfolio-row { --gutter: 1.5rem; } }
+  @media (min-width: 1024px) { .portfolio-row { --gutter: 2rem; } }
+
+  /* 기본(움직임 없음): 옆으로 넘겨서 봄. 두 번째 줄은 숨김 */
+  .portfolio-row-wrap { overflow-x: auto; scrollbar-width: none; }
+  .portfolio-row-wrap::-webkit-scrollbar { display: none; }
+  .portfolio-row-wrap[aria-hidden='true'] { display: none; }
+
+  .motion .portfolio-row-wrap { overflow: visible; }
+  .motion .portfolio-row-wrap[aria-hidden='true'] { display: block; }
+  .motion .portfolio-row { will-change: transform; }
+</style>
+
+<script>
+  import { onScrollFrame, motionOn, passProgress } from '../scripts/scroll';
+
+  const section = document.querySelector<HTMLElement>('[data-portfolio]');
+  if (section && motionOn()) {
+    const rows = [...section.querySelectorAll<HTMLElement>('.portfolio-row')];
+    let distances: number[] = [];
+
+    const measure = () => {
+      distances = rows.map((row) => Math.max(0, row.scrollWidth - window.innerWidth));
+    };
+
+    onScrollFrame(() => {
+      const p = passProgress(section);
+      rows.forEach((row, i) => {
+        // 첫 줄은 왼쪽으로, 둘째 줄은 오른쪽으로 흐름
+        const t = row.dataset.dir === 'left' ? p : 1 - p;
+        row.style.transform = `translate3d(${-distances[i] * t}px, 0, 0)`;
+      });
+    }, measure);
+  }
+</script>

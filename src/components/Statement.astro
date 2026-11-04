@@ -1,0 +1,42 @@
+---
+// 스크롤하면 문장이 한 단어씩 진하게 채워지는 섹션
+const text =
+  '옷 한 벌에는 수십 번의 결정이 들어갑니다. 원단, 핏, 봉제, 마감까지. 그 고민을 저희가 대신하고, 약속한 날짜에 완성된 옷으로 돌려드립니다.';
+const words = text.split(' ');
+---
+
+<section class="statement relative bg-paper" data-statement>
+  <div class="statement-stage mx-auto flex max-w-7xl flex-col justify-center px-4 py-24 sm:px-6 lg:px-8">
+    <p class="text-sm font-semibold tracking-[0.2em] text-accent">OUR PROMISE</p>
+    <p class="mt-8 max-w-5xl text-3xl font-bold leading-snug sm:text-5xl sm:leading-snug lg:text-6xl lg:leading-[1.3]">
+      {words.map((w) => (
+        <>
+          <span class="statement-word">{w}</span>{' '}
+        </>
+      ))}
+    </p>
+  </div>
+</section>
+
+<style is:global>
+  .motion .statement { height: 240vh; }
+  .motion .statement-stage { position: sticky; top: 0; height: 100svh; padding-top: 0; padding-bottom: 0; }
+  .motion .statement-word { opacity: 0.12; }
+</style>
+
+<script>
+  import { onScrollFrame, motionOn, stickyProgress, clamp01 } from '../scripts/scroll';
+
+  const section = document.querySelector<HTMLElement>('[data-statement]');
+  if (section && motionOn()) {
+    const words = [...section.querySelectorAll<HTMLElement>('.statement-word')];
+    const n = words.length;
+    onScrollFrame(() => {
+      // 섹션의 80% 지점에서 모든 단어가 다 채워지고, 나머지는 잠깐 머무름
+      const filled = (stickyProgress(section) / 0.8) * n;
+      words.forEach((el, i) => {
+        el.style.opacity = String(0.12 + 0.88 * clamp01(filled - i));
+      });
+    });
+  }
+</script>

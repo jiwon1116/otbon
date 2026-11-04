@@ -4,12 +4,12 @@ import { site } from '../data/site';
 
 <section class="bg-ink text-white">
   <div class="mx-auto max-w-7xl px-4 py-24 text-center sm:px-6 lg:px-8 lg:py-32">
-    <h2 class="text-3xl font-bold leading-tight sm:text-5xl">
+    <h2 class="text-3xl font-bold leading-tight sm:text-5xl" data-reveal>
       만들고 싶은 옷이 있다면,<br />
       <span class="text-accent">지금 이야기해 주세요.</span>
     </h2>
-    <p class="mx-auto mt-6 max-w-xl text-white/70">수량과 일정만 알려주시면 영업일 기준 1일 안에 견적을 드립니다.</p>
-    <div class="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+    <p class="mx-auto mt-6 max-w-xl text-white/70" data-reveal style="--reveal-delay: 120ms">수량과 일정만 알려주시면 영업일 기준 1일 안에 견적을 드립니다.</p>
+    <div class="mt-10 flex flex-col justify-center gap-3 sm:flex-row" data-reveal style="--reveal-delay: 240ms">
       <a href="/contact" class="rounded-full bg-accent px-8 py-4 font-semibold transition-colors hover:bg-accent-dark">견적 문의하기</a>
       <a
         href={site.kakaoChannel}

@@ -1,0 +1,101 @@
+---
+import { process } from '../data/site';
+const total = String(process.length).padStart(2, '0');
+---
+
+<!-- 제작 과정: 아래로 스크롤하면 카드가 옆으로 넘어감 -->
+<section class="process bg-ink text-white" data-process>
+  <div class="process-stage py-24 lg:py-32">
+    <div class="mx-auto flex w-full max-w-7xl items-end justify-between gap-6 px-4 sm:px-6 lg:px-8" data-reveal>
+      <div>
+        <p class="text-sm font-semibold tracking-[0.2em] text-accent">PROCESS</p>
+        <h2 class="mt-3 text-3xl font-bold sm:text-4xl lg:text-5xl">4단계로 끝나는 제작 과정</h2>
+      </div>
+      <p class="shrink-0 text-sm font-semibold tabular-nums text-white/50">
+        <span class="text-white" data-process-current>01</span> / {total}
+      </p>
+    </div>
+
+    <div class="process-viewport mt-12 lg:mt-16">
+      <ol class="process-track flex w-max gap-4 sm:gap-6">
+        {process.map((p) => (
+          <li class="process-card flex w-[82vw] shrink-0 flex-col justify-between rounded-3xl border border-white/15 bg-white/[0.03] p-8 sm:w-[56vw] sm:p-10 lg:w-[38vw] lg:max-w-[520px] lg:p-12">
+            <span class="text-7xl font-extrabold leading-none text-accent sm:text-8xl lg:text-9xl">{p.step}</span>
+            <div class="mt-16 sm:mt-24">
+              <h3 class="text-2xl font-bold sm:text-3xl">{p.title}</h3>
+              <p class="mt-4 leading-relaxed text-white/70">{p.desc}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="mx-auto mt-12 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="h-px bg-white/15">
+        <div class="process-bar h-px origin-left bg-accent" data-process-bar></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* 카드 줄의 왼쪽 끝을 본문 컨테이너(max-w-7xl)에 맞춤 */
+  .process-track {
+    --gutter: 1rem;
+    padding-inline: max(var(--gutter), calc((100vw - 80rem) / 2 + var(--gutter)));
+  }
+  @media (min-width: 640px) { .process-track { --gutter: 1.5rem; } }
+  @media (min-width: 1024px) { .process-track { --gutter: 2rem; } }
+
+  /* 기본(움직임 없음): 손가락/트랙패드로 옆으로 넘김 */
+  .process-viewport { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .process-viewport::-webkit-scrollbar { display: none; }
+  .process-card { scroll-snap-align: start; }
+  .process-bar { transform: scaleX(1); }
+
+  /* 움직임 모드: 화면을 고정하고 세로 스크롤로 가로 이동. 섹션 높이는 JS가 정함 */
+  .motion .process { height: 300vh; }
+  .motion .process-stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    min-height: 640px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .motion .process-viewport { overflow: visible; }
+  .motion .process-track { will-change: transform; }
+  .motion .process-bar { transform: scaleX(0); }
+</style>
+
+<script>
+  import { onScrollFrame, motionOn, stickyProgress, clamp01 } from '../scripts/scroll';
+
+  // 처음과 끝에 잠깐 멈춰서 첫 카드와 마지막 카드를 온전히 보여줌
+  const HOLD = 0.08;
+
+  const section = document.querySelector<HTMLElement>('[data-process]');
+  if (section && motionOn()) {
+    const stage = section.querySelector<HTMLElement>('.process-stage')!;
+    const track = section.querySelector<HTMLElement>('.process-track')!;
+    const bar = section.querySelector<HTMLElement>('[data-process-bar]')!;
+    const current = section.querySelector<HTMLElement>('[data-process-current]')!;
+    const count = track.children.length;
+    let distance = 0;
+
+    const measure = () => {
+      distance = Math.max(0, track.scrollWidth - window.innerWidth);
+      // 스크롤한 만큼 그대로 옆으로 움직이도록 섹션 높이를 맞춤
+      section.style.height = `${stage.offsetHeight + distance / (1 - 2 * HOLD)}px`;
+    };
+
+    onScrollFrame(() => {
+      const p = clamp01((stickyProgress(section) - HOLD) / (1 - 2 * HOLD));
+      track.style.transform = `translate3d(${-distance * p}px, 0, 0)`;
+      bar.style.transform = `scaleX(${p})`;
+      current.textContent = String(Math.min(count, Math.floor(p * count) + 1)).padStart(2, '0');
+    }, measure);
+  }
+</script>
