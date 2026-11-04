@@ -1,5 +1,5 @@
 ---
-import { services } from '../data/site';
+import { services } from '../../../data/site';
 
 // 카드마다 색을 다르게 해서 쌓일 때 구분되게 함
 const tones = [
@@ -54,7 +54,7 @@ const tones = [
 </style>
 
 <script>
-  import { onScrollFrame, motionOn, clamp01 } from '../scripts/scroll';
+  import { onScrollFrame, motionOn, clamp01 } from '../../../scripts/scroll';
 
   const section = document.querySelector<HTMLElement>('[data-services]');
   if (section && motionOn()) {

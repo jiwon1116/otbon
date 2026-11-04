@@ -1,5 +1,5 @@
 ---
-import { process } from '../data/site';
+import { process } from '../../../data/site';
 const total = String(process.length).padStart(2, '0');
 ---
 
@@ -71,7 +71,7 @@ const total = String(process.length).padStart(2, '0');
 </style>
 
 <script>
-  import { onScrollFrame, motionOn, stickyProgress, clamp01 } from '../scripts/scroll';
+  import { onScrollFrame, motionOn, stickyProgress, clamp01 } from '../../../scripts/scroll';
 
   // 처음과 끝에 잠깐 멈춰서 첫 카드와 마지막 카드를 온전히 보여줌
   const HOLD = 0.08;
