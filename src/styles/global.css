@@ -26,3 +26,16 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* 스크롤 등장 애니메이션: 요소에 data-reveal 을 붙이면 적용.
+   순서대로 나오게 하려면 style="--reveal-delay: 120ms" 처럼 지연을 줌.
+   hover 색 전환(transition)과 겹치지 않게 animation 으로 처리 */
+.motion [data-reveal] { opacity: 0; }
+.motion [data-reveal].is-visible {
+  animation: reveal-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms) both;
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: none; }
+}
