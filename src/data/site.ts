@@ -5,7 +5,7 @@ export const site = {
   nameKo: '옷본',
   description:
     '옷본은 단체복, 아우터, OEM, 샘플 제작을 하는 의류 제작 회사입니다. 기획부터 생산까지 한 곳에서 맡겨보세요.',
-  email: 'hello@otban.kr',
+  email: 'hello@otbone.kr',
   kakaoChannel: 'https://pf.kakao.com/_xxxxxx',
 
   // 첫 화면 배경 영상. public/videos/hero.mp4 를 넣으면 바로 적용됩니다.
