@@ -89,6 +89,32 @@ export const gallery = [
   ],
 ];
 
+// 본사·지사 지도. 스크롤하면 위에서부터 순서대로 나라 테두리가 바느질되듯 그려집니다.
+// code = 나라 번호(ISO 3166 숫자 코드). 한국 410, 중국 156, 베트남 704
+// 첫 번째가 본사이고, 나머지 지사에는 본사에서 실이 이어집니다.
+// pin = 단추(핀) 위치 [경도, 위도]. 비우면 나라 한가운데. 도시가 정해지면 그 좌표를 넣어주세요.
+// tag = 큰 화면에서 이름표가 단추의 어느 쪽에 걸릴지 ('left' | 'right')
+type Office = {
+  code: number;
+  name: string;
+  nameKo: string;
+  role: string;
+  desc: string;
+  pin?: [number, number];
+  tag: 'left' | 'right';
+};
+
+export const network: { eyebrow: string; headline: string[]; offices: Office[] } = {
+  eyebrow: 'GLOBAL NETWORK',
+  headline: ['한 땀씩 이어온,', '옷본의 생산 네트워크'],
+  offices: [
+    { code: 410, name: 'Korea', nameKo: '대한민국', role: 'HQ', desc: '기획 · 샘플 · 품질 관리', tag: 'right' },
+    { code: 156, name: 'China', nameKo: '중국', role: 'BRANCH 01', desc: '원단 · 부자재 · 대량 생산', tag: 'left' },
+    // 임시 핀: 나라 모양이 S자라 한가운데가 라오스로 잡혀서 중부 해안에 찍음
+    { code: 704, name: 'Vietnam', nameKo: '베트남', role: 'BRANCH 02', desc: '봉제 · 시즌 생산', pin: [107.2, 16.6], tag: 'right' },
+  ],
+};
+
 // 함께한 업체. logo 에 public/ 기준 이미지 경로를 적으면 로고가 나옵니다. (예: '/images/partners/abc.png')
 export const partners = [
   { name: '', logo: '' },
