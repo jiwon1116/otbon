@@ -3,15 +3,15 @@
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 
-  /* 포인트 컬러: 딥 그린 */
-  --color-accent: #1f7a4d;
-  --color-accent-dark: #17603c;
+  /* 포인트 컬러: 차분한 포레스트 그린 + 베이지 바탕 */
+  --color-accent: #2e5b45;
+  --color-accent-dark: #234636;
 
   --color-ink: #0a0a0a;
-  --color-paper: #ffffff;
-  --color-muted: #6b6b6b;
-  --color-line: #e5e5e5;
-  --color-soft: #f5f5f4;
+  --color-paper: #f5f1e8;
+  --color-muted: #6e685e;
+  --color-line: #e2d9c9;
+  --color-soft: #ebe4d6;
 }
 
 html {

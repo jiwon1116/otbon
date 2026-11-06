@@ -89,31 +89,36 @@ export const gallery = [
   ],
 ];
 
-// 본사·지사 지도. 스크롤하면 위에서부터 순서대로 나라 테두리가 바느질되듯 그려집니다.
+// 본사·지사 지도. 스크롤하면 위에서부터 순서대로 지도가 이동하며 나라가 강조됩니다.
 // code = 나라 번호(ISO 3166 숫자 코드). 한국 410, 중국 156, 베트남 704
-// 첫 번째가 본사이고, 나머지 지사에는 본사에서 실이 이어집니다.
-// pin = 단추(핀) 위치 [경도, 위도]. 비우면 나라 한가운데. 도시가 정해지면 그 좌표를 넣어주세요.
-// tag = 큰 화면에서 이름표가 단추의 어느 쪽에 걸릴지 ('left' | 'right')
-type Office = {
-  code: number;
-  name: string;
-  nameKo: string;
-  role: string;
-  desc: string;
-  pin?: [number, number];
-  line?: number; // 지도 이름표를 잇는 실 길이(px), 기본 44
-  tag: 'left' | 'right';
-};
+// 첫 번째가 본사이고, 나머지 지사에는 본사에서 선이 이어집니다.
+// cities = 지도에 점과 이름이 찍히는 도시. pin = [경도, 위도] (비우면 나라 한가운데),
+//   side = 이름을 점의 왼쪽/오른쪽 중 어디에 쓸지, sub = 이름 밑 작은 글씨
+type City = { name: string; sub?: string; pin?: [number, number]; side?: 'left' | 'right' };
+// zoom = 그 장면 확대 배율 (비우면 나라 크기에 맞춰 자동)
+// region = 나라 전체 대신 이 행정구역만 초록으로 칠함 (src/data/regions.json 의 id, 비우면 나라 전체)
+type Office = { code: number; name: string; role: string; caption: string[]; cities: City[]; zoom?: number; region?: string };
 
-export const network: { eyebrow: string; headline: string[]; offices: Office[] } = {
+// intro = 첫 장면(세계 지도 전체)에 나오는 글자
+export const network: { eyebrow: string; intro: { caption: string[]; name: string }; offices: Office[] } = {
   eyebrow: 'GLOBAL NETWORK',
-  headline: ['한 땀씩 이어온,', '옷본의 생산 네트워크'],
+  intro: { caption: ['한국 본사에서 중국, 베트남 지사까지', '옷본의 생산 네트워크 입니다.'], name: 'Network' },
   offices: [
-    { code: 410, name: 'Korea', nameKo: '대한민국', role: 'HQ', desc: '기획 · 샘플 · 품질 관리', tag: 'right' },
-    // 단동 지사: 핀을 나라 한가운데가 아니라 단동(랴오닝성, 북한 국경)에 찍음
-    { code: 156, name: 'China', nameKo: '중국 단동', role: 'BRANCH 01', desc: '원단 · 부자재 · 대량 생산', pin: [124.39, 40.13], tag: 'left', line: 18 },
-    // 임시 핀: 나라 모양이 S자라 한가운데가 라오스로 잡혀서 중부 해안에 찍음
-    { code: 704, name: 'Vietnam', nameKo: '베트남', role: 'BRANCH 02', desc: '봉제 · 시즌 생산', pin: [107.2, 16.6], tag: 'right' },
+    {
+      code: 410, name: 'Korea', role: 'HEADQUARTERS',
+      caption: ['기획부터 샘플, 품질 관리까지 책임지는', '옷본의 본사, 대한민국 입니다.'],
+      cities: [{ name: '한국', side: 'right' }],
+    },
+    {
+      code: 156, name: 'China', role: 'BRANCH 01', zoom: 2.6, region: 'CN-LN', // 중국 전체 말고 랴오닝성만
+      caption: ['원단과 부자재, 대량 생산을 맡는', '옷본의 중국 단동 지사 입니다.'],
+      cities: [{ name: '단동', sub: '랴오닝성', pin: [124.39, 40.13], side: 'left' }],
+    },
+    {
+      code: 704, name: 'Vietnam', role: 'BRANCH 02', zoom: 7, region: 'VN-54', // 베트남 전체 말고 박지앙성만
+      caption: ['봉제와 시즌 생산을 맡는', '옷본의 베트남 하노이 박지앙 지사 입니다.'],
+      cities: [{ name: '박지앙', sub: '하노이', pin: [106.2, 21.27], side: 'left' }],
+    },
   ],
 };
 

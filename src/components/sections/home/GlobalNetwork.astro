@@ -3,293 +3,254 @@
 import { feature } from 'topojson-client';
 // @ts-ignore
 import { presimplify, simplify, quantile } from 'topojson-simplify';
-import { geoMercator, geoPath, geoCentroid, geoArea } from 'd3-geo';
+import { geoMercator, geoPath, geoCentroid } from 'd3-geo';
 import world from 'world-atlas/countries-50m.json';
+// 첫 장면(세계 전체)용 가벼운 땅 모양
+import worldLand from 'world-atlas/land-110m.json';
 import { network } from '../../../data/site';
+// 지사가 있는 성(행정구역) 경계. Natural Earth(퍼블릭 도메인)에서 필요한 곳만 뽑아 둔 것
+import regions from '../../../data/regions.json';
 
 /*
-  바느질 지도
-  - 패턴지(모눈) 위에 주변 땅은 빗금, 본사·지사 나라는 바늘이 테두리를 한 땀씩 꿰매며 그려짐
-  - 본사 → 지사로 실이 이어지고, 다 꿰맨 나라엔 천 조각(패치) 색이 깔리고 단추가 달림
-  지도 모양은 빌드할 때 실제 국경 데이터로 계산해 페이지에 바로 넣음
+  지도는 빌드할 때 실제 국경 데이터로 SVG를 만들어 페이지에 바로 넣음.
+  브라우저에서는 스크롤에 맞춰 '카메라'(이동·확대)와 강조색만 바꿈.
 */
-const W = 1000;
-const area = { type: 'MultiPoint', coordinates: [[64, 3], [152, 55]] } as any; // 보여줄 범위 [경도, 위도]
-const projection = geoMercator().fitWidth(W, area);
-const H = Math.round(projection([152, 3])![1]);
-const path = geoPath(projection.clipExtent([[-20, -20], [W + 20, H + 20]])).digits(1);
+const W = 1600;
+const H = 1000;
 
-// 해안선을 화면에서 티 안 나는 정도로 단순하게 (페이지를 가볍게)
+// 해안선을 화면에서 티 안 나는 정도로 단순하게 (점 개수를 줄여 페이지를 가볍게)
 const pre = presimplify(world as any);
-const topo = simplify(pre, quantile(pre, 0.55));
-const countries: any[] = (feature(topo, topo.objects.countries) as any).features;
-const landShape = path(feature(topo, topo.objects.land) as any) ?? '';
+const topo = simplify(pre, quantile(pre, 0.5));
+const all: any[] = (feature(topo, topo.objects.countries) as any).features;
 
-const offices = network.offices.map((o, i) => {
-  const f = countries.find((c) => Number(c.id) === o.code);
-  // 가장 큰 땅덩어리 테두리만 바늘이 따라감 (섬은 다 꿰맨 뒤 나타남)
-  const polys: number[][][][] = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
-  const sorted = [...polys].sort((a, b) => geoArea({ type: 'Polygon', coordinates: b } as any) - geoArea({ type: 'Polygon', coordinates: a } as any));
-  const main = path({ type: 'Polygon', coordinates: [sorted[0][0]] } as any) ?? '';
-  const islands = sorted.length > 1 ? path({ type: 'MultiPolygon', coordinates: sorted.slice(1) } as any) ?? '' : '';
-  const [x, y] = projection(o.pin ?? geoCentroid(f))!;
-  return { ...o, i, x, y, patch: path(f) ?? '', main, islands };
+// 동아시아 ~ 동남아가 화면에 들어오게 맞춤
+const projection = geoMercator()
+  .fitExtent([[0, 0], [W, H]], { type: 'MultiPoint', coordinates: [[72, 4], [146, 52]] } as any)
+  // 카메라가 갈 수 있는 범위 밖은 잘라냄 (페이지 크기를 줄이려고)
+  .clipExtent([[-W * 0.4, -H * 0.4], [W * 1.4, H * 1.4]]);
+const path = geoPath(projection).digits(1);
+
+// 세계 전체 땅: 같은 투영으로, 남극·북극 끝은 잘라냄 (첫 장면에서만 보이고 확대하면 자세한 지도로 바뀜)
+const wx0 = projection([-180, 0])![0];
+const wx1 = projection([180, 0])![0];
+const wy0 = projection([0, 78])![1];
+const wy1 = projection([0, -56])![1];
+const worldPath = geoPath(
+  geoMercator().scale(projection.scale()).translate(projection.translate()).clipExtent([[wx0, wy0], [wx1, wy1]]),
+).digits(0);
+const worldShape = worldPath(feature(worldLand as any, (worldLand as any).objects.land) as any) ?? '';
+const worldCam = { cx: (wx0 + wx1) / 2, cy: (wy0 + wy1) / 2 + (wy1 - wy0) * 0.06, k: (W / (wx1 - wx0)) * 0.98 };
+
+// 화면 근처 나라만 그림 (페이지 크기를 줄이려고)
+const land = all
+  .map((f) => ({ id: Number(f.id), d: path(f) ?? '' }))
+  .filter((c) => c.d && !network.offices.some((o) => o.code === c.id));
+
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
+// 나라마다 카메라 위치(가운데 좌표 cx, cy)와 확대 배율 k
+const offices = network.offices.map((o) => {
+  const f = all.find((c) => Number(c.id) === o.code);
+  const [[x0, y0], [x1, y1]] = path.bounds(f);
+  // 도시마다 점 위치: pin 좌표가 있으면 그곳, 없으면 나라 한가운데
+  const cities = o.cities.map((c) => {
+    const [x, y] = projection(c.pin ?? geoCentroid(f))!;
+    return { ...c, x, y };
+  });
+  // 카메라는 그 나라 도시들의 가운데를 비춤
+  const cx = cities.reduce((s, c) => s + c.x, 0) / cities.length;
+  const cy = cities.reduce((s, c) => s + c.y, 0) / cities.length;
+  const k = o.zoom ?? clamp(0.42 * Math.min(W / (x1 - x0), H / (y1 - y0)), 1, 2.6);
+  // region이 있으면 그 행정구역 모양만 강조
+  const r = o.region ? (regions as any).features.find((x: any) => x.id === o.region) : null;
+  return { ...o, d: path(f) ?? '', area: r ? path(r) ?? '' : '', cities, cx, cy, k };
 });
 
-// 본사 → 지사 실 (위로 볼록한 곡선)
+// 본사 → 지사 곡선 (본사 첫 도시 → 지사에서 본사와 가장 가까운 도시)
 const [hq, ...branches] = offices;
-const threads = branches.map((b) => {
-  const dx = b.x - hq.x;
-  const dy = b.y - hq.y;
-  let nx = -dy * 0.28;
-  let ny = dx * 0.28;
-  if (ny > 0) { nx = -nx; ny = -ny; }
-  const qx = (hq.x + b.x) / 2 + nx;
-  const qy = (hq.y + b.y) / 2 + ny;
-  return `M${hq.x.toFixed(1)} ${hq.y.toFixed(1)}Q${qx.toFixed(1)} ${qy.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+const from = hq.cities[0];
+const lines = branches.map((b) => {
+  const to = [...b.cities].sort((p, q) => Math.hypot(p.x - from.x, p.y - from.y) - Math.hypot(q.x - from.x, q.y - from.y))[0];
+  const mx = (from.x + to.x) / 2;
+  const my = (from.y + to.y) / 2;
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  // 선 중간을 옆으로 살짝 띄워 곡선으로
+  const qx = mx - dy * 0.25;
+  const qy = my + dx * 0.25;
+  return `M${from.x.toFixed(1)} ${from.y.toFixed(1)} Q${qx.toFixed(1)} ${qy.toFixed(1)} ${to.x.toFixed(1)} ${to.y.toFixed(1)}`;
 });
 
-// 바느질 순서: [한국 테두리] → [실 → 중국 테두리] → [실 → 베트남 테두리]
-// step = 몇 번째 장면에서 꿰매는지, w = 그 장면 안에서 차지하는 비율
-const seams = [
-  { d: hq.main, kind: 'outline', step: 0, w: 1, office: 0 },
-  ...branches.flatMap((b, j) => [
-    { d: threads[j], kind: 'thread', step: j + 1, w: 0.4, office: -1 },
-    { d: b.main, kind: 'outline', step: j + 1, w: 0.6, office: b.i },
-  ]),
-];
+// 움직임이 없을 때 보여줄 전체 화면 (세 나라가 다 들어오게)
+const xs = offices.map((o) => o.cx);
+const ys = offices.map((o) => o.cy);
+const overview = {
+  cx: (Math.min(...xs) + Math.max(...xs)) / 2,
+  cy: (Math.min(...ys) + Math.max(...ys)) / 2,
+  k: clamp(0.6 * Math.min(W / (Math.max(...xs) - Math.min(...xs)), H / (Math.max(...ys) - Math.min(...ys))), 1, 2),
+};
+const toTransform = (c: { cx: number; cy: number; k: number }) =>
+  `translate(${(W / 2 - c.k * c.cx).toFixed(1)} ${(H * 0.42 - c.k * c.cy).toFixed(1)}) scale(${c.k.toFixed(3)})`;
 
-// 작은 화면용 지도 범위: 세 단추 주변만 세로로 길게 잘라서 크게 보여줌
-const mobileBox = (() => {
-  const xs = offices.map((o) => o.x);
-  const ys = offices.map((o) => o.y);
-  let x0 = Math.min(...xs) - W * 0.1, x1 = Math.max(...xs) + W * 0.08;
-  let y0 = Math.min(...ys) - H * 0.25, y1 = Math.max(...ys) + H * 0.12;
-  const ar = 0.95; // 가로 / 세로
-  if ((x1 - x0) / (y1 - y0) < ar) {
-    const grow = ((y1 - y0) * ar - (x1 - x0)) / 2;
-    x0 -= grow; x1 += grow;
-  } else {
-    const grow = ((x1 - x0) / ar - (y1 - y0)) / 2;
-    y0 -= grow; y1 += grow;
-  }
-  return [x0, y0, x1 - x0, y1 - y0].map((v) => Math.round(v));
-})();
-
-const pct = (v: number, total: number) => `${((v / total) * 100).toFixed(2)}%`;
-const pad = (n: number) => String(n).padStart(2, '0');
+// 장면 순서: 세계 전체 → 한국 → 중국 → 베트남
+const camera = JSON.stringify([worldCam, ...offices.map(({ cx, cy, k }) => ({ cx, cy, k }))]);
+const intro = network.intro;
 ---
 
 <!--
-  본사·지사 지도 (바느질 컨셉)
-  - 스크롤하면 바늘이 한국 테두리를 꿰매고, 실을 끌고 중국·베트남으로 넘어가 차례로 꿰맴
-  - 다 꿰맨 나라엔 천 조각 색과 단추, 이름표(행택)가 달리고 그대로 남음
-  - 이름표를 누르면 해당 장면으로 이동
-  - '동작 줄이기' 사용자나 JS가 꺼진 환경에선 다 꿰매진 상태로 보임
+  본사·지사 지도
+  - 검은 화면에 회색 지도. 처음엔 세계 지도 전체가 보이고, 스크롤하면 한국으로 확대된 뒤 한국 → 중국 → 베트남 순으로 지도가 이동하며 나라가 강조되고,
+    본사에서 지사로 선이 그려짐
+  - '동작 줄이기' 사용자나 JS가 꺼진 환경에선 세 나라가 모두 강조된 지도 한 장으로 보임
 -->
-<section id="network" class="net relative scroll-mt-20" data-network>
-  <div class="net-stage mx-auto flex max-w-7xl flex-col px-4 py-20 sm:px-6 lg:px-8">
-    <!-- 위: 제목 + 진행 표시 -->
-    <div class="flex items-end justify-between gap-6">
-      <div>
-        <p class="flex items-center gap-3 text-xs font-semibold tracking-[0.25em] text-ink/60 sm:text-sm">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <circle cx="6" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12" />
-          </svg>
-          {network.eyebrow}
-        </p>
-        <h2 class="mt-3 text-2xl font-bold leading-snug sm:text-4xl lg:text-5xl lg:leading-[1.2]">
-          {network.headline.map((line) => <span class="block">{line}</span>)}
-        </h2>
-      </div>
-      <p class="net-count hidden shrink-0 font-mono text-sm text-ink/60 sm:block">
-        <span class="net-count-now text-ink">{pad(offices.length)}</span> / {pad(offices.length)}
+<section id="network" class="net relative bg-ink text-white" data-network data-camera={camera} data-w={W} data-h={H}>
+  <div class="net-stage relative h-svh min-h-[560px] overflow-hidden">
+    <svg
+      class="absolute inset-0 h-full w-full"
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+    >
+      <g class="net-cam" transform={toTransform(overview)}>
+        <!-- 세계 전체 (첫 장면). 확대하면 자세한 지도(net-detail)와 서서히 바뀜 -->
+        <g class="net-land net-world"><path d={worldShape} /></g>
+        <g class="net-detail">
+        <g class="net-land">
+          {land.map((c) => <path d={c.d} />)}
+        </g>
+        <!-- region이 있는 나라는 땅은 회색 그대로 두고, 그 행정구역만 칠함 -->
+        <g class="net-land">
+          {offices.map((o) => o.area && <path d={o.d} />)}
+        </g>
+        <g class="net-offices">
+          {offices.map((o) => <path class="net-office" d={o.area || o.d} />)}
+        </g>
+        <g class="net-lines">
+          {lines.map((d) => <path class="net-line" d={d} pathLength="1" />)}
+        </g>
+        <!-- 도시: 점 + 이름. 안쪽 묶음(net-dot-in)은 확대해도 크기가 그대로이게 JS가 1/배율로 줄임 -->
+        <g class="net-dots">
+          {offices.map((o, i) =>
+            o.cities.map((c) => {
+              const left = c.side === 'left';
+              return (
+                <g class="net-dot" data-office={i} transform={`translate(${c.x.toFixed(1)} ${c.y.toFixed(1)})`}>
+                  <g class="net-dot-in" transform={`scale(${(1 / overview.k).toFixed(3)})`}>
+                    <circle class="net-pulse" r="5" />
+                    <circle class="net-core" r="5" />
+                    <text class="net-city" x={left ? -14 : 14} y={c.sub ? -2 : 6} text-anchor={left ? 'end' : 'start'}>{c.name}</text>
+                    {c.sub && <text class="net-city-sub" x={left ? -14 : 14} y="15" text-anchor={left ? 'end' : 'start'}>{c.sub}</text>}
+                  </g>
+                </g>
+              );
+            }),
+          )}
+        </g>
+        </g>
+      </g>
+    </svg>
+
+    <!-- 글자: 위쪽 작은 이름표, 가운데 설명, 아래 큰 나라 이름 -->
+    <p class="net-eyebrow absolute inset-x-0 top-[10%] text-center text-xs font-semibold tracking-[0.3em] text-white/60 sm:text-sm">
+      {network.eyebrow}
+    </p>
+
+    <!-- 첫 장면 글자 -->
+    <div class="net-panel pointer-events-none absolute inset-x-0 bottom-[8%] px-4 text-center">
+      <p class="text-base font-semibold leading-relaxed sm:text-xl">
+        {intro.caption.map((line) => <span class="block">{line}</span>)}
       </p>
+      <h2 class="mt-6 text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">{intro.name}</h2>
     </div>
 
-    <!-- 가운데: 지도 (점선 = 재단선) -->
-    <div class="net-frame relative mt-6 min-h-0 flex-1 lg:mt-8">
-      <div class="net-map relative mx-auto" style={`--ar: ${W / H}; --ar-sm: ${mobileBox[2] / mobileBox[3]}`}>
-        <svg
-          class="absolute inset-0 h-full w-full"
-          viewBox={`0 0 ${W} ${H}`}
-          data-vb-lg={`0 0 ${W} ${H}`}
-          data-vb-sm={mobileBox.join(' ')}
-          aria-hidden="true"
-        >
-          <defs>
-            <!-- 땅이 지도 가장자리에서 뚝 끊기지 않게 바깥쪽을 흐리게 -->
-            <radialGradient id="net-fade-grad" cx="50%" cy="50%" r="55%">
-              <stop offset="0.6" stop-color="#fff" />
-              <stop offset="1" stop-color="#000" />
-            </radialGradient>
-            <mask id="net-fade" maskUnits="userSpaceOnUse" x="-50" y="-50" width={W + 100} height={H + 100}>
-              <rect class="net-fade-rect" x="0" y="0" width={W} height={H} fill="url(#net-fade-grad)" />
-            </mask>
-            <pattern id="net-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-              <line x1="0" y1="0" x2="0" y2="7" class="net-hatch-line" />
-            </pattern>
-            {seams.map((s, k) => (
-              <mask id={`net-seam-${k}`} maskUnits="userSpaceOnUse" x="-50" y="-50" width={W + 100} height={H + 100}>
-                <path class="net-reveal" d={s.d} pathLength="1" />
-              </mask>
-            ))}
-          </defs>
-
-          <path class="net-land" d={landShape} mask="url(#net-fade)" />
-          <g mask="url(#net-fade)">
-            {offices.map((o) => <path class="net-patch" data-office={o.i} d={o.patch} />)}
-          </g>
-          {offices.map((o) => o.islands && <path class="net-stitch net-islands" data-office={o.i} d={o.islands} />)}
-          {seams.map((s, k) => (
-            <path class:list={['net-stitch', s.kind === 'thread' && 'net-thread']} d={s.d} mask={`url(#net-seam-${k})`} data-seam={k} />
-          ))}
-
-          <!-- 단추 -->
-          {offices.map((o) => (
-            <g class="net-button" data-office={o.i} transform={`translate(${o.x.toFixed(1)} ${o.y.toFixed(1)})`}>
-              <g class="net-button-in">
-                <circle r={o.i === 0 ? 11 : 9} class:list={['net-button-face', o.i === 0 && 'is-hq']} />
-                {[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => (
-                  <circle cx={a * 2.6} cy={b * 2.6} r="1.3" class="net-button-hole" />
-                ))}
-              </g>
-            </g>
-          ))}
-
-          <!-- 바늘: 지금 꿰매는 곳 끝에 붙어 다님 -->
-          <g class="net-needle" transform="translate(-100 -100)">
-            <g transform="rotate(180)">
-              <path d="M0 0 L34 -1.6 L36 0 L34 1.6 Z" class="net-needle-body" />
-              <ellipse cx="30" cy="0" rx="3" ry="0.8" class="net-needle-eye" />
-            </g>
-          </g>
-        </svg>
-
-        <!-- 큰 화면: 단추에 걸린 이름표(행택) -->
-        {offices.map((o) => (
-          <button
-            type="button"
-            class:list={['net-tag absolute hidden lg:block', `is-${o.tag}`]}
-            data-office={o.i}
-            style={`left: ${pct(o.x, W)}; top: ${pct(o.y, H)}; --line: ${o.line ?? 44}px`}
-          >
-            <span class="net-tag-card block w-44 bg-paper px-4 py-3 text-left">
-              <span class="block font-mono text-[11px] tracking-wider text-ink/50">{pad(o.i + 1)} · {o.role}</span>
-              <span class="mt-1 block text-lg font-extrabold uppercase tracking-wide">{o.name}</span>
-              <span class="block text-sm font-semibold">{o.nameKo}</span>
-              <span class="mt-1.5 block text-xs text-muted">{o.desc}</span>
-            </span>
-          </button>
-        ))}
+    {offices.map((o) => (
+      <div class="net-panel pointer-events-none absolute inset-x-0 bottom-[8%] px-4 text-center">
+        <p class="text-xs font-bold tracking-[0.25em] text-white/70 sm:text-sm">{o.role}</p>
+        <p class="mt-4 text-base font-semibold leading-relaxed sm:text-xl">
+          {o.caption.map((line) => <span class="block">{line}</span>)}
+        </p>
+        <h2 class="mt-6 text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">{o.name}</h2>
       </div>
-    </div>
+    ))}
 
-    <!-- 작은 화면: 아래에 이름표 세 장 -->
-    <ol class="mt-6 grid grid-cols-3 gap-2 lg:hidden">
+    <!-- 움직임이 없을 때: 세 곳을 한 줄로 -->
+    <ul class="net-static absolute inset-x-0 bottom-[8%] flex justify-center gap-8 px-4 text-center sm:gap-16">
       {offices.map((o) => (
         <li>
-          <button type="button" class="net-tag net-tag-sm block w-full" data-office={o.i}>
-            <span class="net-tag-card block bg-paper px-3 py-2.5 text-left">
-              <span class="block font-mono text-[10px] tracking-wider text-ink/50">{pad(o.i + 1)}</span>
-              <span class="mt-0.5 block text-sm font-extrabold uppercase">{o.name}</span>
-              <span class="block text-xs text-muted">{o.nameKo} · {o.i === 0 ? '본사' : '지사'}</span>
-            </span>
-          </button>
+          <p class="text-[10px] font-bold tracking-[0.2em] text-accent sm:text-xs">{o.role}</p>
+          <p class="mt-2 text-3xl font-extrabold sm:text-5xl">{o.name}</p>
         </li>
       ))}
-    </ol>
+    </ul>
   </div>
 </section>
 
 <style is:global>
-  /* 패턴지: 원단색 바탕 + 작은 칸/큰 칸 모눈 */
-  .net {
-    background-color: #f3eee3;
-    background-image:
-      linear-gradient(rgb(10 10 10 / 0.09) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(10 10 10 / 0.09) 1px, transparent 1px),
-      linear-gradient(rgb(10 10 10 / 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(10 10 10 / 0.04) 1px, transparent 1px);
-    background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
-    background-position: -1px -1px;
+  /* 검은 배경에서도 잘 보이도록 사이트 그린(#2e5b45)을 한 톤 밝게 */
+  .net { --color-accent: #4f8f6d; --color-accent-dark: #3d7357; }
+
+  .net-land path {
+    fill: #262626;
+    stroke: var(--color-ink);
+    stroke-width: 0.8;
+    vector-effect: non-scaling-stroke;
+  }
+  .net-office {
+    fill: var(--color-accent);
+    stroke: var(--color-ink);
+    stroke-width: 0.8;
+    vector-effect: non-scaling-stroke;
+    transition: fill 0.6s ease, opacity 0.6s ease;
   }
 
-  /* 지도 영역 크기: 남은 공간에 비율을 유지하며 최대한 크게 */
-  .net-frame { container-type: size; min-height: 260px; }
-  .net-map { --r: var(--ar-sm); aspect-ratio: var(--r); width: min(100cqw, 100cqh * var(--r)); }
-  @media (min-width: 1024px) { .net-map { --r: var(--ar); } }
-
-  .net-land { fill: url(#net-hatch); }
-  .net-hatch-line { stroke: #d6cdb9; stroke-width: 2.2; }
-
-  .net-patch { fill: var(--color-accent); opacity: 0.14; transition: opacity 0.8s ease; }
-
-  /* 바늘땀: 짧은 실선 + 간격 */
-  .net-stitch {
+  /* 선 굵기는 확대 배율에 맞춰 JS가 조절 (non-scaling-stroke를 쓰면 선 그리기 효과가 깨짐) */
+  .net-line {
     fill: none;
-    stroke: var(--color-accent);
-    stroke-width: 2.4;
+    stroke: #fff;
+    stroke-width: 1.2;
     stroke-linecap: round;
-    stroke-dasharray: 5 4;
   }
-  .net-thread { stroke: var(--color-ink); stroke-width: 1.6; stroke-dasharray: 6 5; }
-  .net-islands { transition: opacity 0.6s ease; }
-  .net-reveal { fill: none; stroke: #fff; stroke-width: 14; stroke-dasharray: 1 2; stroke-dashoffset: 0; }
-
-  /* 단추 */
-  .net-button-in { transform-box: fill-box; transform-origin: center; transition: transform 0.5s cubic-bezier(0.3, 1.6, 0.5, 1); }
-  .net-button-face { fill: var(--color-paper); stroke: var(--color-ink); stroke-width: 1.6; }
-  .net-button-face.is-hq { fill: var(--color-ink); }
-  .net-button-hole { fill: var(--color-ink); }
-  .is-hq ~ .net-button-hole { fill: var(--color-paper); }
-
-  .net-needle { opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
-  .net-needle-body { fill: #9a9a9a; stroke: #6b6b6b; stroke-width: 0.6; }
-  .net-needle-eye { fill: #f3eee3; }
-
-  /* 행택: 단추 옆에 실로 매달린 카드. 카드 안쪽에 바늘땀 테두리 */
-  .net-tag { cursor: pointer; transition: opacity 0.5s ease, transform 0.5s ease; }
-  .net-tag-card {
-    position: relative;
-    box-shadow: 0 1px 0 rgb(10 10 10 / 0.06), 0 8px 24px -12px rgb(10 10 10 / 0.25);
-    outline: 1.5px dashed rgb(10 10 10 / 0.18);
-    outline-offset: -6px;
-    transition: outline-color 0.4s ease;
+  .net-core { fill: #fff; }
+  /* 도시 이름: 지도 위에서도 잘 읽히게 검은 테두리를 글자 뒤에 깔음 */
+  .net-city, .net-city-sub {
+    paint-order: stroke;
+    stroke: rgb(10 10 10 / 0.85);
+    stroke-width: 4px;
+    stroke-linejoin: round;
   }
-  .net-tag.is-current .net-tag-card { outline-color: var(--color-accent); }
-
-  .net-tag:not(.net-tag-sm) { transform: translate(var(--tx), -50%); }
-  .net-tag.is-right { --tx: var(--line, 44px); }
-  .net-tag.is-left { --tx: calc(-100% - var(--line, 44px)); }
-  /* 단추와 카드를 잇는 실 (길이는 site.ts 의 line, 기본 44px) */
-  .net-tag:not(.net-tag-sm)::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: var(--line, 44px);
-    border-top: 1.5px dashed var(--color-ink);
+  .net-city { fill: #fff; font-size: 18px; font-weight: 700; }
+  .net-city-sub { fill: rgb(255 255 255 / 0.65); font-size: 12px; font-weight: 500; letter-spacing: 0.04em; }
+  .net-pulse {
+    fill: #fff;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: net-pulse 2s ease-out infinite;
   }
-  .net-tag.is-right::before { right: 100%; }
-  .net-tag.is-left::before { left: 100%; }
+  @keyframes net-pulse {
+    from { transform: scale(1); opacity: 0.6; }
+    to { transform: scale(4); opacity: 0; }
+  }
 
-  /* 움직임 모드: 긴 섹션 안에서 화면이 고정되고, 스크롤로 한 땀씩 꿰매짐 */
-  .motion .net { height: 360vh; }
-  .motion .net-stage { position: sticky; top: 0; height: 100svh; min-height: 620px; padding-block: 6.5rem 2rem; }
-  .motion .net-reveal { stroke-dashoffset: 1; }
-  .motion .net-patch { opacity: 0; }
-  .motion .net-patch.is-on { opacity: 0.14; }
-  .motion .net-islands { opacity: 0; }
-  .motion .net-islands.is-on { opacity: 1; }
-  .motion .net-button-in { transform: scale(0); }
-  .motion .net-button.is-on .net-button-in { transform: scale(1); }
-  .motion .net-tag { opacity: 0; pointer-events: none; }
-  .motion .net-tag.is-on { opacity: 1; pointer-events: auto; }
-  .motion .net-tag:not(.net-tag-sm):not(.is-on) { transform: translate(var(--tx), -30%); }
-  .motion .net-tag-sm { opacity: 0.35; pointer-events: auto; }
-  .motion .net-tag-sm.is-on { opacity: 0.7; }
-  .motion .net-tag-sm.is-current { opacity: 1; }
-  .motion .net-needle.is-sewing { opacity: 1; }
+  /* 기본(움직임 없음): 지도 한 장 + 세 나라 목록 */
+  .net-panel { display: none; text-shadow: 0 2px 16px rgb(0 0 0 / 0.45); }
+
+  /* 움직임 모드: 긴 섹션 안에서 화면이 고정되고, 스크롤로 장면이 넘어감 */
+  .motion .net { height: 500vh; }
+  .net-world { opacity: 0; }
+  .motion .net-stage { position: sticky; top: 0; }
+  .motion .net-static { display: none; }
+  .motion .net-panel { display: block; opacity: 0; will-change: opacity, transform; }
+  .motion .net-cam { will-change: transform; }
+  .motion .net-office { fill: #262626; }
+  .motion .net-office.is-active { fill: var(--color-accent); }
+  .motion .net-office.is-past { fill: var(--color-accent); opacity: 0.4; }
+  .motion .net-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .motion .net-dot { opacity: 0; transition: opacity 0.5s ease; }
+  .motion .net-dot.is-shown { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .net-pulse { animation: none; opacity: 0; }
+  }
 </style>
 
 <script>
@@ -297,87 +258,90 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
   const section = document.querySelector<HTMLElement>('[data-network]');
 
-  // 작은 화면에선 지도 범위를 세 나라 주변으로 좁힘 (CSS의 --ar-sm 비율과 짝)
-  if (section) {
-    const svg = section.querySelector<SVGSVGElement>('.net-map svg')!;
-    const fade = section.querySelector<SVGRectElement>('.net-fade-rect')!;
-    const lg = window.matchMedia('(min-width: 1024px)');
-    const applyBox = () => {
-      const vb = (lg.matches ? svg.dataset.vbLg : svg.dataset.vbSm)!;
-      svg.setAttribute('viewBox', vb);
-      const [x, y, w, h] = vb.split(' ');
-      Object.entries({ x, y, width: w, height: h }).forEach(([k, v]) => fade.setAttribute(k, v));
-    };
-    applyBox();
-    lg.addEventListener('change', applyBox);
-  }
-
   if (section && motionOn()) {
-    const n = section.querySelectorAll('.net-patch').length;
-    const reveals = [...section.querySelectorAll<SVGPathElement>('.net-reveal')];
-    const stitches = [...section.querySelectorAll<SVGPathElement>('[data-seam]')];
-    const needle = section.querySelector<SVGGElement>('.net-needle')!;
-    const counter = section.querySelector<HTMLElement>('.net-count-now');
-    const byOffice = (sel: string) =>
-      [...section.querySelectorAll<Element>(sel)].map((el) => ({ el, i: Number((el as HTMLElement).dataset.office) }));
-    const patches = byOffice('.net-patch');
-    const islands = byOffice('.net-islands');
-    const buttons = byOffice('.net-button');
-    const tags = byOffice('.net-tag');
+    const W = Number(section.dataset.w);
+    const H = Number(section.dataset.h);
+    const cams: { cx: number; cy: number; k: number }[] = JSON.parse(section.dataset.camera!);
+    const n = cams.length;
 
-    // 바느질 순서 (Astro 쪽 seams와 같아야 함): 한국 → [실, 중국] → [실, 베트남]
-    type Seam = { step: number; from: number; to: number; office: number };
-    const seams: Seam[] = [{ step: 0, from: 0, to: 1, office: 0 }];
-    for (let j = 1; j < n; j++) {
-      seams.push({ step: j, from: 0, to: 0.4, office: -1 });
-      seams.push({ step: j, from: 0.4, to: 1, office: j });
-    }
-    const lengths = stitches.map((p) => p.getTotalLength());
+    const cam = section.querySelector<SVGGElement>('.net-cam')!;
+    const countries = [...section.querySelectorAll<SVGPathElement>('.net-office')];
+    const lines = [...section.querySelectorAll<SVGPathElement>('.net-line')];
+    const dots = [...section.querySelectorAll<SVGGElement>('.net-dot')];
+    const dotInner = [...section.querySelectorAll<SVGGElement>('.net-dot-in')];
+    const worldLayer = section.querySelector<SVGGElement>('.net-world')!;
+    const detail = section.querySelector<SVGGElement>('.net-detail')!;
+    const panels = [...section.querySelectorAll<HTMLElement>('.net-panel')];
 
-    const SEW = 0.7; // 각 장면에서 앞 70% 동안 꿰매고, 나머지는 잠깐 머무름
-    const fmt = (v: number) => String(v).padStart(2, '0');
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const smooth = (t: number) => t * t * (3 - 2 * t);
+
+    let current = -1;
+
+    // 세로로 긴 화면(모바일)에선 세계 지도 양옆이 잘리므로, 첫 장면을 한국 쪽으로 옮겨 한국이 보이게 함
+    const world0 = { ...cams[0] };
+    const stage = section.querySelector<HTMLElement>('.net-stage')!;
+    const measure = () => {
+      const visibleW = Math.min(W, (H * stage.clientWidth) / stage.clientHeight); // 화면에 보이는 viewBox 폭
+      const half = visibleW / 2 / world0.k; // 화면 반폭(지도 단위)
+      const korea = cams[1].cx;
+      // 한국이 화면 오른쪽 1/4쯤에 오도록, 단 세계 지도 끝을 넘지 않게
+      cams[0].cx = Math.min(world0.cx + (W / 2 / world0.k - half), Math.max(world0.cx, korea - half * 0.5));
+    };
 
     const render = () => {
-      const p = stickyProgress(section) * n;
-      const active = Math.min(n - 1, Math.floor(p));
-      const done = new Set<number>();
-      let tip: { k: number; t: number } | null = null;
+      // 나라마다 스크롤 구간을 똑같이 나누고, 구간 가운데쯤에서만 다음 나라로 넘어감(앞뒤로는 잠시 머무름)
+      const raw = Math.min(n - 1, Math.max(0, stickyProgress(section) * n - 0.5));
+      const i = Math.min(n - 2, Math.floor(raw));
+      const s = i + smooth(clamp01((raw - i - 0.25) / 0.5));
 
-      seams.forEach((s, k) => {
-        const local = clamp01((p - s.step) / SEW);
-        const t = clamp01((local - s.from) / (s.to - s.from));
-        reveals[k].style.strokeDashoffset = String(1 - t);
-        if (t >= 1 && s.office >= 0) done.add(s.office);
-        if (t > 0 && t < 1) tip = { k, t };
+      // 카메라: 두 나라 사이를 부드럽게 이동. 확대 배율은 로그로 섞어야 자연스러움
+      const a = cams[Math.floor(s)];
+      const b = cams[Math.min(n - 1, Math.floor(s) + 1)];
+      const t = s - Math.floor(s);
+      const k = Math.exp(lerp(Math.log(a.k), Math.log(b.k), t));
+      // 다음 장면의 중심점(b)이 화면 위에서 곧게 가운데로 다가오게 → 그곳으로 빨려 들어가듯 확대됨
+      const sx = lerp(a.k * (b.cx - a.cx), 0, t);
+      const sy = lerp(a.k * (b.cy - a.cy), 0, t);
+      const cx = b.cx - sx / k;
+      const cy = b.cy - sy / k;
+      cam.setAttribute('transform', `translate(${W / 2 - k * cx} ${H * 0.42 - k * cy}) scale(${k})`);
+
+      // 세계 지도 ↔ 자세한 지도: 확대될수록 자세한 쪽이 보임
+      // (자세한 지도는 가장자리가 잘려 있어서, 그 가장자리가 화면 밖으로 나갈 만큼 확대된 뒤에 나타나게 함)
+      const z = clamp01((k - 0.8) / 0.5);
+      detail.style.opacity = String(z);
+      worldLayer.style.opacity = String(1 - z);
+
+      // 점과 도시 이름 크기는 확대와 상관없이 같게
+      dotInner.forEach((g) => g.setAttribute('transform', `scale(${1 / k})`));
+
+      // 본사 → 지사 선: 해당 지사로 넘어가는 동안 그려짐 (장면 0은 세계, 1부터 나라)
+      lines.forEach((line, j) => {
+        line.style.strokeWidth = String(1.6 / k);
+        line.style.strokeDashoffset = String(1 - clamp01(s - 1 - j));
       });
 
-      // 바늘을 지금 꿰매는 땀 끝에, 진행 방향으로 돌려서
-      if (tip) {
-        const { k, t } = tip as { k: number; t: number };
-        const L = lengths[k] * t;
-        const a = stitches[k].getPointAtLength(L);
-        const b = stitches[k].getPointAtLength(Math.max(0, L - 2));
-        const deg = (Math.atan2(a.y - b.y, a.x - b.x) * 180) / Math.PI;
-        needle.setAttribute('transform', `translate(${a.x} ${a.y}) rotate(${deg})`);
-        needle.classList.add('is-sewing');
-      } else {
-        needle.classList.remove('is-sewing');
-      }
+      // 글자: 지금 나라와 가까울수록 진하게
+      panels.forEach((panel, j) => {
+        const d = s - j;
+        const o = clamp01(1 - Math.abs(d) * 2.5);
+        panel.style.opacity = String(o);
+        panel.style.transform = `translateY(${d * -40}px)`;
+      });
 
-      [patches, islands, buttons, tags].forEach((list) => list.forEach(({ el, i }) => el.classList.toggle('is-on', done.has(i))));
-      tags.forEach(({ el, i }) => el.classList.toggle('is-current', i === active));
-      if (counter) counter.textContent = fmt(active + 1);
+      // 강조색: 지금 나라는 진하게, 지나온 나라는 옅게 (세계 장면에선 아무것도 강조 안 함)
+      const active = Math.round(s) - 1;
+      if (active !== current) {
+        current = active;
+        countries.forEach((c, j) => {
+          c.classList.toggle('is-active', j === active);
+          c.classList.toggle('is-past', j < active);
+        });
+        dots.forEach((dot) => dot.classList.toggle('is-shown', Number(dot.dataset.office) <= active));
+      }
     };
 
-    onScrollFrame(render);
-
-    // 이름표를 누르면 그 장면(다 꿰매진 시점)으로 스크롤
-    tags.forEach(({ el, i }) => {
-      el.addEventListener('click', () => {
-        const range = section.offsetHeight - window.innerHeight;
-        const top = section.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({ top: top + range * ((i + 0.85) / n) });
-      });
-    });
+    onScrollFrame(render, measure);
   }
 </script>

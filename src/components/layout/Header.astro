@@ -12,7 +12,7 @@ const { transparent = false } = Astro.props;
   id="site-header"
   data-transparent={transparent ? 'true' : 'false'}
   data-tone="light"
-  class="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
+  class="fixed inset-x-0 top-0 z-50 transition-[color,background-color,border-color,transform] duration-300"
 >
   <!-- 로고(왼쪽) · 메뉴(가운데) · 견적 문의(오른쪽) -->
   <div class="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto] items-center px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr] lg:h-20 lg:px-8">
@@ -70,6 +70,8 @@ const { transparent = false } = Astro.props;
     color: #fff;
     border-bottom-color: transparent;
   }
+  /* 지도 섹션이 화면을 덮는 동안엔 헤더를 위로 숨김 */
+  #site-header.is-hidden { transform: translateY(-100%); }
   /* 스크롤 히어로의 흰 배경 위에선 검은 글자. 영상이 꽉 차면 히어로가 data-tone="dark"로 바꿈 */
   :global(.motion) #site-header[data-transparent='true'][data-tone='light']:not(.is-solid) {
     color: var(--color-ink);
@@ -81,6 +83,7 @@ const { transparent = false } = Astro.props;
   const toggle = document.getElementById('menu-toggle')!;
   const menu = document.getElementById('mobile-menu')!;
   const hero = document.querySelector<HTMLElement>('[data-hero]');
+  const map = document.querySelector<HTMLElement>('[data-network]');
   let menuOpen = false;
 
   // 히어로가 있으면, 히어로 연출이 끝나 화면 위로 밀려 올라가기 시작할 때 흰 헤더로 바뀜
@@ -88,6 +91,10 @@ const { transparent = false } = Astro.props;
   const update = () => {
     const passed = hero ? hero.getBoundingClientRect().bottom <= window.innerHeight + 1 : window.scrollY > 40;
     header.classList.toggle('is-solid', menuOpen || passed);
+    // 지도 섹션이 화면 맨 위에 닿아 있는 동안엔 헤더를 숨김 (메뉴가 열려 있으면 그대로)
+    const r = map?.getBoundingClientRect();
+    const onMap = !!r && r.top <= header.offsetHeight && r.bottom > header.offsetHeight;
+    header.classList.toggle('is-hidden', onMap && !menuOpen);
   };
 
   toggle.addEventListener('click', () => {
