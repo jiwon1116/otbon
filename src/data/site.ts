@@ -1,11 +1,11 @@
 // 사이트 전반에서 쓰는 정보. 연락처나 링크가 바뀌면 여기만 고치면 됩니다.
 export const site = {
-  name: 'otbone',
+  name: 'otbon',
   // 한글 이름. 문장 안에서 "옷본은", "옷본과"처럼 씀
   nameKo: '옷본',
   description:
     '옷본은 단체복, 아우터, OEM, 샘플 제작을 하는 의류 제작 회사입니다. 기획부터 생산까지 한 곳에서 맡겨보세요.',
-  email: 'hello@otbone.kr',
+  email: 'hello@otbon.co.kr',
   kakaoChannel: 'https://pf.kakao.com/_xxxxxx',
 
   // 첫 화면 배경 영상. public/videos/hero.mp4 를 넣으면 바로 적용됩니다.

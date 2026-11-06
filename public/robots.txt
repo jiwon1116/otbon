@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://otbone.pages.dev/sitemap-index.xml
+Sitemap: https://otbon.co.kr/sitemap-index.xml
