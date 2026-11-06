@@ -2,42 +2,110 @@
 import { Image } from 'astro:assets';
 import { site, services } from '../../../data/site';
 import { photo } from '../../../data/photos';
+
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<!-- 생산 분야: 사진 카드 2x2 -->
-<section id="production" class="scroll-mt-20 bg-paper">
-  <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-36">
+<!--
+  생산 분야: 왼쪽 큰 목록 + 오른쪽 사진 한 장
+  - 목록에 마우스를 올리거나(터치 화면은 누르면) 그 분야 사진으로 바뀌고, 설명이 펼쳐짐
+  - 큰 화면에선 사진이 스크롤을 따라 붙어 있음, 작은 화면에선 사진이 목록 위에 옴
+-->
+<section id="production" class="scroll-mt-20 bg-paper" data-prod>
+  <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-40">
     <div data-reveal>
-      <h2 class="text-2xl font-bold sm:text-4xl">{site.nameKo}은 이런 생산을 하고 있어요</h2>
-      <p class="mt-4 max-w-2xl leading-relaxed text-muted">
-        티셔츠 몇십 장부터 브랜드 시즌 생산까지. 필요한 수량과 일정에 맞춰, 원단 선택부터 납품까지 한 번에 진행합니다.
-      </p>
+      <p class="text-xs font-semibold tracking-[0.25em] text-muted sm:text-sm">WHAT WE MAKE</p>
+      <h2 class="mt-4 text-2xl font-bold sm:text-4xl">{site.nameKo}은 이런 생산을 하고 있어요</h2>
     </div>
 
-    <div class="mt-12 grid gap-4 sm:grid-cols-2 sm:gap-6 lg:mt-16">
-      {services.map((s, i) => (
-        <article
-          class="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-ink text-white sm:aspect-[16/11]"
-          data-reveal
-          style={`--reveal-delay: ${(i % 2) * 120}ms`}
-        >
-          <Image
-            src={photo(s.photo)}
-            alt=""
-            widths={[640, 960, 1400]}
-            sizes="(min-width: 640px) 50vw, 100vw"
-            class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/45"></div>
-          <div class="relative flex h-full flex-col justify-between p-6 sm:p-8 lg:p-10">
-            <span class="text-xs font-semibold tracking-[0.2em] text-white/70">0{i + 1} · {s.en.toUpperCase()}</span>
-            <div>
-              <h3 class="text-2xl font-bold sm:text-3xl lg:text-4xl">{s.title}</h3>
-              <p class="mt-3 max-w-md text-sm leading-relaxed text-white/80 sm:text-base">{s.desc}</p>
-            </div>
-          </div>
-        </article>
-      ))}
+    <div class="mt-12 grid gap-8 lg:mt-16 lg:grid-cols-12 lg:gap-12">
+      <!-- 사진: 겹쳐 놓고 고른 것만 보이게 -->
+      <div class="lg:order-2 lg:col-span-5 lg:col-start-8">
+        <div class="relative aspect-[3/2] overflow-hidden rounded-xl bg-soft lg:sticky lg:top-28 lg:aspect-square" data-reveal>
+          {services.map((s, i) => (
+            <Image
+              src={photo(s.photo)}
+              alt={`${s.title} 생산 현장`}
+              widths={[480, 800, 1100]}
+              sizes="(min-width: 1024px) 38vw, 100vw"
+              class:list={['prod-photo absolute inset-0 h-full w-full object-cover', i === 0 && 'is-on']}
+              data-prod-photo={i}
+            />
+          ))}
+        </div>
+      </div>
+
+      <!-- 목록 -->
+      <ol class="border-t border-ink/15 lg:order-1 lg:col-span-6">
+        {services.map((s, i) => (
+          <li class="border-b border-ink/15" data-reveal style={`--reveal-delay: ${i * 100}ms`}>
+            <button
+              type="button"
+              class:list={['prod-row group block w-full py-6 text-left sm:py-8', i === 0 && 'is-on']}
+              data-prod-row={i}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+            >
+              <span class="flex items-baseline gap-4 sm:gap-6">
+                <span class="prod-num font-mono text-sm">{pad(i + 1)}</span>
+                <span class="prod-title text-3xl font-bold sm:text-5xl">{s.title}</span>
+                <span class="prod-en ml-auto hidden text-sm font-medium tracking-wide sm:inline">{s.en}</span>
+                <span class="prod-arrow text-xl sm:text-2xl" aria-hidden="true">→</span>
+              </span>
+              <span class="prod-desc grid">
+                <span class="overflow-hidden">
+                  <span class="block max-w-md pt-4 pl-9 leading-relaxed text-muted sm:pl-12">{s.desc}</span>
+                </span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ol>
     </div>
   </div>
 </section>
+
+<style is:global>
+  /* 사진 바뀜: 겹친 사진끼리 서서히 교차 */
+  .prod-photo { opacity: 0; transform: scale(1.04); transition: opacity 0.6s ease, transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .prod-photo.is-on { opacity: 1; transform: none; }
+
+  /* 목록: 고른 줄만 진하고, 나머지는 흐리게 */
+  .prod-row { cursor: pointer; }
+  .prod-title, .prod-num, .prod-en { color: rgb(10 10 10 / 0.25); transition: color 0.35s ease; }
+  .prod-row.is-on .prod-title { color: var(--color-ink); }
+  .prod-row.is-on .prod-num { color: var(--color-accent); }
+  .prod-row.is-on .prod-en { color: rgb(10 10 10 / 0.5); }
+  .prod-arrow { color: var(--color-accent); opacity: 0; transform: translateX(-8px); transition: opacity 0.35s ease, transform 0.35s ease; }
+  .prod-row.is-on .prod-arrow { opacity: 1; transform: none; }
+
+  /* 설명 펼침 (높이 0 → 자기 높이) */
+  .prod-desc { grid-template-rows: 0fr; transition: grid-template-rows 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .prod-row.is-on .prod-desc { grid-template-rows: 1fr; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prod-photo, .prod-desc, .prod-arrow { transition: none; }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-prod]');
+  if (root) {
+    const rows = [...root.querySelectorAll<HTMLElement>('[data-prod-row]')];
+    const photos = [...root.querySelectorAll<HTMLElement>('[data-prod-photo]')];
+
+    const select = (n: number) => {
+      rows.forEach((r, i) => {
+        r.classList.toggle('is-on', i === n);
+        r.setAttribute('aria-pressed', String(i === n));
+      });
+      photos.forEach((p, i) => p.classList.toggle('is-on', i === n));
+    };
+
+    rows.forEach((r, i) => {
+      // 마우스가 있는 화면에선 올리기만 해도, 터치 화면에선 눌러서 바꿈
+      r.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') select(i); });
+      r.addEventListener('focus', () => select(i));
+      r.addEventListener('click', () => select(i));
+    });
+  }
+</script>

@@ -1,30 +1,133 @@
 ---
 import { about } from '../../../data/site';
 
-// '**굵게**' 표시를 잘라서 [보통, 굵게, 보통...] 조각으로 만듦
-const toParts = (line: string) => line.split('**').map((text, i) => ({ text, bold: i % 2 === 1 }));
+// '**굵게**' 표시를 잘라서 [보통, 굵게, 보통...] 조각으로, 조각은 다시 단어로 나눔
+const toParts = (line: string) =>
+  line.split('**').map((text, i) => ({ bold: i % 2 === 1, words: text.split(/(\s+)/).filter(Boolean) }));
 ---
 
-<!-- 회사 소개: 큰 문장 + 오른쪽 설명 -->
-<section id="about" class="scroll-mt-20 bg-paper">
+<!--
+  회사 소개: 큰 문장 + 오른쪽 설명
+  - 스크롤하면 제목이 단어 단위로 연한 회색 → 검정으로 채워짐
+  - 굵은 부분이 다 채워지면 그 아래로 포인트 컬러 바늘땀이 꿰매짐
+  - 짧은 막대가 왼쪽부터 자라고, 설명 문단이 차례로 떠오름
+  - 설명 속 공정 단어(재단·봉제·세탁·검수)가 하나씩 진해짐
+  - '동작 줄이기' 사용자나 JS가 꺼진 환경에선 처음부터 다 채워진 상태
+-->
+<section id="about" class="scroll-mt-20 bg-paper" data-about>
   <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-36">
     <p class="text-xs font-semibold tracking-[0.25em] text-muted sm:text-sm" data-reveal>{about.eyebrow}</p>
 
-    <h2 class="mt-6 text-2xl font-medium leading-snug text-ink/80 sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.3]">
-      {about.headline.map((line, i) => (
-        <span class="block" data-reveal style={`--reveal-delay: ${100 + i * 120}ms`}>
-          {toParts(line).map((part) => (part.bold ? <strong class="font-bold text-ink">{part.text}</strong> : part.text))}
+    <h2 class="about-title mt-6 text-2xl font-medium leading-snug sm:text-4xl sm:leading-snug lg:text-5xl lg:leading-[1.35]">
+      {about.headline.map((line) => (
+        <span class="block">
+          {toParts(line).map((part) =>
+            part.bold ? (
+              <strong class="about-stitch font-bold">
+                {part.words.map((w) => (/^\s+$/.test(w) ? w : <span class="about-word is-bold">{w}</span>))}
+              </strong>
+            ) : (
+              part.words.map((w) => (/^\s+$/.test(w) ? w : <span class="about-word">{w}</span>))
+            ),
+          )}
         </span>
       ))}
     </h2>
 
     <div class="mt-16 grid lg:mt-24 lg:grid-cols-12">
       <div class="space-y-5 leading-relaxed text-muted lg:col-span-5 lg:col-start-8">
-        <span class="block h-1 w-10 bg-ink" data-reveal aria-hidden="true"></span>
-        {about.body.map((para, i) => (
-          <p data-reveal style={`--reveal-delay: ${120 + i * 120}ms`}>{para}</p>
-        ))}
+        <span class="about-bar block h-1 w-10 bg-ink" aria-hidden="true"></span>
+        {about.body.map((para, i) => {
+          let step = 0;
+          return (
+            <p class="about-para" data-reveal style={`--reveal-delay: ${200 + i * 140}ms`}>
+              {para.split('**').map((text, j) =>
+                j % 2 === 1 ? <span class="about-step" style={`--i: ${step++}`}>{text}</span> : text,
+              )}
+            </p>
+          );
+        })}
       </div>
     </div>
   </div>
 </section>
+
+<style is:global>
+  .about-word { color: rgb(10 10 10 / 0.8); transition: color 0.35s ease; }
+  .about-word.is-bold { color: var(--color-ink); }
+
+  /* 굵은 부분 아래 바늘땀: --u(0~1)만큼 왼쪽부터 보임 */
+  .about-stitch { position: relative; white-space: nowrap; }
+  .about-stitch::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.08em;
+    height: 3px;
+    background: repeating-linear-gradient(90deg, var(--color-accent) 0 8px, transparent 8px 14px);
+    border-radius: 2px;
+    clip-path: inset(0 calc(100% - var(--u, 1) * 100%) 0 0);
+  }
+
+  .about-bar { transform-origin: left; }
+
+  /* 설명 속 공정 단어(재단·봉제·세탁·검수): 진하게 */
+  .about-step { font-weight: 600; color: var(--color-ink); }
+
+  /* 움직임 모드 */
+  .motion .about-word { color: rgb(10 10 10 / 0.14); }
+  .motion .about-word.is-lit { color: rgb(10 10 10 / 0.8); }
+  .motion .about-word.is-bold.is-lit { color: var(--color-ink); }
+  .motion .about-stitch { --u: 0; }
+  .motion .about-bar { transform: scaleX(0); transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .motion .about-bar.is-visible { transform: scaleX(1); }
+
+  /* 문단이 떠오른 뒤 공정 단어가 하나씩 진해짐 */
+  .motion .about-step { color: inherit; transition: color 0.4s ease; }
+  .motion .about-para.is-visible .about-step {
+    color: var(--color-ink);
+    transition-delay: calc(var(--reveal-delay, 0ms) + 700ms + var(--i) * 260ms);
+  }
+
+  @media (max-width: 639px) {
+    /* 좁은 화면에선 굵은 부분이 줄바꿈될 수 있게 */
+    .about-stitch { white-space: normal; }
+  }
+</style>
+
+<script>
+  import { onScrollFrame, motionOn, clamp01 } from '../../../scripts/scroll';
+
+  const section = document.querySelector<HTMLElement>('[data-about]');
+
+  if (section && motionOn()) {
+    const title = section.querySelector<HTMLElement>('.about-title')!;
+    const words = [...title.querySelectorAll<HTMLElement>('.about-word')];
+    const stitches = [...title.querySelectorAll<HTMLElement>('.about-stitch')].map((el) => {
+      const own = [...el.querySelectorAll('.about-word')];
+      return { el, last: words.indexOf(own[own.length - 1] as HTMLElement) };
+    });
+    const bar = section.querySelector<HTMLElement>('.about-bar')!;
+
+    const render = () => {
+      // 제목 윗변이 화면 85% 지점에 닿으면 시작, 화면 35% 지점까지 올라오면 다 채워짐
+      const vh = window.innerHeight;
+      const top = title.getBoundingClientRect().top;
+      const p = clamp01((vh * 0.85 - top) / (vh * 0.5));
+      const lit = p * words.length;
+
+      words.forEach((w, i) => w.classList.toggle('is-lit', i < lit));
+      // 굵은 부분의 마지막 단어가 켜진 뒤 바늘땀이 꿰매짐 (단어 2개 분량 동안)
+      // 굵은 부분 뒤에 남은 단어가 2개보다 적으면 남은 만큼만 써서, 제목이 다 채워질 때 바늘땀도 끝까지 꿰매지게 함
+      stitches.forEach(({ el, last }) => {
+        const span = Math.min(2, words.length - (last + 1));
+        const u = span > 0 ? clamp01((lit - (last + 1)) / span) : p >= 1 ? 1 : 0;
+        el.style.setProperty('--u', String(u));
+      });
+      if (p >= 1) bar.classList.add('is-visible');
+    };
+
+    onScrollFrame(render);
+  }
+</script>

@@ -3,9 +3,9 @@
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 
-  /* 포인트 컬러: 시그널 오렌지 */
-  --color-accent: #ff5a1f;
-  --color-accent-dark: #e04812;
+  /* 포인트 컬러: 딥 그린 */
+  --color-accent: #1f7a4d;
+  --color-accent-dark: #17603c;
 
   --color-ink: #0a0a0a;
   --color-paper: #ffffff;

@@ -172,7 +172,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
             type="button"
             class:list={['net-tag absolute hidden lg:block', `is-${o.tag}`]}
             data-office={o.i}
-            style={`left: ${pct(o.x, W)}; top: ${pct(o.y, H)}`}
+            style={`left: ${pct(o.x, W)}; top: ${pct(o.y, H)}; --line: ${o.line ?? 44}px`}
           >
             <span class="net-tag-card block w-44 bg-paper px-4 py-3 text-left">
               <span class="block font-mono text-[11px] tracking-wider text-ink/50">{pad(o.i + 1)} · {o.role}</span>
@@ -260,14 +260,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .net-tag.is-current .net-tag-card { outline-color: var(--color-accent); }
 
   .net-tag:not(.net-tag-sm) { transform: translate(var(--tx), -50%); }
-  .net-tag.is-right { --tx: 44px; }
-  .net-tag.is-left { --tx: calc(-100% - 44px); }
-  /* 단추와 카드를 잇는 실 */
+  .net-tag.is-right { --tx: var(--line, 44px); }
+  .net-tag.is-left { --tx: calc(-100% - var(--line, 44px)); }
+  /* 단추와 카드를 잇는 실 (길이는 site.ts 의 line, 기본 44px) */
   .net-tag:not(.net-tag-sm)::before {
     content: '';
     position: absolute;
     top: 50%;
-    width: 44px;
+    width: var(--line, 44px);
     border-top: 1.5px dashed var(--color-ink);
   }
   .net-tag.is-right::before { right: 100%; }

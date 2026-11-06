@@ -32,7 +32,7 @@ export const about = {
     '모든 과정을 직접 책임지는 의류 제작 기업 **옷본**입니다.',
   ],
   body: [
-    '재단, 봉제, 세탁, 검수까지 생산 라인을 직접 운영합니다. 공정마다 사람이 직접 확인하기 때문에, 처음 약속한 품질과 납기를 지킬 수 있습니다.',
+    '**재단**, **봉제**, **세탁**, **검수**까지 생산 라인을 직접 운영합니다. 공정마다 사람이 직접 확인하기 때문에, 처음 약속한 품질과 납기를 지킬 수 있습니다.',
     '소량 단체복부터 브랜드 시즌 생산까지, 수량과 일정에 맞춰 가장 알맞은 방식을 함께 찾아드립니다.',
   ],
 };
@@ -101,6 +101,7 @@ type Office = {
   role: string;
   desc: string;
   pin?: [number, number];
+  line?: number; // 지도 이름표를 잇는 실 길이(px), 기본 44
   tag: 'left' | 'right';
 };
 
@@ -109,7 +110,8 @@ export const network: { eyebrow: string; headline: string[]; offices: Office[] }
   headline: ['한 땀씩 이어온,', '옷본의 생산 네트워크'],
   offices: [
     { code: 410, name: 'Korea', nameKo: '대한민국', role: 'HQ', desc: '기획 · 샘플 · 품질 관리', tag: 'right' },
-    { code: 156, name: 'China', nameKo: '중국', role: 'BRANCH 01', desc: '원단 · 부자재 · 대량 생산', tag: 'left' },
+    // 단동 지사: 핀을 나라 한가운데가 아니라 단동(랴오닝성, 북한 국경)에 찍음
+    { code: 156, name: 'China', nameKo: '중국 단동', role: 'BRANCH 01', desc: '원단 · 부자재 · 대량 생산', pin: [124.39, 40.13], tag: 'left', line: 18 },
     // 임시 핀: 나라 모양이 S자라 한가운데가 라오스로 잡혀서 중부 해안에 찍음
     { code: 704, name: 'Vietnam', nameKo: '베트남', role: 'BRANCH 02', desc: '봉제 · 시즌 생산', pin: [107.2, 16.6], tag: 'right' },
   ],
