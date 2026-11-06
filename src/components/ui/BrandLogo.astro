@@ -1,0 +1,35 @@
+---
+/*
+  브랜드 로고 자리
+  - 로고 바꾸는 법: 로고 SVG를 public/images/brand/logo.svg 로 넣기만 하면 됨 (코드 수정 없음)
+    다른 이름·위치로 넣었다면 아래 LOGO_SRC 한 줄만 바꾸기
+  - 파일이 없으면 회색 박스 + "로고 준비중입니다" 가 보임 (placeholder={false} 로 쓰면 아무것도 안 그림)
+  - 빌드할 때 파일이 있는지 확인하므로, 파일을 넣은 뒤엔 dev 서버를 다시 켜거나 다시 빌드하기
+*/
+import fs from 'node:fs';
+import path from 'node:path';
+import { site } from '../../data/site';
+
+const LOGO_SRC = '/images/brand/logo.svg';
+
+interface Props {
+  class?: string;
+  /** 로고 파일이 없을 때 회색 박스를 보여줄지 (기본: 보여줌) */
+  placeholder?: boolean;
+}
+const { class: className, placeholder = true } = Astro.props;
+
+const hasLogo = fs.existsSync(path.join(process.cwd(), 'public', LOGO_SRC));
+---
+
+{(hasLogo || placeholder) && (
+<div class:list={['aspect-square w-full', className]}>
+  {hasLogo ? (
+    <img src={LOGO_SRC} alt={`${site.name} 로고`} class="h-full w-full object-contain" />
+  ) : (
+    <div class="flex h-full w-full items-center justify-center rounded-2xl bg-[#E5E5E5]">
+      <p class="text-center text-sm text-[#555]">로고 준비중입니다</p>
+    </div>
+  )}
+</div>
+)}

@@ -17,8 +17,22 @@ export const site = {
 };
 
 // 메뉴. '/#about' 처럼 #이 붙은 건 메인 화면의 해당 섹션으로 이동
-export const nav = [
-  { label: '회사소개', href: '/#about' },
+// children 이 있으면 메뉴에 마우스를 올렸을 때 아래로 하위 메뉴가 펼쳐짐
+export const nav: {
+  label: string;
+  href: string;
+  en?: string;
+  children?: { label: string; href: string; desc: string }[];
+}[] = [
+  {
+    label: '회사소개',
+    href: '/#about',
+    en: 'COMPANY',
+    children: [
+      { label: '회사소개', href: '/#about', desc: '옷본이 하는 일과 생산 과정' },
+      { label: 'CI', href: '/ci', desc: '로고와 심볼에 담긴 의미' },
+    ],
+  },
   { label: '제작 기준', href: '/standards' },
   { label: '생산 분야', href: '/#production' },
   { label: '제작현황', href: '/#works' },
@@ -120,6 +134,22 @@ export const network: { eyebrow: string; intro: { caption: string[]; name: strin
       cities: [{ name: '박지앙', sub: '하노이', pin: [106.2, 21.27], side: 'left' }],
     },
   ],
+};
+
+// 브랜드 스토리 섹션 문구. icon = 카드 아이콘 종류 (thread 실뭉치 / globe 지구 / symbol 원형 심볼)
+export const brandStory = {
+  label: 'BRAND STORY',
+  title: ['실 한 가닥에서 시작해', '세계를 잇습니다'],
+  body: [
+    'OTBON의 심볼은 이니셜 O와 B, 그리고 지구를 하나의 원 안에 담았습니다.',
+    '원단의 결처럼 촘촘히 이어진 선은 한 벌의 옷이 완성되기까지의 정직한 과정과, 고객과 함께 넓혀가는 생산 네트워크를 의미합니다.',
+  ],
+  cards: [
+    { icon: 'thread', title: 'Thread · 실', desc: '한 가닥의 실에서 시작되는 정교한 제작 과정' },
+    { icon: 'globe', title: 'Global · 세계', desc: '국내를 넘어 세계로 이어지는 생산 네트워크' },
+    { icon: 'symbol', title: 'OTBON', desc: '브랜드의 이니셜로 완성한 단단하고 안정적인 형태' },
+  ] as { icon: 'thread' | 'globe' | 'symbol'; title: string; desc: string }[],
+  closing: '보이지 않는 한 땀까지, OTBON이 책임집니다.',
 };
 
 // 함께한 업체. logo 에 public/ 기준 이미지 경로를 적으면 로고가 나옵니다. (예: '/images/partners/abc.png')

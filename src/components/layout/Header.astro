@@ -20,16 +20,43 @@ const { transparent = false } = Astro.props;
 >
   <!-- 로고(왼쪽) · 메뉴(가운데) · 견적 문의(오른쪽) -->
   <div class="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto] items-center px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr] lg:h-20 lg:px-8">
-    <a href="/" class="justify-self-start" aria-label={site.name}>
-      <img class="site-logo h-11 w-auto lg:h-12" src="/images/logo-otbon.png" alt={site.name} width="519" height="447" />
-    </a>
+    <a href="/" class="justify-self-start text-2xl font-extrabold tracking-tight">{site.name}<span class="text-accent">.</span></a>
 
     <nav class="hidden items-center gap-8 md:flex lg:gap-12" aria-label="주요 메뉴">
-      {nav.map((item) => (
-        <a href={item.href} class="text-[15px] font-medium opacity-80 transition-opacity hover:opacity-100">
-          {item.label}
-        </a>
-      ))}
+      {nav.map((item) =>
+        item.children ? (
+          <div class="nav-drop">
+            <a href={item.href} class="nav-drop-link relative text-[15px] font-medium opacity-80 transition-opacity hover:opacity-100">
+              {item.label}
+            </a>
+            <div class="nav-sub absolute inset-x-0 top-full border-b border-line bg-paper text-ink">
+              <div class="mx-auto grid max-w-7xl grid-cols-12 gap-8 px-4 py-10 sm:px-6 lg:px-8">
+                <div class="col-span-3">
+                  <p class="text-[11px] font-semibold tracking-[0.3em] text-accent">{item.en}</p>
+                  <p class="mt-3 text-2xl font-bold">{item.label}</p>
+                </div>
+                <ul class="col-span-9 grid grid-cols-3 gap-4">
+                  {item.children.map((c, i) => (
+                    <li class="nav-sub-item" style={`--i:${i}`}>
+                      <a href={c.href} class="group block border-t border-ink/15 pt-5 transition-colors hover:border-accent">
+                        <span class="flex items-center justify-between">
+                          <span class="text-lg font-bold transition-colors group-hover:text-accent">{c.label}</span>
+                          <svg class="h-4 w-4 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-accent" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        </span>
+                        <span class="mt-2 block text-sm text-muted">{c.desc}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <a href={item.href} class="text-[15px] font-medium opacity-80 transition-opacity hover:opacity-100">
+            {item.label}
+          </a>
+        ),
+      )}
     </nav>
 
     <div class="hidden justify-self-end md:block">
@@ -58,7 +85,12 @@ const { transparent = false } = Astro.props;
   <div id="mobile-menu" class="hidden border-t border-line bg-paper text-ink md:hidden">
     <nav class="flex flex-col px-4 py-4" aria-label="모바일 메뉴">
       {nav.map((item) => (
-        <a href={item.href} class="py-3 text-lg font-medium">{item.label}</a>
+        <>
+          <a href={item.href} class="py-3 text-lg font-medium">{item.label}</a>
+          {item.children?.filter((c) => c.href !== item.href).map((c) => (
+            <a href={c.href} class="-mt-1 py-2 pl-4 text-base text-muted">— {c.label}</a>
+          ))}
+        </>
       ))}
       <a href="/contact" class="mt-3 rounded-full bg-accent py-3 text-center font-semibold text-white">견적 문의</a>
     </nav>
@@ -66,6 +98,33 @@ const { transparent = false } = Astro.props;
 </header>
 
 <style>
+  /* 하위 메뉴: 헤더 아래로 화면 폭 전체 패널이 내려옴. 메뉴에 마우스를 올리거나 키보드로 들어가면 보임 */
+  .nav-sub {
+    opacity: 0;
+    visibility: hidden;
+    clip-path: inset(0 0 100% 0);
+    box-shadow: 0 24px 40px -32px rgb(10 10 10 / 0.35);
+    transition: clip-path 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.3s, visibility 0.45s;
+  }
+  .nav-drop:hover .nav-sub,
+  .nav-drop:focus-within .nav-sub { opacity: 1; visibility: visible; clip-path: inset(0 0 -60px 0); }
+  /* 항목은 패널이 내려온 뒤 차례로 살짝 떠오름 */
+  .nav-sub-item { opacity: 0; transform: translateY(8px); transition: opacity 0.4s, transform 0.4s; }
+  .nav-drop:hover .nav-sub-item,
+  .nav-drop:focus-within .nav-sub-item { opacity: 1; transform: none; transition-delay: calc(120ms + var(--i) * 70ms); }
+  /* 메뉴 글씨에서 패널까지 마우스가 내려가는 동안 끊기지 않게 보이지 않는 다리를 놓음 */
+  .nav-drop-link::after { content: ; position: absolute; left: -24px; right: -24px; top: 100%; height: 40px; }
+  /* 열린 메뉴 아래 밑줄 */
+  .nav-drop-link::before { content: ; position: absolute; left: 0; right: 0; bottom: -6px; height: 1.5px; background: currentColor; transform: scaleX(0); transition: transform 0.3s; }
+  .nav-drop:hover .nav-drop-link::before { transform: scaleX(1); }
+  /* 패널이 열리면 영상 위 투명 헤더도 베이지 바탕으로 */
+  #site-header[data-transparent=true]:has(.nav-drop:hover, .nav-drop:focus-within) {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border-bottom-color: var(--color-line);
+  }
+  @media (prefers-reduced-motion: reduce) { .nav-sub, .nav-sub-item { transition: none; } }
+
   #site-header {
     background: var(--color-paper);
     color: var(--color-ink);
@@ -81,10 +140,6 @@ const { transparent = false } = Astro.props;
   #site-header.is-hidden { transform: translateY(-100%); }
   /* 움직임 모드에서만 (움직임 없는 환경에선 히어로 연출이 없으니 헤더를 그대로 보여줌) */
   :global(.motion) #site-header.is-hero-hidden { transform: translateY(-100%); }
-  /* 로고 그림은 검정이라, 헤더 글자가 흰색일 때(투명 헤더 · 영상 위)는 색을 뒤집어 흰 로고로 */
-  .site-logo { transition: filter 0.3s ease; }
-  #site-header[data-transparent='true']:not(.is-solid) .site-logo { filter: invert(1); }
-  :global(.motion) #site-header[data-transparent='true'][data-tone='light']:not(.is-solid) .site-logo { filter: none; }
   /* 스크롤 히어로의 흰 배경 위에선 검은 글자. 영상이 꽉 차면 히어로가 data-tone="dark"로 바꿈 */
   :global(.motion) #site-header[data-transparent='true'][data-tone='light']:not(.is-solid) {
     color: var(--color-ink);
