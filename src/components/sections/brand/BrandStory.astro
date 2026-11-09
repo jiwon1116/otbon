@@ -1,65 +1,97 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
 import { brandStory } from '../../../data/site';
 
-// 심볼 풀이 그림 (viewBox 400x400, 원 중심 200,200 · 반지름 150)
-// 정식 로고를 받기 전 임시로 그린 심볼(원 + 촘촘한 가로선). 로고를 받으면 모양을 로고에 맞춰 다듬기
-const thread = {
-  lead: 'M-130 250 C-70 330 -20 170 20 120 S70 110 98 110',
-  lines:
-    'M98 110 L302 110 C320 110 343 140 325 140 L75 140 C57 140 52 170 70 170 L330 170 C348 170 350 200 332 200 L68 200 C50 200 52 230 70 230 L330 230 C348 230 343 260 325 260 L75 260 C57 260 80 290 98 290 L302 290',
-};
-const globe = 'M200 50 A150 150 0 1 1 200 350 A150 150 0 1 1 200 50';
+// 심볼 풀이 그림 (viewBox 400x400, 원 중심 200,200)
+// 실제 심볼 SVG(public/images/brand/symbol-white.svg)의 가로줄 모양을 그대로 가져와서 씀
+const SYMBOL_SRC = path.join(process.cwd(), 'public/images/brand/symbol-white.svg');
+const symbolSvg = fs.readFileSync(SYMBOL_SRC, 'utf8');
+const vb = symbolSvg.match(/viewBox="([^"]+)"/)![1].split(/\s+/).map(Number);
+// 심볼(지름 약 48)을 지름 300으로 키워 가운데 놓음
+const SIZE = 300;
+const k = SIZE / Math.max(vb[2], vb[3]);
+const symbolTransform = `translate(${200 - (vb[2] * k) / 2} ${200 - (vb[3] * k) / 2}) scale(${k})`;
 
-// 부분마다 붙는 설명표: 가리키는 점(from) → 글자 자리(to), 글자 정렬
-const callouts = [
-  { from: [302, 290], to: [352, 362], text: '실 · Thread', anchor: 'end', tx: 400, ty: 384 },
-  { from: [94, 94], to: [54, 44], text: '지구 · Global', anchor: 'start', tx: 0, ty: 30 },
-  { from: [306, 94], to: [346, 44], text: '이니셜 · OTBON', anchor: 'end', tx: 400, ty: 30 },
+// 가로줄마다 위에서부터 순서를 매김 (시작점 y 기준)
+const stripes = [...symbolSvg.matchAll(/<path[^>]*\sd="([^"]+)"/g)].map((m) => ({
+  d: m[1],
+  y: Number(m[1].match(/^M[\d.-]+,([\d.-]+)/)?.[1] ?? 0),
+}));
+const order = [...stripes].sort((a, b) => a.y - b.y);
+const stripeList = stripes.map((s) => ({ d: s.d, i: order.indexOf(s) }));
+
+// 지구 · O: 심볼을 한 바퀴 감싸는 원 (12시에서 시작해 시계 방향)
+const R = 166;
+const globe = `M200 ${200 - R} A${R} ${R} 0 1 1 200 ${200 + R} A${R} ${R} 0 1 1 200 ${200 - R}`;
+
+// B: 가로줄마다 꺾이는 단차를 위에서 아래로 이으면 B의 오른쪽 윤곽(위 볼록 · 가운데 잘록 · 아래 볼록)이 됨
+// 단차 위치는 심볼 SVG 좌표(0~48) 기준, 위아래 끝은 B의 세로 기둥 자리
+const notches: [number, number][] = [
+  [24.6, 2.4],
+  [26.45, 7.78], [29.6, 12.66], [30.5, 17.6], [27.3, 22.6],
+  [31.7, 27.5], [32.96, 32.5], [32.58, 37.45], [29.37, 42.4],
+  [25.6, 45.6],
 ];
+const toStage = ([x, y]: [number, number]): [number, number] => [
+  200 - (vb[2] * k) / 2 + x * k,
+  200 - (vb[3] * k) / 2 + y * k,
+];
+// 점들을 부드러운 곡선으로 이음 (Catmull-Rom → 베지어)
+const pts = notches.map(toStage);
+const bCurve = pts
+  .map((p, i) => {
+    if (i === 0) return `M${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+    const p0 = pts[i - 2] ?? pts[i - 1];
+    const p1 = pts[i - 1];
+    const p3 = pts[i + 1] ?? p;
+    const c1 = [p1[0] + (p[0] - p0[0]) / 6, p1[1] + (p[1] - p0[1]) / 6];
+    const c2 = [p[0] - (p3[0] - p1[0]) / 6, p[1] - (p3[1] - p1[1]) / 6];
+    return `C${c1.map((v) => v.toFixed(1)).join(' ')} ${c2.map((v) => v.toFixed(1)).join(' ')} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+  })
+  .join(' ');
 ---
 
 <!--
   CI 페이지 - 02 심볼 풀이 (스크롤 연출)
-  - 스크롤하는 동안 화면이 멈춘 채 초록 실이 심볼을 그리며 부분별로 풀이
-    실(가로선) → 지구(원) → 전체(OTBON). 지금 설명하는 부분만 초록색, 부분마다 설명표가 붙음
+  - 스크롤하는 동안 화면이 멈춘 채 실제 심볼로 부분별 풀이
+    01 실: 심볼 가로줄이 위에서부터 한 줄씩 초록색으로 그어짐
+    02 지구: 가로줄은 흐려지고 심볼을 감싸는 원이 초록 선으로 한 바퀴 그려짐
+    03 이니셜: 가로줄은 연하게, O(감싸는 원)와 B(가로줄 단차를 이은 선)를 초록으로 짚어줌
   - '동작 줄이기' 사용자나 JS가 꺼진 환경에선 처음부터 다 그려진 상태로 보임
 -->
-<section id="symbol" class="bs bg-white">
+<section id="symbol" class="bs">
   <div class="bs-track" data-brand>
-    <div class="bs-stage">
-      <div class="mx-auto grid w-full max-w-7xl items-center gap-x-16 gap-y-10 px-4 py-24 sm:px-6 lg:grid-cols-12 lg:px-8 lg:py-0">
+    <div class="bs-stage relative overflow-hidden">
+      <!-- 배경 글자: 단계마다 아주 연한 큰 영어 단어가 바뀜 (실 → 세계 → 이니셜) -->
+      <div class="bs-words" aria-hidden="true">
+        {['Thread', 'Global', 'OTBON'].map((w, i) => <span class="bs-word" data-word={i}>{w}</span>)}
+      </div>
+
+      <div class="relative mx-auto grid w-full max-w-7xl items-center gap-x-16 gap-y-10 px-4 py-24 sm:px-6 lg:grid-cols-12 lg:px-8 lg:py-0">
         <div class="bs-art relative mx-auto aspect-square w-full max-w-[280px] sm:max-w-[340px] lg:order-2 lg:col-span-6 lg:col-start-7 lg:max-w-[460px]">
-          <svg class="bs-draw absolute inset-0 h-full w-full overflow-visible" data-phase="all" viewBox="0 0 400 400" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <defs>
-              <!-- 들어오는 실은 왼쪽 끝이 흐려지며 시작 -->
-              <linearGradient id="bs-fade" gradientUnits="userSpaceOnUse" x1="-130" y1="0" x2="20" y2="0">
-                <stop offset="0" stop-color="var(--color-accent)" stop-opacity="0" />
-                <stop offset="1" stop-color="var(--color-accent)" />
-              </linearGradient>
-            </defs>
-
+          <svg class="bs-draw absolute inset-0 h-full w-full overflow-visible" data-phase="all" viewBox="0 0 400 400" fill="none" stroke-linecap="round" aria-hidden="true">
             <!-- 완성될 모양을 아주 연하게 미리 깔아둠 -->
-            <path d={thread.lines} class="bs-ghost" stroke-width="1.5" stroke-dasharray="2 7" />
-            <path d={globe} class="bs-ghost" stroke-width="1.5" stroke-dasharray="2 7" />
-
-            <!-- 그려지는 순서대로: 실(들어옴 → 가로선), 지구(원) -->
-            <g class="bs-part" data-part="0">
-              <path d={thread.lead} class="bs-line" data-thread pathLength="1" stroke-width="3.5" style="stroke: url(#bs-fade)" />
-              <path d={thread.lines} class="bs-line" data-thread pathLength="1" stroke-width="3.5" />
+            <g transform={symbolTransform} class="bs-ghost">
+              {stripeList.map((s) => <path d={s.d} />)}
             </g>
+
+            <!-- 01 실: 심볼 가로줄 -->
+            <g transform={symbolTransform} class="bs-part bs-symbol" data-part="0">
+              {stripeList.map((s) => (
+                <path d={s.d} class:list={['bs-stripe', s.i % 2 && 'from-right']} data-stripe={s.i} />
+              ))}
+            </g>
+
+            <!-- 02 지구: 감싸는 원 -->
             <g class="bs-part" data-part="1">
-              <path d={globe} class="bs-line" data-thread pathLength="1" stroke-width="3.5" />
+              <path d={globe} class="bs-line" data-globe pathLength="1" stroke-width="3.5" />
             </g>
-            <circle class="bs-needle" r="6" cx="-130" cy="250" />
 
-            <!-- 설명표 -->
-            {callouts.map((c, i) => (
-              <g class="bs-callout" data-callout={i}>
-                <circle cx={c.from[0]} cy={c.from[1]} r="5" />
-                <path d={`M${c.from[0]} ${c.from[1]} L${c.to[0]} ${c.to[1]}`} stroke-width="1.5" />
-                <text x={c.tx} y={c.ty} text-anchor={c.anchor}>{c.text}</text>
-              </g>
-            ))}
+            <!-- 03 이니셜 B: 가로줄 단차를 잇는 선 -->
+            <g class="bs-part" data-part="2">
+              <path d={bCurve} class="bs-line" data-b pathLength="1" stroke-width="3.5" />
+            </g>
           </svg>
         </div>
 
@@ -85,16 +117,51 @@ const callouts = [
 </section>
 
 <style is:global>
-  .bs-ghost { stroke: rgb(10 10 10 / 0.13); }
+  .bs-ghost { fill: rgb(40 40 40 / 0.05); }
   .bs-line { stroke: var(--color-accent); }
   .bs-part { transition: opacity 0.5s ease; }
-  .bs-needle { fill: var(--color-accent); opacity: 0; }
 
-  /* 설명표: 점 + 점선 + 글자 */
-  .bs-callout { transition: opacity 0.5s ease; }
-  .bs-callout circle { fill: var(--color-accent); }
-  .bs-callout path { stroke: var(--color-ink); stroke-dasharray: 3 4; }
-  .bs-callout text { fill: var(--color-ink); font-size: 17px; font-weight: 700; }
+  /* 심볼 가로줄: 기본(완성)은 진한 색. 줄마다 왼쪽 · 오른쪽에서 번갈아 그어짐 */
+  .bs-stripe {
+    fill: var(--color-ink);
+    transform-box: fill-box;
+    transform-origin: left center;
+    transition: fill 0.5s ease;
+  }
+  .bs-stripe.from-right { transform-origin: right center; }
+
+  /* 배경 글자: 화면 아래쪽에 걸친 아주 큰 단어. 움직임 모드에서만 보임 */
+  .bs-words { display: none; }
+  .motion .bs-words {
+    display: block;
+    position: absolute;
+    inset: auto 0 -0.12em;
+    height: 1em;
+    font-size: clamp(6rem, 21vw, 22rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    pointer-events: none;
+    user-select: none;
+  }
+  .bs-word {
+    position: absolute;
+    inset: 0;
+    text-align: center;
+    white-space: nowrap;
+    color: rgb(40 40 40 / 0.05);
+    opacity: 0;
+    transform: translateY(18%);
+    transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  /* 지금 단계 단어만 아래에서 떠오르며 나타남 (시작 전엔 첫 단어) */
+  [data-phase='-1'] .bs-word[data-word='0'],
+  [data-phase='0'] .bs-word[data-word='0'],
+  [data-phase='1'] .bs-word[data-word='1'],
+  [data-phase='2'] .bs-word[data-word='2'] { opacity: 1; transform: none; }
+  /* 이니셜 단계: 단어 OTBON 은 초록빛으로 아주 연하게 */
+  .bs-word[data-word='2'] { color: rgb(46 91 69 / 0.08); }
+
 
   .bs-steps { display: grid; }
   .bs-step {
@@ -102,7 +169,7 @@ const callouts = [
     grid-template-columns: 3rem 1fr;
     align-items: baseline;
     padding: 20px 0;
-    border-top: 1px solid rgb(10 10 10 / 0.1);
+    border-top: 1px solid rgb(40 40 40 / 0.1);
     transition: opacity 0.5s ease, transform 0.5s ease;
   }
   .bs-num { font-size: 13px; font-weight: 600; color: var(--color-accent); font-variant-numeric: tabular-nums; }
@@ -111,12 +178,19 @@ const callouts = [
   .motion .bs-track { height: 360vh; }
   .motion .bs-stage { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; }
   .motion .bs-line { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
-  .motion .bs-callout { opacity: 0; }
-  /* 지금 설명하는 부분만 진하게: 지구 단계엔 가로선을 흐리게 */
+  .motion .bs-stripe { transform: scaleX(0); }
+
+  /* 실 · 지구 단계엔 가로줄을 초록 실 색으로 */
+  .motion .bs-draw:is([data-phase='-1'], [data-phase='0'], [data-phase='1']) .bs-stripe { fill: var(--color-accent); }
+  /* 지금 설명하는 부분만 진하게: 지구 단계엔 가로줄을 흐리게,
+     이니셜 단계엔 가로줄을 연하게 깔고 O(원) · B(단차 선)를 초록으로 */
+  /* 아직 그릴 차례가 아닌 선은 숨김 (둥근 선 끝이 점처럼 남지 않게) */
+  .motion .bs-draw:is([data-phase='-1'], [data-phase='0']) .bs-part[data-part='1'],
+  .motion .bs-draw:not([data-phase='2']) .bs-part[data-part='2'] { opacity: 0; }
   .motion .bs-draw[data-phase='1'] .bs-part[data-part='0'] { opacity: 0.18; }
-  .motion .bs-draw[data-phase='0'] .bs-callout[data-callout='0'],
-  .motion .bs-draw[data-phase='1'] .bs-callout[data-callout='1'],
-  .motion .bs-draw[data-phase='2'] .bs-callout[data-callout='2'] { opacity: 1; }
+  .motion .bs-draw[data-phase='2'] .bs-part[data-part='0'] { opacity: 0.3; }
+  /* 움직임 없는 환경(완성 그림)에선 B 선은 숨겨 로고 그대로 보이게 */
+  html:not(.motion) .bs-part[data-part='2'] { display: none; }
 
   /* 작은 화면: 단계를 한 자리에 겹쳐두고 지금 단계만 보이게 */
   .motion .bs-step { grid-area: 1 / 1; opacity: 0; transform: translateY(10px); }
@@ -130,47 +204,45 @@ const callouts = [
 </style>
 
 <script>
-  import { onScrollFrame, motionOn, stickyProgress, clamp01 } from '../../../scripts/scroll';
+  import { onScrollFrame, motionOn, stickyProgress, clamp01, easeOut } from '../../../scripts/scroll';
 
   const track = document.querySelector<HTMLElement>('[data-brand]');
 
   if (track && motionOn()) {
     const draw = track.querySelector<SVGSVGElement>('.bs-draw')!;
-    const paths = [...track.querySelectorAll<SVGPathElement>('[data-thread]')]; // 들어오는 실, 가로선, 원
-    const lens = paths.map((p) => p.getTotalLength());
-    const needle = track.querySelector<SVGCircleElement>('.bs-needle')!;
+    const stripes = [...track.querySelectorAll<SVGPathElement>('[data-stripe]')];
+    const globe = track.querySelector<SVGPathElement>('[data-globe]')!;
+    const bLine = track.querySelector<SVGPathElement>('[data-b]')!;
     const steps = [...track.querySelectorAll<HTMLElement>('[data-step]')];
 
-    // 스크롤 진행도(0~1) 중 각 선이 그려지는 구간
-    const ranges = [
-      [0.04, 0.12],
-      [0.12, 0.32],
-      [0.4, 0.6],
-    ];
+    // 스크롤 진행도(0~1) 중 구간
+    const STRIPES = [0.04, 0.34]; // 가로줄이 위에서부터 차례로 그어짐
+    const GLOBE = [0.42, 0.62]; // 원이 한 바퀴 그려짐
+    const B = [0.7, 0.88]; // B 윤곽선이 위에서 아래로 그려짐
     // 단계(실 · 지구 · OTBON)가 시작되는 지점
     const phaseAt = [0.04, 0.4, 0.68];
 
+    const n = stripes.length;
+    const span = STRIPES[1] - STRIPES[0];
+    const each = span / (n * 0.45 + 0.55); // 줄 하나가 그어지는 길이 (앞줄과 반쯤 겹치며 이어짐)
+    const gap = (span - each) / Math.max(n - 1, 1);
+
     const render = () => {
       const p = stickyProgress(track);
-      let head: DOMPoint | null = null;
 
-      paths.forEach((path, i) => {
-        const [a, b] = ranges[i];
-        const t = clamp01((p - a) / (b - a));
-        path.style.strokeDashoffset = String(1 - t);
-        if (t > 0 && t < 1) head = path.getPointAtLength(lens[i] * t);
+      stripes.forEach((s) => {
+        const i = Number(s.dataset.stripe);
+        const a = STRIPES[0] + i * gap;
+        s.style.transform = `scaleX(${easeOut(clamp01((p - a) / each))})`;
       });
 
-      // 바늘(실 끝 점)은 선을 그리는 동안만 보임
-      if (head) {
-        needle.setAttribute('cx', String((head as DOMPoint).x));
-        needle.setAttribute('cy', String((head as DOMPoint).y));
-      }
-      needle.style.opacity = head ? '1' : '0';
+      globe.style.strokeDashoffset = String(1 - clamp01((p - GLOBE[0]) / (GLOBE[1] - GLOBE[0])));
+      bLine.style.strokeDashoffset = String(1 - clamp01((p - B[0]) / (B[1] - B[0])));
 
       let phase = -1;
       phaseAt.forEach((at, i) => { if (p >= at) phase = i; });
       draw.dataset.phase = String(phase);
+      track.dataset.phase = String(phase); // 배경 글자용
       steps.forEach((s, i) => {
         s.dataset.state = i < phase ? 'done' : i === phase ? 'on' : '';
       });

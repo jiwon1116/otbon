@@ -190,7 +190,7 @@ const intro = network.intro;
   .net { --color-accent: #4f8f6d; --color-accent-dark: #3d7357; }
 
   .net-land path {
-    fill: #262626;
+    fill: #3a3a3a; /* 바탕(#282828)보다 한 톤 밝게 해서 땅 / 바다 구분 */
     stroke: var(--color-ink);
     stroke-width: 0.8;
     vector-effect: non-scaling-stroke;
@@ -214,7 +214,7 @@ const intro = network.intro;
   /* 도시 이름: 지도 위에서도 잘 읽히게 검은 테두리를 글자 뒤에 깔음 */
   .net-city, .net-city-sub {
     paint-order: stroke;
-    stroke: rgb(10 10 10 / 0.85);
+    stroke: rgb(40 40 40 / 0.85);
     stroke-width: 4px;
     stroke-linejoin: round;
   }

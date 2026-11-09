@@ -40,24 +40,26 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
 
   <!-- 2) 로고 -->
   <section id="logo" class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-36">
-    <div class="flex items-end justify-between gap-6">
-      <div data-reveal>
-        <p class="ci-eyebrow"><span>01</span>Logo</p>
-        <h2 class="mt-5 text-3xl font-bold sm:text-4xl">로고</h2>
-      </div>
-      <p class="hidden max-w-sm text-right text-muted md:block" data-reveal>
-        밝은 바탕에는 기본형을, 어두운 바탕에는 반전형을 사용합니다.
-      </p>
+    <div data-reveal>
+      <p class="ci-eyebrow"><span>01</span>Logo</p>
+      <h2 class="mt-5 text-3xl font-bold sm:text-4xl">로고</h2>
     </div>
-    <div class="mt-10 grid gap-4 md:grid-cols-2 lg:mt-14">
-      <figure class="ci-plate bg-white" data-reveal>
-        <BrandLogo class="aspect-square max-w-[180px] sm:max-w-[240px] lg:max-w-[280px]" />
-        <figcaption class="ci-plate-cap text-muted"><b class="text-ink">Primary</b> 기본형</figcaption>
+
+    <!-- 큰 판 하나. 아래 버튼으로 기본형(흰 바탕) ↔ 반전형(초록 바탕) 전환. 바뀔 때 심볼이 다시 그어짐 -->
+    <div class="mt-10 lg:mt-14" data-logo-switch data-mode="primary">
+      <figure class="ci-stage" data-reveal style="--reveal-delay: 80ms">
+        <BrandLogo class="aspect-square max-w-[180px] sm:max-w-[240px] lg:max-w-[300px]" animate fill="currentColor" />
+        <figcaption class="ci-stage-cap">
+          <span data-cap="primary">밝은 바탕에 사용하는 기본형</span>
+          <span data-cap="reverse">어두운 바탕에 사용하는 반전형</span>
+        </figcaption>
       </figure>
-      <figure class="ci-plate bg-accent text-white" data-reveal style="--reveal-delay: 120ms">
-        <BrandLogo class="aspect-square max-w-[180px] sm:max-w-[240px] lg:max-w-[280px]" tone="dark" />
-        <figcaption class="ci-plate-cap text-white/60"><b class="text-white">Reverse</b> 반전형</figcaption>
-      </figure>
+      <div class="mt-6 flex justify-center" data-reveal style="--reveal-delay: 160ms">
+        <div class="ci-toggle" role="tablist" aria-label="로고 바탕 선택">
+          <button type="button" role="tab" data-to="primary" aria-selected="true">Primary</button>
+          <button type="button" role="tab" data-to="reverse" aria-selected="false">Reverse</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -109,11 +111,26 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
   .ci-eyebrow { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--color-accent); }
   .ci-eyebrow span { letter-spacing: 0; padding-right: 12px; border-right: 1px solid currentColor; }
 
-  /* 로고 판: 가운데 로고, 왼쪽 아래 이름 */
-  .ci-plate { position: relative; display: flex; align-items: center; justify-content: center; border-radius: 20px; padding: 48px 24px 72px; }
-  @media (min-width: 768px) { .ci-plate { aspect-ratio: 4 / 3; padding: 48px; } }
-  .ci-plate-cap { position: absolute; left: 28px; bottom: 24px; font-size: 13px; }
-  .ci-plate-cap b { margin-right: 8px; font-weight: 600; }
+  /* 로고 판: 큰 판 하나, 바탕 · 로고 색이 모드에 따라 부드럽게 바뀜 */
+  .ci-stage {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    aspect-ratio: 1 / 1; padding: 48px 24px; border-radius: 24px;
+    background: #fff; color: #282828;
+    transition: background-color 0.6s ease, color 0.6s ease;
+  }
+  @media (min-width: 768px) { .ci-stage { aspect-ratio: 16 / 8; } }
+  [data-mode='reverse'] .ci-stage { background: var(--color-accent); color: #fff; }
+  .ci-stage-cap { position: absolute; left: 0; right: 0; bottom: 22px; text-align: center; font-size: 13px; opacity: 0.55; }
+  .ci-stage-cap span { display: none; }
+  [data-mode='primary'] .ci-stage-cap [data-cap='primary'],
+  [data-mode='reverse'] .ci-stage-cap [data-cap='reverse'] { display: inline; }
+
+  /* 전환 버튼: 둥근 알약 두 칸 */
+  .ci-toggle { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--color-soft); }
+  .ci-toggle button { padding: 8px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--color-muted); transition: background-color 0.3s, color 0.3s; }
+  .ci-toggle button[aria-selected='true'] { background: #fff; color: var(--color-ink); box-shadow: 0 1px 2px rgb(10 10 10 / 0.08); }
+  .ci-toggle button[data-to='reverse'][aria-selected='true'] { background: var(--color-accent); color: #fff; }
+  .ci-toggle button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 
   /* 컬러 칩: 위에 이름, 아래 값 */
   .ci-chip { display: flex; flex-direction: column; justify-content: space-between; gap: 56px; min-height: 340px; border-radius: 20px; padding: 32px; }
@@ -121,3 +138,24 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
   /* 맺음말 위 세로 바늘땀 */
   .ci-stitch { width: 2px; height: 72px; background: repeating-linear-gradient(180deg, var(--color-accent) 0 8px, transparent 8px 14px); }
 </style>
+
+<script>
+  // 로고 판 전환: 버튼을 누르면 data-mode 를 바꿔 바탕 · 로고 색을 바꾸고, 심볼 애니메이션을 처음부터 다시 재생
+  document.querySelectorAll<HTMLElement>('[data-logo-switch]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-to]')];
+    const replay = () => {
+      root.querySelectorAll<SVGElement>('.logo-stripe, .logo-type').forEach((el) =>
+        el.getAnimations().forEach((a) => { a.cancel(); a.play(); }),
+      );
+    };
+    tabs.forEach((tab) =>
+      tab.addEventListener('click', () => {
+        const mode = tab.dataset.to!;
+        if (root.dataset.mode === mode) return;
+        root.dataset.mode = mode;
+        tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+        replay();
+      }),
+    );
+  });
+</script>

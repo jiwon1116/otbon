@@ -71,10 +71,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
   /* 목록: 고른 줄만 진하고, 나머지는 흐리게 */
   .prod-row { cursor: pointer; }
-  .prod-title, .prod-num, .prod-en { color: rgb(10 10 10 / 0.25); transition: color 0.35s ease; }
+  .prod-title, .prod-num, .prod-en { color: rgb(40 40 40 / 0.25); transition: color 0.35s ease; }
   .prod-row.is-on .prod-title { color: var(--color-ink); }
   .prod-row.is-on .prod-num { color: var(--color-accent); }
-  .prod-row.is-on .prod-en { color: rgb(10 10 10 / 0.5); }
+  .prod-row.is-on .prod-en { color: rgb(40 40 40 / 0.5); }
   .prod-arrow { color: var(--color-accent); opacity: 0; transform: translateX(-8px); transition: opacity 0.35s ease, transform 0.35s ease; }
   .prod-row.is-on .prod-arrow { opacity: 1; transform: none; }
 

@@ -7,7 +7,7 @@
   --color-accent: #2e5b45;
   --color-accent-dark: #234636;
 
-  --color-ink: #0a0a0a;
+  --color-ink: #282828; /* 로고 실제 색과 같은 진회색 */
   --color-paper: #f5f1e8;
   --color-muted: #6e685e;
   --color-line: #e2d9c9;
