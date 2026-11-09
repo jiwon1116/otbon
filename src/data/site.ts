@@ -150,6 +150,12 @@ export const brandStory = {
     { icon: 'symbol', title: 'OTBON', desc: '브랜드의 이니셜로 완성한 단단하고 안정적인 형태' },
   ] as { icon: 'thread' | 'globe' | 'symbol'; title: string; desc: string }[],
   closing: '보이지 않는 한 땀까지, OTBON이 책임집니다.',
+  // CI 페이지 브랜드 컬러. hex 만 바꾸면 RGB 는 자동 계산. dark = 글자를 흰색으로
+  colors: [
+    { name: 'Forest Green', ko: '포레스트 그린', hex: '#2E5B45', desc: '옷본의 대표 색. 로고와 강조에 씁니다.', dark: true },
+    { name: 'Ink Black', ko: '잉크 블랙', hex: '#0A0A0A', desc: '글자와 선. 단단하고 정직한 인상', dark: true },
+    { name: 'Linen Beige', ko: '린넨 베이지', hex: '#F5F1E8', desc: '원단의 바탕처럼 편안한 배경색', dark: false },
+  ],
 };
 
 // 함께한 업체. logo 에 public/ 기준 이미지 경로를 적으면 로고가 나옵니다. (예: '/images/partners/abc.png')

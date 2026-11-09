@@ -32,17 +32,20 @@ const poster = await getImage({ src: photo(site.hero.poster), width: 1920, forma
       <div class="hero-shade absolute inset-0 bg-black/35"></div>
     </div>
 
-    <!-- 첫 화면 로고 (헤더 로고와 같은 글자 로고를 크게. 정식 로고 그림을 받으면 교체). 바깥은 스크롤용, 안쪽은 처음 등장용 -->
-    <div class="hero-logo absolute inset-x-0 top-[38%] -translate-y-1/2 text-center" aria-hidden="true">
-      <p class="hero-logo-in text-7xl font-extrabold leading-none tracking-tight text-ink sm:text-9xl lg:text-[11rem]">
-        {site.name}<span class="text-accent">.</span>
-      </p>
+    <!-- 첫 화면 로고 (세로형 로고 그림, public/images/brand/logo.svg). 바깥은 스크롤용, 안쪽은 처음 등장용
+         높이는 화면 높이에 맞춰 줄어들어서, 낮은 화면에서도 아래 스크롤 안내와 겹치지 않음 -->
+    <div class="hero-logo absolute inset-x-0 top-[38%] -translate-y-1/2" aria-hidden="true">
+      <img
+        src="/images/brand/logo.svg"
+        alt=""
+        class="hero-logo-in mx-auto h-[clamp(90px,17svh,160px)] w-auto"
+      />
     </div>
 
-    <!-- 스크롤 안내: 로고와 영상 원 사이. 마우스 모양 안에서 휠이 아래로 굴러감 -->
-    <div class="hero-cue pointer-events-none absolute inset-x-0 flex flex-col items-center gap-3 text-ink/60" aria-hidden="true">
+    <!-- 스크롤 안내: 로고와 영상 원 사이. 가는 세로선 위로 짧은 선이 위에서 아래로 계속 흘러내림 -->
+    <div class="hero-cue pointer-events-none absolute inset-x-0 flex flex-col items-center gap-4 text-ink/60" aria-hidden="true">
       <span class="text-[11px] font-semibold tracking-[0.3em]">SCROLL</span>
-      <span class="hero-cue-mouse relative block h-[42px] w-[26px] rounded-[14px] border-2 border-ink/60"></span>
+      <span class="hero-cue-line relative block h-12 w-px overflow-hidden bg-ink/15"></span>
     </div>
 
     <!-- 영상 위 글씨 -->
@@ -72,25 +75,20 @@ const poster = await getImage({ src: photo(site.hero.poster), width: 1920, forma
   /* 스크롤 안내 (움직임 모드에서만). 영상 원 윗부분(화면 72%)보다 조금 위 */
   .hero-cue { display: none; bottom: calc(28% + 28px); }
   .motion .hero-cue { display: flex; animation: hero-cue-in 0.8s ease 2s both; }
-  /* 마우스 휠: 위에서 아래로 굴러가며 흐려지고, 다시 위에서 시작 */
-  .hero-cue-mouse::after {
+  /* 세로선 안에서 짧은 진한 선이 위 → 아래로 빠져나가고, 다시 위에서 들어옴 */
+  .hero-cue-line::after {
     content: '';
     position: absolute;
-    left: 50%;
-    top: 7px;
-    width: 4px;
-    height: 8px;
-    margin-left: -2px;
-    border-radius: 2px;
+    inset: 0;
     background: rgb(10 10 10 / 0.7);
-    animation: hero-cue-wheel 1.6s ease-in-out infinite;
+    transform: translateY(-100%);
+    animation: hero-cue-flow 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
   }
-  @keyframes hero-cue-wheel {
-    0% { transform: translateY(0); opacity: 1; }
-    70% { transform: translateY(12px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 0; }
+  @keyframes hero-cue-flow {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
   }
-  @media (prefers-reduced-motion: reduce) { .hero-cue-mouse::after { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .hero-cue-line::after { animation: none; transform: none; } }
   .motion .hero-media {
     /* JS가 정확한 값으로 바로 덮어씀. 아래는 첫 그림이 튀지 않게 하는 대략값 */
     clip-path: circle(20vw at 50% calc(72% + 20vw));
@@ -132,7 +130,12 @@ const poster = await getImage({ src: photo(site.hero.poster), width: 1920, forma
       vh = stage.offsetHeight;
       // 처음 원: 지름이 화면 폭의 40% 정도, 윗부분만 화면 아래쪽(72% 지점)에 보이게
       r0 = Math.min(Math.max(vw * 0.2, 150), 340);
-      cy0 = vh * 0.72 + r0;
+      // 세로로 긴 모바일 화면에선 72% 지점이면 원이 거의 통째로 보이므로,
+      // 보이는 높이가 반지름의 85%를 넘지 않게 원 윗부분을 아래로 내려 반원 모양을 유지
+      const top0 = Math.max(vh * 0.72, vh - r0 * 0.85);
+      cy0 = top0 + r0;
+      // 스크롤 안내도 원 바로 위에 붙어 따라 내려감
+      cue.style.bottom = `${vh - top0 + 28}px`;
       // 마지막 원: 화면 가운데에서 네 모서리까지 덮는 크기
       r1 = Math.hypot(vw / 2, vh / 2) + 2;
     };

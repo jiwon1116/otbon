@@ -20,7 +20,10 @@ const { transparent = false } = Astro.props;
 >
   <!-- 로고(왼쪽) · 메뉴(가운데) · 견적 문의(오른쪽) -->
   <div class="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto] items-center px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr] lg:h-20 lg:px-8">
-    <a href="/" class="justify-self-start text-2xl font-extrabold tracking-tight">{site.name}<span class="text-accent">.</span></a>
+    <!-- 가로형 로고. 그림을 글자색(currentColor)으로 칠해서, 영상 위 흰 헤더 · 베이지 헤더 어디서든 글자색을 따라감 -->
+    <a href="/" class="justify-self-start" aria-label={`${site.name} 홈`}>
+      <span class="brand-mark block h-7 bg-current lg:h-8" aria-hidden="true"></span>
+    </a>
 
     <nav class="hidden items-center gap-8 md:flex lg:gap-12" aria-label="주요 메뉴">
       {nav.map((item) =>
@@ -98,6 +101,13 @@ const { transparent = false } = Astro.props;
 </header>
 
 <style>
+  /* 헤더 로고: public/images/brand/logo-horizontal.svg 모양대로 글자색을 오려냄 (비율은 SVG viewBox 그대로) */
+  .brand-mark {
+    aspect-ratio: 197.57 / 44.73;
+    -webkit-mask: url('/images/brand/logo-horizontal.svg') center / contain no-repeat;
+    mask: url('/images/brand/logo-horizontal.svg') center / contain no-repeat;
+  }
+
   /* 하위 메뉴: 헤더 아래로 화면 폭 전체 패널이 내려옴. 메뉴에 마우스를 올리거나 키보드로 들어가면 보임 */
   .nav-sub {
     opacity: 0;

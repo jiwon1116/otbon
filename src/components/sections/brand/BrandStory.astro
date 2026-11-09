@@ -1,5 +1,4 @@
 ---
-import BrandLogo from '../../ui/BrandLogo.astro';
 import { brandStory } from '../../../data/site';
 
 // 심볼 풀이 그림 (viewBox 400x400, 원 중심 200,200 · 반지름 150)
@@ -20,38 +19,16 @@ const callouts = [
 ---
 
 <!--
-  브랜드 스토리
-  1) 로고를 크게 보여줌 (로고 파일이 없으면 회색 "로고 준비중입니다" 박스)
-  2) 스크롤하면 화면이 멈춘 채 심볼을 부분별로 풀이
-     실(가로선)이 그려지며 "실" → 원이 그려지며 "지구" → 전체가 함께 켜지며 "OTBON"
-     지금 설명하는 부분만 초록색, 나머지는 흐리게. 부분마다 설명표가 붙음
+  CI 페이지 - 02 심볼 풀이 (스크롤 연출)
+  - 스크롤하는 동안 화면이 멈춘 채 초록 실이 심볼을 그리며 부분별로 풀이
+    실(가로선) → 지구(원) → 전체(OTBON). 지금 설명하는 부분만 초록색, 부분마다 설명표가 붙음
   - '동작 줄이기' 사용자나 JS가 꺼진 환경에선 처음부터 다 그려진 상태로 보임
-  - 이 섹션만 Noto Sans KR 글꼴
 -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" />
-
-<section id="brand" class="brand scroll-mt-20">
-  <!-- 1) 로고 크게 -->
-  <div class="mx-auto max-w-3xl px-4 pt-24 text-center sm:px-6 lg:pt-36">
-    <p class="text-xs font-bold tracking-[0.3em] text-accent sm:text-sm" data-reveal>{brandStory.label}</p>
-    <div class="mx-auto mt-10 w-full max-w-[240px] sm:max-w-[320px]" data-reveal style="--reveal-delay: 100ms">
-      <BrandLogo />
-    </div>
-    <h2 class="mt-12 text-3xl font-bold leading-snug sm:text-4xl lg:text-5xl lg:leading-[1.3]" data-reveal style="--reveal-delay: 150ms">
-      {brandStory.title.map((line) => <span class="block">{line}</span>)}
-    </h2>
-    <div class="bs-muted mx-auto mt-6 max-w-xl space-y-2 leading-relaxed sm:text-lg" data-reveal style="--reveal-delay: 200ms">
-      {brandStory.body.map((p) => <p>{p}</p>)}
-    </div>
-  </div>
-
-  <!-- 2) 심볼 풀이 -->
+<section id="symbol" class="bs bg-white">
   <div class="bs-track" data-brand>
     <div class="bs-stage">
-      <div class="mx-auto grid w-full max-w-6xl items-center gap-x-16 gap-y-10 px-4 py-24 sm:px-6 lg:grid-cols-12 lg:px-8 lg:py-0">
-        <div class="bs-art relative mx-auto aspect-square w-full max-w-[280px] sm:max-w-[340px] lg:order-2 lg:col-span-6 lg:col-start-7 lg:max-w-[440px]">
+      <div class="mx-auto grid w-full max-w-7xl items-center gap-x-16 gap-y-10 px-4 py-24 sm:px-6 lg:grid-cols-12 lg:px-8 lg:py-0">
+        <div class="bs-art relative mx-auto aspect-square w-full max-w-[280px] sm:max-w-[340px] lg:order-2 lg:col-span-6 lg:col-start-7 lg:max-w-[460px]">
           <svg class="bs-draw absolute inset-0 h-full w-full overflow-visible" data-phase="all" viewBox="0 0 400 400" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <defs>
               <!-- 들어오는 실은 왼쪽 끝이 흐려지며 시작 -->
@@ -88,15 +65,15 @@ const callouts = [
 
         <!-- 의미 3단계: 큰 화면은 목록으로 차례로 켜지고, 작은 화면은 지금 단계만 보임 -->
         <div class="lg:order-1 lg:col-span-5">
-          <p class="hidden text-xs font-bold tracking-[0.3em] text-accent lg:block">SYMBOL</p>
-          <h3 class="mt-4 hidden text-3xl font-bold leading-snug lg:block">심볼에 담긴 의미</h3>
-          <ol class="bs-steps lg:mt-10">
+          <p class="ci-eyebrow"><span>02</span>Symbol</p>
+          <h2 class="mt-5 text-3xl font-bold leading-snug sm:text-4xl">심볼에 담긴 의미</h2>
+          <ol class="bs-steps mt-8 lg:mt-12">
             {brandStory.cards.map((c, i) => (
               <li class="bs-step" data-step>
-                <span class="bs-num text-xs font-bold text-accent">{String(i + 1).padStart(2, '0')}</span>
+                <span class="bs-num">{String(i + 1).padStart(2, '0')}</span>
                 <div>
-                  <h4 class="text-base font-bold sm:text-lg">{c.title}</h4>
-                  <p class="bs-muted mt-1 text-sm leading-relaxed sm:text-base">{c.desc}</p>
+                  <h3 class="text-lg font-bold sm:text-xl">{c.title}</h3>
+                  <p class="mt-1.5 text-sm leading-relaxed text-muted sm:text-base">{c.desc}</p>
                 </div>
               </li>
             ))}
@@ -105,46 +82,37 @@ const callouts = [
       </div>
     </div>
   </div>
-
-  <p class="px-4 pb-24 text-center text-lg font-medium sm:text-xl lg:pb-36" data-reveal>{brandStory.closing}</p>
 </section>
 
 <style is:global>
-  .brand {
-    --brand-ink: #16181d;
-    background: #fff;
-    color: var(--brand-ink);
-    font-family: 'Noto Sans KR', var(--font-sans);
-  }
-  .bs-muted { color: rgb(22 24 29 / 0.62); }
-
-  .bs-ghost { stroke: rgb(22 24 29 / 0.14); }
+  .bs-ghost { stroke: rgb(10 10 10 / 0.13); }
   .bs-line { stroke: var(--color-accent); }
   .bs-part { transition: opacity 0.5s ease; }
   .bs-needle { fill: var(--color-accent); opacity: 0; }
 
-  /* 설명표: 점 + 선 + 글자 */
+  /* 설명표: 점 + 점선 + 글자 */
   .bs-callout { transition: opacity 0.5s ease; }
   .bs-callout circle { fill: var(--color-accent); }
-  .bs-callout path { stroke: var(--brand-ink); stroke-dasharray: 3 4; }
-  .bs-callout text { fill: var(--brand-ink); font-size: 17px; font-weight: 700; }
+  .bs-callout path { stroke: var(--color-ink); stroke-dasharray: 3 4; }
+  .bs-callout text { fill: var(--color-ink); font-size: 17px; font-weight: 700; }
 
   .bs-steps { display: grid; }
   .bs-step {
     display: grid;
-    grid-template-columns: 2.5rem 1fr;
+    grid-template-columns: 3rem 1fr;
     align-items: baseline;
-    padding: 16px 0;
-    border-top: 1px solid rgb(22 24 29 / 0.1);
+    padding: 20px 0;
+    border-top: 1px solid rgb(10 10 10 / 0.1);
     transition: opacity 0.5s ease, transform 0.5s ease;
   }
+  .bs-num { font-size: 13px; font-weight: 600; color: var(--color-accent); font-variant-numeric: tabular-nums; }
 
   /* 움직임 모드: 긴 트랙 안에서 화면이 멈춘 채 부분별로 풀이 */
   .motion .bs-track { height: 360vh; }
   .motion .bs-stage { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; }
   .motion .bs-line { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
   .motion .bs-callout { opacity: 0; }
-  /* 지금 설명하는 부분만 진하게: 실 단계엔 원을, 지구 단계엔 가로선을 흐리게 */
+  /* 지금 설명하는 부분만 진하게: 지구 단계엔 가로선을 흐리게 */
   .motion .bs-draw[data-phase='1'] .bs-part[data-part='0'] { opacity: 0.18; }
   .motion .bs-draw[data-phase='0'] .bs-callout[data-callout='0'],
   .motion .bs-draw[data-phase='1'] .bs-callout[data-callout='1'],

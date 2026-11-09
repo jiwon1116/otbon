@@ -1,11 +1,123 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import BrandLogo from '../components/ui/BrandLogo.astro';
 import BrandStory from '../components/sections/brand/BrandStory.astro';
 import CtaSection from '../components/sections/CtaSection.astro';
+import { brandStory } from '../data/site';
+
+const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(' · ');
 ---
 
-<!-- CI 페이지 (회사소개 > CI): 로고 소개 + 심볼 풀이 -->
+<!--
+  CI 페이지 (회사소개 > CI)
+  1) 큰 제목 Corporate Identity + 브랜드 이야기
+  2) 01 Logo: 기본형(밝은 바탕) · 반전형(초록 바탕) 로고
+  3) 02 Symbol: 초록 실이 심볼을 그리며 의미 풀이 (BrandStory)
+  4) 03 Color: 브랜드 컬러 3가지
+  5) 맺음말
+-->
 <Layout title="CI" description="옷본(OTBON)의 로고와 심볼에 담긴 의미를 소개합니다.">
+  <!-- 1) 첫 화면 -->
+  <section class="mx-auto max-w-7xl px-4 pb-20 pt-32 sm:px-6 lg:px-8 lg:pb-28 lg:pt-44">
+    <p class="text-sm text-muted" data-reveal>
+      <a href="/#about" class="transition-colors hover:text-ink">회사소개</a>
+      <span class="mx-2 text-line">/</span>
+      <span class="text-ink">CI</span>
+    </p>
+    <h1 class="ci-title mt-8 font-extrabold" data-reveal style="--reveal-delay: 80ms">
+      <span class="block">Corporate</span>
+      <span class="block">Identity<span class="text-accent">.</span></span>
+    </h1>
+    <div class="mt-14 grid gap-8 border-t border-ink pt-10 lg:mt-20 lg:grid-cols-12" data-reveal style="--reveal-delay: 160ms">
+      <h2 class="text-2xl font-bold leading-snug sm:text-3xl lg:col-span-5">
+        {brandStory.title.map((line) => <span class="block">{line}</span>)}
+      </h2>
+      <div class="space-y-3 leading-relaxed text-muted sm:text-lg lg:col-span-6 lg:col-start-7">
+        {brandStory.body.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <!-- 2) 로고 -->
+  <section id="logo" class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-36">
+    <div class="flex items-end justify-between gap-6">
+      <div data-reveal>
+        <p class="ci-eyebrow"><span>01</span>Logo</p>
+        <h2 class="mt-5 text-3xl font-bold sm:text-4xl">로고</h2>
+      </div>
+      <p class="hidden max-w-sm text-right text-muted md:block" data-reveal>
+        밝은 바탕에는 기본형을, 어두운 바탕에는 반전형을 사용합니다.
+      </p>
+    </div>
+    <div class="mt-10 grid gap-4 md:grid-cols-2 lg:mt-14">
+      <figure class="ci-plate bg-white" data-reveal>
+        <BrandLogo class="aspect-square max-w-[180px] sm:max-w-[240px] lg:max-w-[280px]" />
+        <figcaption class="ci-plate-cap text-muted"><b class="text-ink">Primary</b> 기본형</figcaption>
+      </figure>
+      <figure class="ci-plate bg-accent text-white" data-reveal style="--reveal-delay: 120ms">
+        <BrandLogo class="aspect-square max-w-[180px] sm:max-w-[240px] lg:max-w-[280px]" tone="dark" />
+        <figcaption class="ci-plate-cap text-white/60"><b class="text-white">Reverse</b> 반전형</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 3) 심볼 풀이 -->
   <BrandStory />
+
+  <!-- 4) 브랜드 컬러 -->
+  <section id="color" class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-36">
+    <div data-reveal>
+      <p class="ci-eyebrow"><span>03</span>Color</p>
+      <h2 class="mt-5 text-3xl font-bold sm:text-4xl">브랜드 컬러</h2>
+    </div>
+    <ul class="mt-10 grid gap-4 md:grid-cols-3 lg:mt-14">
+      {brandStory.colors.map((c, i) => (
+        <li
+          class:list={['ci-chip', c.dark ? 'text-white' : 'border border-line text-ink']}
+          style={`background:${c.hex}; --reveal-delay:${i * 120}ms`}
+          data-reveal
+        >
+          <div>
+            <p class="text-2xl font-bold">{c.name}</p>
+            <p class:list={['mt-1 text-sm', c.dark ? 'text-white/70' : 'text-muted']}>{c.ko}</p>
+          </div>
+          <div>
+            <p class:list={['text-sm leading-relaxed', c.dark ? 'text-white/70' : 'text-muted']}>{c.desc}</p>
+            <dl class:list={['mt-5 grid grid-cols-[3rem_1fr] gap-y-1 border-t pt-5 text-sm tabular-nums', c.dark ? 'border-white/20' : 'border-ink/15']}>
+              <dt class="opacity-60">HEX</dt><dd class="font-semibold">{c.hex}</dd>
+              <dt class="opacity-60">RGB</dt><dd class="font-semibold">{rgb(c.hex)}</dd>
+            </dl>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- 5) 맺음말: 바늘땀 점선 아래 한 문장 -->
+  <section class="px-4 pb-28 text-center lg:pb-40">
+    <div class="ci-stitch mx-auto" aria-hidden="true"></div>
+    <p class="mx-auto mt-10 max-w-3xl text-2xl font-bold leading-snug sm:text-4xl" data-reveal>{brandStory.closing}</p>
+  </section>
+
   <CtaSection />
 </Layout>
+
+<style is:global>
+  .ci-title { font-size: clamp(3.5rem, 13vw, 11.5rem); line-height: 0.92; letter-spacing: -0.045em; }
+
+  /* 섹션 머리: 번호 + 영어 이름 */
+  .ci-eyebrow { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--color-accent); }
+  .ci-eyebrow span { letter-spacing: 0; padding-right: 12px; border-right: 1px solid currentColor; }
+
+  /* 로고 판: 가운데 로고, 왼쪽 아래 이름 */
+  .ci-plate { position: relative; display: flex; align-items: center; justify-content: center; border-radius: 20px; padding: 48px 24px 72px; }
+  @media (min-width: 768px) { .ci-plate { aspect-ratio: 4 / 3; padding: 48px; } }
+  .ci-plate-cap { position: absolute; left: 28px; bottom: 24px; font-size: 13px; }
+  .ci-plate-cap b { margin-right: 8px; font-weight: 600; }
+
+  /* 컬러 칩: 위에 이름, 아래 값 */
+  .ci-chip { display: flex; flex-direction: column; justify-content: space-between; gap: 56px; min-height: 340px; border-radius: 20px; padding: 32px; }
+
+  /* 맺음말 위 세로 바늘땀 */
+  .ci-stitch { width: 2px; height: 72px; background: repeating-linear-gradient(180deg, var(--color-accent) 0 8px, transparent 8px 14px); }
+</style>
