@@ -47,7 +47,7 @@ export const about = {
   ],
   body: [
     '**재단**, **봉제**, **세탁**, **검수**까지 생산 라인을 직접 운영합니다. 공정마다 사람이 직접 확인하기 때문에, 처음 약속한 품질과 납기를 지킬 수 있습니다.',
-    '소량 단체복부터 브랜드 시즌 생산까지, 수량과 일정에 맞춰 가장 알맞은 방식을 함께 찾아드립니다.',
+    '빠르고 싼 옷보다 오래 입는 옷을 만듭니다. 원단 선택부터 마지막 실밥 정리까지, 브랜드의 이름을 걸 수 있는 품질만 내보냅니다.',
   ],
 };
 
@@ -80,26 +80,29 @@ export const services = [
 ];
 
 // 제작현황(현장 사진) 두 줄. 번호 = src/assets/factory/factory-번호.jpg
+// factory = 사진에 마우스를 올리면 나오는 공장 이름
+// ※ 지금 공장 이름은 모두 '예시'입니다. 실제 공장이 정해지면 이름을 바꾸고 아래 galleryExample 을 false 로 바꾸세요.
+export const galleryExample = true;
 export const gallery = [
   [
-    { photo: 4, alt: '봉제 작업장 전경' },
-    { photo: 21, alt: '산업용 세탁 설비' },
-    { photo: 3, alt: '재봉틀로 작업하는 모습' },
-    { photo: 17, alt: '봉제 라인 작업 모습' },
-    { photo: 22, alt: '대형 작업장 내부' },
-    { photo: 32, alt: '생산 라인 전경' },
-    { photo: 6, alt: '부자재 작업 모습' },
-    { photo: 24, alt: '마감 작업 공간' },
+    { photo: 4, alt: '봉제 작업장 전경', factory: '단동 제1공장' },
+    { photo: 21, alt: '산업용 세탁 설비', factory: '단동 세탁공장' },
+    { photo: 3, alt: '재봉틀로 작업하는 모습', factory: '단동 제2공장' },
+    { photo: 17, alt: '봉제 라인 작업 모습', factory: '단동 제1공장' },
+    { photo: 22, alt: '대형 작업장 내부', factory: '청도 공장' },
+    { photo: 32, alt: '생산 라인 전경', factory: '단동 제2공장' },
+    { photo: 6, alt: '부자재 작업 모습', factory: '청도 공장' },
+    { photo: 24, alt: '마감 작업 공간', factory: '하노이 공장' },
   ],
   [
-    { photo: 29, alt: '봉제 설비가 놓인 작업대' },
-    { photo: 5, alt: '포장 대기 중인 제품' },
-    { photo: 16, alt: '재봉틀 작업 라인' },
-    { photo: 33, alt: '생산 중인 원단과 제품' },
-    { photo: 34, alt: '샘플 검수 공간' },
-    { photo: 23, alt: '원단 정리 작업' },
-    { photo: 30, alt: '봉제 작업 모습' },
-    { photo: 14, alt: '완성품 정리 공간' },
+    { photo: 29, alt: '봉제 설비가 놓인 작업대', factory: '단동 제1공장' },
+    { photo: 5, alt: '포장 대기 중인 제품', factory: '하노이 공장' },
+    { photo: 16, alt: '재봉틀 작업 라인', factory: '단동 제2공장' },
+    { photo: 33, alt: '생산 중인 원단과 제품', factory: '청도 공장' },
+    { photo: 34, alt: '샘플 검수 공간', factory: '서울 본사' },
+    { photo: 23, alt: '원단 정리 작업', factory: '단동 제1공장' },
+    { photo: 30, alt: '봉제 작업 모습', factory: '하노이 공장' },
+    { photo: 14, alt: '완성품 정리 공간', factory: '단동 세탁공장' },
   ],
 ];
 

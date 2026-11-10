@@ -4,14 +4,34 @@ import { about } from '../../../data/site';
 // '**굵게**' 표시를 잘라서 [보통, 굵게, 보통...] 조각으로, 조각은 다시 단어로 나눔
 const toParts = (line: string) =>
   line.split('**').map((text, i) => ({ bold: i % 2 === 1, words: text.split(/(\s+)/).filter(Boolean) }));
+
+// 설명 문단: 띄어쓰기 단위로 나누고, 단어 안의 '**굵게**' 조각은 공정 단어(step)로 표시
+// (예: '**재단**,' → 한 단어 안에 [재단(굵게), ','] 이라서 쉼표가 따로 줄바꿈되지 않음)
+type Piece = { text: string; step?: number };
+type Token = { space: true; text: string } | { space: false; pieces: Piece[]; w: number };
+const toBodyTokens = (para: string) => {
+  let bold = false;
+  let step = 0;
+  let w = 0;
+  const tokens: Token[] = para.split(/(\s+)/).filter(Boolean).map((tok) => {
+    if (/^\s+$/.test(tok)) return { space: true, text: tok };
+    const pieces: Piece[] = [];
+    tok.split('**').forEach((text, j) => {
+      if (j > 0) bold = !bold;
+      if (text) pieces.push(bold ? { text, step: step++ } : { text });
+    });
+    return { space: false, pieces, w: w++ };
+  });
+  return { tokens, count: w };
+};
 ---
 
 <!--
   회사 소개: 큰 문장 + 오른쪽 설명
   - 스크롤하면 제목이 단어 단위로 연한 회색 → 검정으로 채워짐
   - 굵은 부분이 다 채워지면 그 아래로 포인트 컬러 바늘땀이 꿰매짐
-  - 짧은 막대가 왼쪽부터 자라고, 설명 문단이 차례로 떠오름
-  - 설명 속 공정 단어(재단·봉제·세탁·검수)가 하나씩 진해짐
+  - 짧은 막대가 왼쪽부터 자라고, 설명 문단은 단어가 하나씩 살짝 떠오름
+  - 문장이 다 나오면 공정 단어(재단·봉제·세탁·검수)가 차례로 진해짐
   - '동작 줄이기' 사용자나 JS가 꺼진 환경에선 처음부터 다 채워진 상태
 -->
 <section id="about" class="scroll-mt-20 bg-paper" data-about>
@@ -38,11 +58,19 @@ const toParts = (line: string) =>
       <div class="space-y-5 leading-relaxed text-muted lg:col-span-5 lg:col-start-8">
         <span class="about-bar block h-1 w-10 bg-ink" aria-hidden="true"></span>
         {about.body.map((para, i) => {
-          let step = 0;
+          const { tokens, count } = toBodyTokens(para);
           return (
-            <p class="about-para" data-reveal style={`--reveal-delay: ${200 + i * 140}ms`}>
-              {para.split('**').map((text, j) =>
-                j % 2 === 1 ? <span class="about-step" style={`--i: ${step++}`}>{text}</span> : text,
+            <p class="about-para" data-reveal style={`--reveal-delay: ${200 + i * 260}ms; --n: ${count}`}>
+              {tokens.map((t) =>
+                t.space ? (
+                  t.text
+                ) : (
+                  <span class="about-bw" style={`--w: ${t.w}`}>
+                    {t.pieces.map((p) =>
+                      p.step === undefined ? p.text : <span class="about-step" style={`--i: ${p.step}`}>{p.text}</span>,
+                    )}
+                  </span>
+                ),
               )}
             </p>
           );
@@ -73,7 +101,8 @@ const toParts = (line: string) =>
   .about-bar { transform-origin: left; }
 
   /* 설명 속 공정 단어(재단·봉제·세탁·검수): 진하게 */
-  .about-step { font-weight: 600; color: var(--color-ink); }
+  .about-step { color: var(--color-ink); }
+  .about-bw { display: inline-block; }
 
   /* 움직임 모드 */
   .motion .about-word { color: rgb(40 40 40 / 0.14); }
@@ -83,11 +112,22 @@ const toParts = (line: string) =>
   .motion .about-bar { transform: scaleX(0); transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
   .motion .about-bar.is-visible { transform: scaleX(1); }
 
-  /* 문단이 떠오른 뒤 공정 단어가 하나씩 진해짐 */
+  /* 설명 문단: 문단 통째로 떠오르는 대신, 단어가 하나씩 흐림 → 선명하게 떠오름 */
+  .motion .about-para[data-reveal],
+  .motion .about-para[data-reveal].is-visible { opacity: 1; animation: none; }
+  .motion .about-bw { opacity: 0; transform: translateY(0.25em); }
+  .motion .about-para.is-visible .about-bw {
+    animation: about-word-in 0.6s ease-out calc(var(--reveal-delay, 0ms) + var(--w) * 25ms) both;
+  }
+  @keyframes about-word-in {
+    to { opacity: 1; transform: none; }
+  }
+
+  /* 문장이 다 나온 뒤 공정 단어가 순서대로 진해짐 */
   .motion .about-step { color: inherit; transition: color 0.4s ease; }
   .motion .about-para.is-visible .about-step {
     color: var(--color-ink);
-    transition-delay: calc(var(--reveal-delay, 0ms) + 700ms + var(--i) * 260ms);
+    transition-delay: calc(var(--reveal-delay, 0ms) + var(--n) * 25ms + 300ms + var(--i) * 220ms);
   }
 
   @media (max-width: 639px) {
