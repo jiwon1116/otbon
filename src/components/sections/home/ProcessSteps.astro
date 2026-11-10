@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+import { process, processIntro } from '../../../data/site';
+import { photo } from '../../../data/photos';
+---
+
+<!--
+  제작 과정: 위에 제목과 설명, 아래 4단계를 네 칸으로 (태블릿 2칸, 휴대폰 1칸)
+  - 칸마다: 번호 + 얇은 선 → 사진 → 제목 → 설명 → 기간
+  - 화면에 들어오면 칸이 차례로 살짝 떠오름. 마우스를 올리면 선이 초록으로, 사진이 아주 살짝 커짐
+-->
+<section id="process" class="scroll-mt-20 bg-paper">
+  <div class="mx-auto max-w-7xl px-4 py-28 sm:px-6 lg:px-8 lg:py-40">
+    <div class="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-8" data-reveal>
+      <div class="lg:col-span-7">
+        <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">PROCESS</p>
+        <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">{processIntro.title}</h2>
+      </div>
+      <p class="max-w-sm leading-relaxed text-muted lg:col-span-4 lg:col-start-9">{processIntro.desc}</p>
+    </div>
+
+    <ol class="mt-16 grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:mt-20 lg:grid-cols-4 lg:gap-x-8">
+      {process.map((p, i) => (
+        <li class="step" data-reveal style={`--reveal-delay: ${i * 110}ms`}>
+          <div class="step-head flex items-center gap-4 text-sm tabular-nums">
+            <span class="font-medium text-ink">{p.step}</span>
+            <span class="step-rule h-px flex-1" aria-hidden="true"></span>
+            <span class="text-[11px] uppercase tracking-[0.2em] text-muted">{p.en}</span>
+          </div>
+          <div class="step-photo mt-6">
+            <Image
+              src={photo(p.photo)}
+              alt={`${p.title} 과정 현장 사진`}
+              widths={[400, 640, 900]}
+              sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 92vw"
+              class="h-full w-full object-cover"
+            />
+          </div>
+          <h3 class="mt-6 text-xl font-semibold tracking-tight">{p.title}</h3>
+          <p class="mt-3 text-[15px] leading-relaxed text-muted">{p.desc}</p>
+          <dl class="mt-6 text-sm">
+            <dt class="text-[11px] tracking-[0.15em] text-muted">기간 · 방식</dt>
+            <dd class="mt-1.5 text-ink">{p.time}</dd>
+          </dl>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style is:global>
+  .step-rule { background: rgb(40 40 40 / 0.2); transition: background-color 0.4s ease; }
+  .step:hover .step-rule { background: var(--color-accent); }
+
+  .step-photo {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--color-soft);
+  }
+  .step-photo img { transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .step:hover .step-photo img { transform: scale(1.03); }
+</style>

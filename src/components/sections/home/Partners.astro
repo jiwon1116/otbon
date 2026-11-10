@@ -1,19 +1,20 @@
 ---
-import { site, partners } from '../../../data/site';
+import { partners } from '../../../data/site';
 ---
 
-<!-- 함께한 업체: 로고 카드가 옆으로 흐름 -->
-<section class="overflow-hidden bg-soft py-24 lg:py-32" data-partners>
+<!-- 함께한 업체: 얇은 선으로 나뉜 로고 칸이 옆으로 흐름 -->
+<section class="overflow-hidden bg-soft py-28 lg:py-36" data-partners>
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" data-reveal>
-    <h2 class="text-2xl font-bold sm:text-4xl">{site.nameKo}과 함께한 업체</h2>
+    <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">PARTNERS</p>
+    <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">함께한 브랜드</h2>
   </div>
 
-  <div class="drift-wrap mt-12 lg:mt-16">
-    <ul class="drift-row gap-4 sm:gap-6" data-drift="left">
+  <div class="drift-wrap mt-14 lg:mt-16">
+    <ul class="drift-row" data-drift="left">
       {partners.map((p) => (
-        <li class="flex aspect-[4/3] w-[64vw] shrink-0 items-center justify-center rounded-2xl bg-paper p-10 sm:w-[40vw] lg:w-[30vw] lg:max-w-[460px]">
+        <li class="partner-cell flex aspect-[3/2] w-[56vw] shrink-0 items-center justify-center p-10 sm:w-[34vw] lg:w-[24vw] lg:max-w-[360px]">
           {p.logo ? (
-            <img src={p.logo} alt={p.name} loading="lazy" class="max-h-20 w-auto max-w-[70%] object-contain" />
+            <img src={p.logo} alt={p.name} loading="lazy" class="max-h-14 w-auto max-w-[65%] object-contain opacity-80" />
           ) : (
             <span class="text-sm text-muted">{p.name || '로고 준비 중'}</span>
           )}
@@ -22,6 +23,11 @@ import { site, partners } from '../../../data/site';
     </ul>
   </div>
 </section>
+
+<style>
+  .partner-cell { border-left: 1px solid rgb(40 40 40 / 0.12); }
+  .partner-cell:last-child { border-right: 1px solid rgb(40 40 40 / 0.12); }
+</style>
 
 <script>
   import { initDrift } from '../../../scripts/drift';

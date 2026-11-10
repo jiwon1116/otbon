@@ -98,13 +98,13 @@ const bCurve = pts
         <!-- 의미 3단계: 큰 화면은 목록으로 차례로 켜지고, 작은 화면은 지금 단계만 보임 -->
         <div class="lg:order-1 lg:col-span-5">
           <p class="ci-eyebrow"><span>02</span>Symbol</p>
-          <h2 class="mt-5 text-3xl font-bold leading-snug sm:text-4xl">심볼에 담긴 의미</h2>
+          <h2 class="mt-5 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">심볼에 담긴 의미</h2>
           <ol class="bs-steps mt-8 lg:mt-12">
             {brandStory.cards.map((c, i) => (
               <li class="bs-step" data-step>
                 <span class="bs-num">{String(i + 1).padStart(2, '0')}</span>
                 <div>
-                  <h3 class="text-lg font-bold sm:text-xl">{c.title}</h3>
+                  <h3 class="text-lg font-semibold sm:text-xl">{c.title}</h3>
                   <p class="mt-1.5 text-sm leading-relaxed text-muted sm:text-base">{c.desc}</p>
                 </div>
               </li>

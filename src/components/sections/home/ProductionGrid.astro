@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { site, services } from '../../../data/site';
+import { services } from '../../../data/site';
 import { photo } from '../../../data/photos';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -14,14 +14,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
 <section id="production" class="scroll-mt-20 bg-paper" data-prod>
   <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-40">
     <div data-reveal>
-      <p class="text-xs font-semibold tracking-[0.25em] text-muted sm:text-sm">WHAT WE MAKE</p>
-      <h2 class="mt-4 text-2xl font-bold sm:text-4xl">{site.nameKo}은 이런 생산을 하고 있어요</h2>
+      <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">WHAT WE MAKE</p>
+      <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">브랜드에 필요한 생산을 한 곳에서</h2>
     </div>
 
     <div class="mt-12 grid gap-8 lg:mt-16 lg:grid-cols-12 lg:gap-12">
       <!-- 사진: 겹쳐 놓고 고른 것만 보이게 -->
       <div class="lg:order-2 lg:col-span-5 lg:col-start-8">
-        <div class="relative aspect-[3/2] overflow-hidden rounded-xl bg-soft lg:sticky lg:top-28 lg:aspect-square" data-reveal>
+        <div class="relative aspect-[3/2] overflow-hidden rounded-[2px] bg-soft lg:sticky lg:top-28 lg:aspect-square" data-reveal>
           {services.map((s, i) => (
             <Image
               src={photo(s.photo)}
@@ -46,10 +46,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
               aria-pressed={i === 0 ? 'true' : 'false'}
             >
               <span class="flex items-baseline gap-4 sm:gap-6">
-                <span class="prod-num font-mono text-sm">{pad(i + 1)}</span>
-                <span class="prod-title text-3xl font-bold sm:text-5xl">{s.title}</span>
+                <span class="prod-num text-sm tabular-nums">{pad(i + 1)}</span>
+                <span class="prod-title text-3xl font-semibold tracking-tight sm:text-5xl">{s.title}</span>
                 <span class="prod-en ml-auto hidden text-sm font-medium tracking-wide sm:inline">{s.en}</span>
-                <span class="prod-arrow text-xl sm:text-2xl" aria-hidden="true">→</span>
+                <svg class="prod-arrow h-5 w-5 shrink-0 self-center sm:h-6 sm:w-6" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
               </span>
               <span class="prod-desc grid">
                 <span class="overflow-hidden">

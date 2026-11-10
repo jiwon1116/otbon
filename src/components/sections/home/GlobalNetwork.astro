@@ -157,19 +157,19 @@ const intro = network.intro;
 
     <!-- 첫 장면 글자 -->
     <div class="net-panel pointer-events-none absolute inset-x-0 bottom-[8%] px-4 text-center">
-      <p class="text-base font-semibold leading-relaxed sm:text-xl">
+      <p class="text-base font-normal leading-relaxed sm:text-xl">
         {intro.caption.map((line) => <span class="block">{line}</span>)}
       </p>
-      <h2 class="mt-6 text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">{intro.name}</h2>
+      <h2 class="mt-6 text-6xl font-semibold tracking-tight sm:text-8xl lg:text-9xl">{intro.name}</h2>
     </div>
 
     {offices.map((o) => (
       <div class="net-panel pointer-events-none absolute inset-x-0 bottom-[8%] px-4 text-center">
-        <p class="text-xs font-bold tracking-[0.25em] text-white/70 sm:text-sm">{o.role}</p>
-        <p class="mt-4 text-base font-semibold leading-relaxed sm:text-xl">
+        <p class="text-xs font-medium tracking-[0.25em] text-white/70 sm:text-sm">{o.role}</p>
+        <p class="mt-4 text-base font-normal leading-relaxed sm:text-xl">
           {o.caption.map((line) => <span class="block">{line}</span>)}
         </p>
-        <h2 class="mt-6 text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">{o.name}</h2>
+        <h2 class="mt-6 text-6xl font-semibold tracking-tight sm:text-8xl lg:text-9xl">{o.name}</h2>
       </div>
     ))}
 
@@ -177,8 +177,8 @@ const intro = network.intro;
     <ul class="net-static absolute inset-x-0 bottom-[8%] flex justify-center gap-8 px-4 text-center sm:gap-16">
       {offices.map((o) => (
         <li>
-          <p class="text-[10px] font-bold tracking-[0.2em] text-accent sm:text-xs">{o.role}</p>
-          <p class="mt-2 text-3xl font-extrabold sm:text-5xl">{o.name}</p>
+          <p class="text-[10px] font-medium tracking-[0.2em] text-accent sm:text-xs">{o.role}</p>
+          <p class="mt-2 text-3xl font-semibold sm:text-5xl">{o.name}</p>
         </li>
       ))}
     </ul>

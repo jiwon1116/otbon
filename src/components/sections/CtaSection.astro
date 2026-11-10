@@ -2,23 +2,43 @@
 import { site } from '../../data/site';
 ---
 
+<!-- 맺음 문의: 왼쪽 큰 문장, 오른쪽 안내와 버튼. 위에 얇은 선 -->
 <section class="bg-ink text-white">
-  <div class="mx-auto max-w-7xl px-4 py-24 text-center sm:px-6 lg:px-8 lg:py-32">
-    <h2 class="text-3xl font-bold leading-tight sm:text-5xl" data-reveal>
-      만들고 싶은 옷이 있다면,<br />
-      <span class="text-accent">지금 이야기해 주세요.</span>
-    </h2>
-    <p class="mx-auto mt-6 max-w-xl text-white/70" data-reveal style="--reveal-delay: 120ms">수량과 일정만 알려주시면 영업일 기준 1일 안에 견적을 드립니다.</p>
-    <div class="mt-10 flex flex-col justify-center gap-3 sm:flex-row" data-reveal style="--reveal-delay: 240ms">
-      <a href="/contact" class="rounded-full bg-accent px-8 py-4 font-semibold transition-colors hover:bg-accent-dark">견적 문의하기</a>
-      <a
-        href={site.kakaoChannel}
-        target="_blank"
-        rel="noopener"
-        class="rounded-full border border-white/30 px-8 py-4 font-semibold transition-colors hover:bg-white hover:text-ink"
-      >
-        카카오톡 상담
-      </a>
+  <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
+    <p class="text-xs font-medium tracking-[0.25em] text-white/50 sm:text-sm" data-reveal>CONTACT</p>
+    <div class="mt-8 grid gap-12 border-t border-white/15 pt-10 lg:grid-cols-12 lg:gap-8">
+      <h2 class="text-3xl font-semibold leading-snug tracking-tight sm:text-5xl sm:leading-tight lg:col-span-7" data-reveal>
+        다음 시즌의 생산,<br />
+        <span class="text-white/45">{site.nameKo}과 함께 준비하세요.</span>
+      </h2>
+      <div class="lg:col-span-4 lg:col-start-9" data-reveal style="--reveal-delay: 120ms">
+        <p class="leading-relaxed text-white/65">품목과 일정을 알려주시면 영업일 기준 1일 이내에 견적을 회신드립니다.</p>
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row lg:flex-col">
+          <a href="/contact" class="cta-btn bg-accent hover:bg-accent-dark">
+            견적 문의
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+          </a>
+          <a href={site.kakaoChannel} target="_blank" rel="noopener" class="cta-btn border border-white/25 hover:border-white/60">
+            카카오톡 상담
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
+
+<style>
+  .cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 1rem 1.25rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  @media (min-width: 640px) { .cta-btn { min-width: 15rem; } }
+  .cta-btn svg { width: 1rem; height: 1rem; transition: transform 0.3s ease; }
+  .cta-btn:hover svg { transform: translateX(4px); }
+</style>

@@ -24,12 +24,12 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
       <span class="mx-2 text-line">/</span>
       <span class="text-ink">CI</span>
     </p>
-    <h1 class="ci-title mt-8 font-extrabold" data-reveal style="--reveal-delay: 80ms">
+    <h1 class="ci-title mt-8 font-semibold tracking-tight" data-reveal style="--reveal-delay: 80ms">
       <span class="block">Corporate</span>
       <span class="block">Identity<span class="text-accent">.</span></span>
     </h1>
     <div class="mt-14 grid gap-8 border-t border-ink pt-10 lg:mt-20 lg:grid-cols-12" data-reveal style="--reveal-delay: 160ms">
-      <h2 class="text-2xl font-bold leading-snug sm:text-3xl lg:col-span-5">
+      <h2 class="text-2xl font-semibold leading-snug tracking-tight sm:text-3xl lg:col-span-5">
         {brandStory.title.map((line) => <span class="block">{line}</span>)}
       </h2>
       <div class="space-y-3 leading-relaxed text-muted sm:text-lg lg:col-span-6 lg:col-start-7">
@@ -42,7 +42,7 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
   <section id="logo" class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-36">
     <div data-reveal>
       <p class="ci-eyebrow"><span>01</span>Logo</p>
-      <h2 class="mt-5 text-3xl font-bold sm:text-4xl">로고</h2>
+      <h2 class="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">로고</h2>
     </div>
 
     <!-- 큰 판 하나. 아래 버튼으로 기본형(흰 바탕) ↔ 반전형(초록 바탕) 전환. 바뀔 때 심볼이 다시 그어짐 -->
@@ -70,7 +70,7 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
   <section id="color" class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-36">
     <div data-reveal>
       <p class="ci-eyebrow"><span>03</span>Color</p>
-      <h2 class="mt-5 text-3xl font-bold sm:text-4xl">브랜드 컬러</h2>
+      <h2 class="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">브랜드 컬러</h2>
     </div>
     <ul class="mt-10 grid gap-4 md:grid-cols-3 lg:mt-14">
       {brandStory.colors.map((c, i) => (
@@ -80,7 +80,7 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
           data-reveal
         >
           <div>
-            <p class="text-2xl font-bold">{c.name}</p>
+            <p class="text-2xl font-semibold">{c.name}</p>
             <p class:list={['mt-1 text-sm', c.dark ? 'text-white/70' : 'text-muted']}>{c.ko}</p>
           </div>
           <div>
@@ -98,7 +98,7 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
   <!-- 5) 맺음말: 바늘땀 점선 아래 한 문장 -->
   <section class="px-4 pb-28 text-center lg:pb-40">
     <div class="ci-stitch mx-auto" aria-hidden="true"></div>
-    <p class="mx-auto mt-10 max-w-3xl text-2xl font-bold leading-snug sm:text-4xl" data-reveal>{brandStory.closing}</p>
+    <p class="mx-auto mt-10 max-w-3xl text-2xl font-semibold leading-snug tracking-tight sm:text-4xl" data-reveal>{brandStory.closing}</p>
   </section>
 
   <CtaSection />
@@ -114,7 +114,7 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
   /* 로고 판: 큰 판 하나, 바탕 · 로고 색이 모드에 따라 부드럽게 바뀜 */
   .ci-stage {
     position: relative; display: flex; align-items: center; justify-content: center;
-    aspect-ratio: 1 / 1; padding: 48px 24px; border-radius: 24px;
+    aspect-ratio: 1 / 1; padding: 48px 24px; border-radius: 2px;
     background: #fff; color: #282828;
     transition: background-color 0.6s ease, color 0.6s ease;
   }
@@ -126,14 +126,14 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
   [data-mode='reverse'] .ci-stage-cap [data-cap='reverse'] { display: inline; }
 
   /* 전환 버튼: 둥근 알약 두 칸 */
-  .ci-toggle { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--color-soft); }
-  .ci-toggle button { padding: 8px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--color-muted); transition: background-color 0.3s, color 0.3s; }
+  .ci-toggle { display: inline-flex; gap: 4px; padding: 4px; border-radius: 2px; background: var(--color-soft); }
+  .ci-toggle button { padding: 8px 20px; border-radius: 1px; font-size: 14px; font-weight: 500; color: var(--color-muted); transition: background-color 0.3s, color 0.3s; }
   .ci-toggle button[aria-selected='true'] { background: #fff; color: var(--color-ink); box-shadow: 0 1px 2px rgb(10 10 10 / 0.08); }
   .ci-toggle button[data-to='reverse'][aria-selected='true'] { background: var(--color-accent); color: #fff; }
   .ci-toggle button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 
   /* 컬러 칩: 위에 이름, 아래 값 */
-  .ci-chip { display: flex; flex-direction: column; justify-content: space-between; gap: 56px; min-height: 340px; border-radius: 20px; padding: 32px; }
+  .ci-chip { display: flex; flex-direction: column; justify-content: space-between; gap: 56px; min-height: 340px; border-radius: 2px; padding: 32px; }
 
   /* 맺음말 위 세로 바늘땀 */
   .ci-stitch { width: 2px; height: 72px; background: repeating-linear-gradient(180deg, var(--color-accent) 0 8px, transparent 8px 14px); }

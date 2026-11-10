@@ -32,7 +32,7 @@ body {
    hover 색 전환(transition)과 겹치지 않게 animation 으로 처리 */
 .motion [data-reveal] { opacity: 0; }
 .motion [data-reveal].is-visible {
-  animation: reveal-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms) both;
+  animation: reveal-up 1s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms) both;
 }
 
 /* 옆으로 흐르는 줄(data-drift). 왼쪽 끝을 본문 컨테이너(max-w-7xl)에 맞춤 */
@@ -51,6 +51,6 @@ body {
 .motion .drift-row { will-change: transform; }
 
 @keyframes reveal-up {
-  from { opacity: 0; transform: translateY(40px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: none; }
 }

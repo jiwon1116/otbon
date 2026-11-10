@@ -4,7 +4,7 @@ export const site = {
   // 한글 이름. 문장 안에서 "옷본은", "옷본과"처럼 씀
   nameKo: '옷본',
   description:
-    '옷본은 단체복, 아우터, OEM, 샘플 제작을 하는 의류 제작 회사입니다. 기획부터 생산까지 한 곳에서 맡겨보세요.',
+    '옷본은 단체복, 아우터, OEM, 샘플 제작을 하는 의류 제작 기업입니다. 기획부터 생산, 납품까지 한 곳에서 책임집니다.',
   email: 'hello@otbon.co.kr',
   kakaoChannel: 'https://pf.kakao.com/_xxxxxx',
 
@@ -56,7 +56,7 @@ export const services = [
   {
     title: '단체복',
     en: 'Team Wear',
-    desc: '회사, 학교, 동아리, 행사용 티셔츠와 후드를 소량부터 대량까지 제작합니다.',
+    desc: '기업, 학교, 단체를 위한 티셔츠와 후드를 브랜드 의류와 같은 기준으로 제작합니다.',
     photo: 31,
   },
   {
@@ -172,11 +172,45 @@ export const partners = [
   { name: '', logo: '' },
 ];
 
+// 제작 과정 (메인 화면, 옆으로 넘어가는 카드)
+// time = 카드 아래 '기간' 칸에 들어가는 글, photo = src/assets/factory/factory-번호.jpg
+export const processIntro = {
+  title: '제작은 네 단계로 진행됩니다',
+  desc: '첫 상담부터 납품까지, 단계마다 확인 기준을 세워 두고 하나씩 짚어 갑니다.',
+};
 export const process = [
-  { step: '01', title: '상담 · 견적', desc: '수량, 일정, 예산을 듣고 맞는 원단과 방식으로 견적을 드립니다.' },
-  { step: '02', title: '디자인 · 샘플', desc: '디자인 시안을 확정하고 샘플로 핏과 퀄리티를 먼저 확인합니다.' },
-  { step: '03', title: '생산', desc: '확정된 샘플 기준으로 생산하고 공정마다 품질을 점검합니다.' },
-  { step: '04', title: '검수 · 납품', desc: '전수 검수 후 포장해 약속한 날짜에 납품합니다.' },
+  {
+    step: '01',
+    en: 'Consulting',
+    title: '기획 상담',
+    photo: 34,
+    time: '자료 검토 후 일정 안내',
+    desc: '브랜드가 그리는 스타일과 입을 사람을 먼저 이해한 뒤, 그에 맞는 원단과 디자인 방향을 함께 정합니다.',
+  },
+  {
+    step: '02',
+    en: 'Sampling',
+    title: '샘플 제작',
+    photo: 3,
+    time: '3~14일 · 국내 최단 3일',
+    desc: '패턴을 뜨고 가봉을 거치며, 머릿속에 그린 핏이 실물로 나올 때까지 다듬습니다.',
+  },
+  {
+    step: '03',
+    en: 'Production',
+    title: '본 생산',
+    photo: 32,
+    time: '2~4주',
+    desc: '품목에 맞는 전문 라인에서, 확정된 샘플과 똑같은 사양으로 흔들림 없이 생산합니다.',
+  },
+  {
+    step: '04',
+    en: 'Delivery',
+    title: '검품 · 납품',
+    photo: 5,
+    time: '행거 배송 또는 폴리백 포장',
+    desc: '한 벌씩 최종 검품을 마친 뒤 포장해, 원하시는 곳까지 배송해 드립니다.',
+  },
 ];
 
 // image가 비어 있으면 회색 자리 표시가 나옵니다. public/images/portfolio/ 에 사진을 넣고 경로를 적어주세요.
