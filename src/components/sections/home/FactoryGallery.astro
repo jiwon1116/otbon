@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
-import { gallery, galleryExample } from '../../../data/site';
-import { photo } from '../../../data/photos';
+import { gallery } from '../../../data/site';
+import { sitePhoto } from '../../../data/photos';
 ---
 
 <!--
@@ -20,14 +20,13 @@ import { photo } from '../../../data/photos';
               <li class="marquee-item" aria-hidden={copy === 1 ? 'true' : undefined}>
                 <figure class="gallery-card">
                   <Image
-                    src={photo(item.photo)}
-                    alt={copy === 1 ? '' : item.alt}
+                    src={sitePhoto(item.site)}
+                    alt={copy === 1 ? '' : `${item.factory} 현장`}
                     widths={[400, 640, 960]}
                     sizes="(min-width: 1024px) 21vw, (min-width: 640px) 32vw, 52vw"
                     class="h-full w-full object-cover"
                   />
                   <figcaption class="gallery-cap">
-                    {galleryExample && <span class="gallery-tag">예시</span>}
                     <span class="font-semibold">{item.factory}</span>
                   </figcaption>
                 </figure>
@@ -56,7 +55,7 @@ import { photo } from '../../../data/photos';
 
   /* 움직임 모드: 저절로 흐름. 사진 묶음 하나 길이(-50%)만큼 움직이면 처음과 똑같은 모습이라 끊김이 없음 */
   .motion .marquee-wrap { overflow: visible; }
-  .motion .marquee-row { padding-left: 0; animation: marquee 60s linear infinite; }
+  .motion .marquee-row { padding-left: 0; animation: marquee 130s linear infinite; /* 사진이 늘어난 만큼 길게 (한 줄 16장) */ }
   .motion .marquee-row.is-reverse { animation-direction: reverse; }
   .motion .marquee-item[aria-hidden='true'] { display: block; }
   /* 사진 하나에 마우스를 올리면 두 줄 모두 멈춤 */
@@ -112,12 +111,6 @@ import { photo } from '../../../data/photos';
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s;
-  }
-  .gallery-tag {
-    order: 1;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    color: rgb(255 255 255 / 0.65);
   }
 
   .gallery-card:hover img { transform: scale(1.03); }
