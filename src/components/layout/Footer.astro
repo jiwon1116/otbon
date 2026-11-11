@@ -27,18 +27,16 @@ const bizCheck = `https://www.ftc.go.kr/bizCommPop.do?wrkr_no=${company.bizNo}`;
         <div>
           <p class="mb-4 text-[11px] font-medium tracking-[0.2em] text-white/40">MENU</p>
           <ul class="space-y-2.5">
-            {nav.map((item) => <li><a href={item.href} class="transition-colors hover:text-white">{item.label}</a></li>)}
+            {nav.filter((item) => item.label !== '생산 분야').map((item) => <li><a href={item.href} class="transition-colors hover:text-white">{item.label}</a></li>)}
           </ul>
         </div>
         <div>
           <p class="mb-4 text-[11px] font-medium tracking-[0.2em] text-white/40">CONTACT</p>
           <ul class="space-y-2.5">
             <li><a href={`mailto:${site.email}`} class="text-white transition-colors hover:text-white/70">{site.email}</a></li>
-            <li><a href="#contact" class="transition-colors hover:text-white">견적 문의</a></li>
+            <li><a href={`tel:${company.phone.replaceAll('-', '')}`} class="text-white transition-colors hover:text-white/70">{company.phone}</a></li>
           </ul>
-          <p class="mt-4 max-w-[16rem] text-xs leading-relaxed text-white/45">
-            {company.consult} 방문을 원하시면 이메일로 먼저 연락해 주세요.
-          </p>
+          <p class="mt-4 max-w-[16rem] text-xs leading-relaxed text-white/45">{company.consult}</p>
         </div>
       </div>
     </div>
@@ -55,6 +53,7 @@ const bizCheck = `https://www.ftc.go.kr/bizCommPop.do?wrkr_no=${company.bizNo}`;
         </dd>
       </div>
       <div class="flex gap-3"><dt class="text-white/35">주소</dt><dd>{company.address}</dd></div>
+      <div class="flex gap-3"><dt class="text-white/35">전화</dt><dd>{company.phone}</dd></div>
       <div class="flex gap-3"><dt class="text-white/35">이메일</dt><dd>{site.email}</dd></div>
     </dl>
 

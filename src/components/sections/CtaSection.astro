@@ -1,190 +1,270 @@
 ---
 import { site } from '../../data/site';
 
-// '이메일로 문의하기'를 누르면 제목과 적을 내용 틀이 미리 채워진 메일 쓰기 창이 열림
-const subject = `[${site.nameKo} 제작 문의] `;
-const body = [
-  '안녕하세요, 제작 문의드립니다.',
-  '',
-  '1. 브랜드 / 회사명:',
-  '2. 만들고 싶은 품목:',
-  '3. 예상 수량:',
-  '4. 희망 납기:',
-  '5. 참고 이미지나 디자인 파일: (첨부해 주세요)',
-  '',
-  '연락처:',
-].join('\n');
-const mailto = `mailto:${site.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-// 문의 진행 3단계. icon = 아래 icons 의 이름
-const steps = [
-  {
-    icon: 'mail',
-    title: '메일 보내기',
-    desc: '만들고 싶은 옷에 대해 알려주세요.',
-    list: ['품목과 예상 수량', '희망 납기', '참고 이미지 또는 디자인 파일'],
-  },
-  {
-    icon: 'reply',
-    title: '1일 이내 회신',
-    desc: '영업일 기준 하루 안에 담당자가 직접 답장드립니다. 필요한 내용은 함께 정리해 드립니다.',
-  },
-  {
-    icon: 'visit',
-    title: '상담 · 방문',
-    desc: '이메일 상담을 기본으로 하며, 원단과 샘플을 직접 보고 싶으시면 방문 상담을 예약해 드립니다.',
-  },
-];
-
-const icons: Record<string, string> = {
-  mail: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7.5l8 5.5 8-5.5"/>',
-  reply: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
-  visit: '<path d="M12 20.5s6.5-5.6 6.5-10.5a6.5 6.5 0 10-13 0c0 4.9 6.5 10.5 6.5 10.5z"/><circle cx="12" cy="10" r="2.3"/>',
-};
+// 견적 문의: 작은 카드 안에서 1단계(기본 정보) → 2단계(제작 정보) → 접수 완료 로 넘어감
+// 보내면 Web3Forms 를 거쳐 site.email 로 메일이 옴. site.formKey 가 비어 있으면 이메일로 안내
+const subject = `[${site.nameKo} 견적 문의]`;
+const items = ['아우터', '재킷', '셔츠', '팬츠', '니트', '원피스', '기타'];
 ---
 
 <!--
-  문의: 가운데 큰 질문 + 큰 이메일 주소(누르면 메일 쓰기, 옆 버튼으로 주소 복사)
-  아래 둥근 카드 3장으로 문의가 어떻게 진행되는지 보여주고, 맨 아래 문의 버튼
+  문의: 가운데 제목과 안내, 그 아래 작은 카드 한 장
+  - 카드 위쪽에 단계 이름과 (1/2) 표시, 얇은 초록 진행 막대
+  - '다음 단계로'를 누르면 칸이 옆으로 넘어가듯 바뀜. 빈 필수 칸이 있으면 넘어가지 않음
   상단 메뉴 · 하단의 '견적 문의'는 이 섹션(#contact)으로 이동
 -->
-<section id="contact" class="scroll-mt-20 bg-soft">
-  <div class="mx-auto max-w-7xl px-4 py-28 sm:px-6 lg:px-8 lg:py-36">
-    <div class="text-center" data-reveal>
-      <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">CONTACT</p>
-      <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-5xl sm:leading-tight">
-        어떤 옷을 준비하고 계신가요?
-      </h2>
-      <p class="mx-auto mt-5 max-w-md leading-relaxed text-muted">
-        아직 정해진 게 많지 않아도 괜찮습니다.<br class="hidden sm:block" /> 참고 이미지 한 장으로도 상담을 시작할 수 있습니다.
+<!-- 큰 화면에서는 상단 메뉴를 뺀 화면 높이에 딱 맞게, 가운데 정렬 -->
+<section id="contact" class="scroll-mt-20 bg-paper lg:flex lg:min-h-[calc(100svh-5rem)] lg:items-center">
+  <div class="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-8">
+    <div class="mx-auto max-w-2xl text-center" data-reveal>
+      <p class="text-xs font-semibold tracking-[0.25em] text-accent sm:text-sm">CONTACT</p>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight sm:text-[2.1rem]">견적 <span class="text-accent">문의하기</span></h2>
+      <p class="mt-2 leading-relaxed text-muted">
+        아래 세 단계 양식을 작성해 보내 주세요. 담당자가 확인하고 견적과 일정을 안내해 드립니다.
       </p>
+    </div>
 
-      <div class="mt-10 flex flex-col items-center gap-3">
-        <a href={mailto} class="contact-mail group inline-flex items-center gap-2 text-2xl font-medium tracking-tight sm:text-4xl">
-          <span class="contact-mail-text">{site.email}</span>
-          <svg class="h-6 w-6 shrink-0 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 sm:h-8 sm:w-8" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4.5 11.5l7-7M5.5 4.5h6v6" /></svg>
-        </a>
-        <button type="button" class="contact-copy" data-copy={site.email}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5" /><path d="M16 8V6.5A2.5 2.5 0 0013.5 4h-7A2.5 2.5 0 004 6.5v7A2.5 2.5 0 006.5 16H8" /></svg>
-          <span data-copy-label>주소 복사</span>
-        </button>
+    <form class="wz-card" data-wizard data-key={site.formKey} data-email={site.email} novalidate data-reveal style="--reveal-delay: 100ms">
+      <input type="hidden" name="subject" value={subject} />
+      <input type="hidden" name="from_name" value={`${site.nameKo} 웹사이트`} />
+      <input type="checkbox" name="botcheck" class="hidden" tabindex="-1" autocomplete="off" />
+
+      <!-- 진행 표시 -->
+      <div class="wz-head" data-head>
+        <div class="flex items-center justify-between">
+          <p class="text-lg font-bold tracking-tight sm:text-xl">
+            <span data-step-title>기본 정보 입력</span>
+            <span class="ml-1 tabular-nums" data-step-count>(1/3)</span>
+          </p>
+          <span class="wz-badge">필수</span>
+        </div>
       </div>
-    </div>
 
-    <ol class="mt-16 grid gap-4 md:grid-cols-3 lg:mt-20 lg:gap-6">
-      {steps.map((s, i) => (
-        <li data-reveal style={`--reveal-delay: ${i * 110}ms`}>
-          <div class="contact-step h-full">
-          <div class="flex items-center justify-between">
-            <span class="contact-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={icons[s.icon]} />
-            </span>
-            <span class="text-sm tabular-nums text-muted">{String(i + 1).padStart(2, '0')}</span>
-          </div>
-          <h3 class="mt-8 text-xl font-semibold tracking-tight">{s.title}</h3>
-          <p class="mt-3 text-[15px] leading-relaxed text-muted">{s.desc}</p>
-          {s.list && (
-            <ul class="mt-5 space-y-2 text-[15px]">
-              {s.list.map((item) => (
-                <li class="flex items-center gap-2.5">
-                  <svg class="h-4 w-4 shrink-0 text-accent" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          )}
-          </div>
-        </li>
-      ))}
-    </ol>
+      <!-- 1단계: 기본 정보 -->
+      <fieldset class="wz-step is-active" data-step="1">
+        <label class="wz-field">
+          <span>업체명 / 성함</span>
+          <input name="업체명 / 성함" required placeholder="예: 브랜드명 또는 성함" autocomplete="organization" />
+        </label>
+        <label class="wz-field">
+          <span>연락처</span>
+          <input type="tel" name="연락처" required placeholder="010-1234-5678" autocomplete="tel" />
+          <small>휴대폰 · 사무실 번호 모두 가능하며, 하이픈(-)은 넣지 않으셔도 됩니다.</small>
+        </label>
+        <label class="wz-field">
+          <span>이메일</span>
+          <input type="email" name="email" required placeholder="회신받으실 이메일" autocomplete="email" />
+        </label>
+        <button type="button" class="wz-btn w-full" data-next>다음 단계로 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg></button>
+      </fieldset>
 
-    <div class="mt-12 flex justify-center" data-reveal>
-      <a href={mailto} class="contact-btn">
-        이메일로 문의하기
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
-      </a>
-    </div>
+      <!-- 2단계: 제작 정보 -->
+      <fieldset class="wz-step" data-step="2">
+        <label class="wz-field">
+          <span>제작 희망 품목</span>
+          <div class="wz-select">
+            <select name="품목" required>
+              <option value="" selected disabled>선택해 주세요</option>
+              {items.map((it) => <option>{it}</option>)}
+            </select>
+          </div>
+        </label>
+        <label class="wz-field">
+          <span>예상 수량</span>
+          <input name="예상 수량" placeholder="예: 스타일당 300장" />
+        </label>
+        <label class="wz-field">
+          <span>희망 납기</span>
+          <input name="희망 납기" placeholder="예: 9월 말" />
+        </label>
+        <div class="flex gap-2">
+          <button type="button" class="wz-btn is-ghost" data-prev>이전</button>
+          <button type="button" class="wz-btn flex-1" data-next>다음 단계로 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg></button>
+        </div>
+      </fieldset>
+
+      <!-- 3단계: 상세 내용 -->
+      <fieldset class="wz-step" data-step="3">
+        <label class="wz-field">
+          <span>작업지시서 링크</span>
+          <input type="url" name="작업지시서" placeholder="구글 드라이브 등 공유 링크" />
+          <small>파일은 회신 메일로 보내주셔도 됩니다.</small>
+        </label>
+        <label class="wz-field">
+          <span>문의 내용</span>
+          <textarea name="문의 내용" rows="2" required placeholder="제품 설명, 원단, 참고 사항 등을 적어주세요"></textarea>
+        </label>
+        <label class="flex items-start gap-2.5 text-[13px] leading-relaxed text-muted">
+          <input type="checkbox" name="개인정보 동의" value="동의함" required class="wz-check" />
+          <span><span class="text-ink">개인정보 수집 · 이용에 동의합니다. (필수)</span><br />업체명 · 연락처 · 이메일 / 문의 회신 목적 / 1년 보관</span>
+        </label>
+        <div class="flex gap-2">
+          <button type="button" class="wz-btn is-ghost" data-prev>이전</button>
+          <button type="submit" class="wz-btn flex-1">문의 보내기 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg></button>
+        </div>
+      </fieldset>
+
+      <!-- 접수 완료 -->
+      <div class="wz-step wz-done" data-step="4">
+        <span class="wz-done-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </span>
+        <p class="mt-5 text-lg font-semibold">문의가 접수되었습니다</p>
+        <p class="mt-2 text-sm leading-relaxed text-muted">영업일 기준 1~3일 안에 담당자가 연락드리겠습니다.</p>
+      </div>
+
+      <p class="wz-status" data-status role="status" aria-live="polite"></p>
+    </form>
+
+    <p class="mt-4 text-center text-sm text-muted">
+      이메일 · 전화로도 상담해 드립니다 ·
+      <a href={`mailto:${site.email}`} class="text-ink underline underline-offset-4 hover:text-accent">{site.email}</a> ·
+      <a href={`tel:${site.company.phone.replaceAll('-', '')}`} class="text-ink underline underline-offset-4 hover:text-accent">{site.company.phone}</a>
+    </p>
   </div>
 </section>
 
 <style>
-  /* 큰 이메일 주소: 마우스를 올리면 초록으로 바뀌고 밑줄이 왼쪽부터 그어짐 */
-  .contact-mail { transition: color 0.3s ease; }
-  .contact-mail:hover { color: var(--color-accent); }
-  .contact-mail-text {
-    background: linear-gradient(currentColor, currentColor) left bottom / 0% 1px no-repeat;
-    padding-bottom: 0.1em;
-    transition: background-size 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-  .contact-mail:hover .contact-mail-text { background-size: 100% 1px; }
-
-  /* 주소 복사: 작은 알약 버튼 */
-  .contact-copy {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 0.9rem;
-    border: 1px solid rgb(40 40 40 / 0.15);
-    border-radius: 999px;
-    font-size: 0.8rem;
-    color: var(--color-muted);
-    transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
-  }
-  .contact-copy:hover { border-color: var(--color-ink); color: var(--color-ink); background: #fdfbf7; }
-  .contact-copy svg { width: 0.9rem; height: 0.9rem; }
-
-  /* 단계 카드: 바탕보다 밝은 따뜻한 흰색, 마우스를 올리면 살짝 떠오름 */
-  .contact-step {
-    padding: 1.75rem;
+  /* 카드: 연한 크림색 (흰색 아님) */
+  .wz-card {
+    max-width: 45rem;
+    margin: 1.5rem auto 0;
+    padding: 1.5rem 1.5rem;
     border: 1px solid var(--color-line);
-    border-radius: 20px;
-    background: #fdfbf7;
-    box-shadow: 0 1px 2px rgb(40 40 40 / 0.04);
-    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.4s ease;
+    border-radius: 28px;
+    background: #faf6ee;
+    box-shadow: 0 2px 4px rgb(40 40 40 / 0.03), 0 40px 80px -40px rgb(40 40 40 / 0.25);
   }
-  @media (min-width: 1024px) { .contact-step { padding: 2.25rem; } }
-  .contact-step:hover { transform: translateY(-4px); box-shadow: 0 16px 36px -16px rgb(40 40 40 / 0.18); }
+  @media (min-width: 640px) { .wz-card { padding: 1.9rem 2.75rem; } }
 
-  /* 단계 아이콘: 연한 초록 동그라미 */
-  .contact-icon {
-    display: grid;
-    place-items: center;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 999px;
-    background: rgb(46 91 69 / 0.09);
-    color: var(--color-accent);
-  }
-  .contact-icon svg { width: 1.4rem; height: 1.4rem; }
+  .wz-badge { padding: 0.2rem 0.6rem; border-radius: 999px; background: rgb(46 91 69 / 0.1); color: var(--color-accent); font-size: 0.72rem; font-weight: 600; }
 
-  .contact-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 2.5rem;
-    padding: 1.05rem 1.75rem;
-    border-radius: 999px;
-    background: var(--color-accent);
-    color: #fff;
-    font-weight: 500;
-    transition: background-color 0.3s ease;
+  /* 단계: 지금 단계만 보이고, 넘어갈 때 옆에서 살짝 밀려 들어옴 */
+  .wz-step { display: none; margin-top: 1.25rem; }
+  .wz-step.is-active { display: flex; flex-direction: column; gap: 1rem; animation: wz-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .wz-step.is-back { animation-name: wz-in-back; }
+  @keyframes wz-in { from { opacity: 0; transform: translateX(24px); } }
+  @keyframes wz-in-back { from { opacity: 0; transform: translateX(-24px); } }
+
+  .wz-field { display: flex; flex-direction: column; gap: 0.45rem; }
+  .wz-field > span { font-size: 0.875rem; font-weight: 700; }
+  .wz-field small { font-size: 0.75rem; color: var(--color-accent); }
+  .wz-field small::before { content: "* "; }
+  .wz-field input, .wz-field textarea, .wz-select select {
+    width: 100%;
+    padding: 0.8rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background: #f0e9dd; /* 카드보다 한 톤 짙은 베이지 */
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .contact-btn:hover { background: var(--color-accent-dark); }
-  .contact-btn svg { width: 1rem; height: 1rem; transition: transform 0.3s ease; }
-  .contact-btn:hover svg { transform: translateX(4px); }
+  .wz-field textarea { resize: vertical; }
+  .wz-field ::placeholder { color: rgb(110 104 94 / 0.55); }
+  .wz-field :is(input, textarea, select):hover { border-color: #e2d9c9; }
+  .wz-field :is(input, textarea, select):focus { outline: none; border-color: #c9bead; background: #f5efe5; } /* 누르면 테두리만 살짝 진해짐 (초록 · 그림자 없음) */
+  .wz-card.was-checked .wz-step.is-active :is(input, textarea, select):invalid { border-color: #c2543d; }
+
+  .wz-select { position: relative; }
+  .wz-select select { appearance: none; padding-right: 2.5rem; cursor: pointer; }
+  .wz-select select:invalid { color: rgb(110 104 94 / 0.7); }
+  .wz-select::after { content: ''; position: absolute; right: 1.1rem; top: 50%; width: 0.45rem; height: 0.45rem; border-right: 1.5px solid var(--color-muted); border-bottom: 1.5px solid var(--color-muted); transform: translateY(-70%) rotate(45deg); pointer-events: none; }
+
+  .wz-check { margin-top: 0.2rem; width: 1rem; height: 1rem; accent-color: var(--color-accent); flex-shrink: 0; }
+
+  .wz-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+    margin-top: 0.3rem; padding: 0.95rem 1.5rem; border-radius: 16px;
+    background: var(--color-accent); color: #fff; font-weight: 700; font-size: 1.05rem;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+  }
+  .wz-btn:hover { background: var(--color-accent-dark); }
+  .wz-btn:disabled { opacity: 0.6; cursor: wait; }
+  .wz-btn svg { width: 1rem; height: 1rem; transition: transform 0.3s ease; }
+  .wz-btn:hover svg { transform: translateX(3px); }
+  .wz-btn.is-ghost { background: transparent; color: var(--color-ink); border: 1px solid #ddd5c6; box-shadow: none; }
+  .wz-btn.is-ghost:hover { background: #f0e9dd; }
+
+  .wz-done { align-items: center; text-align: center; padding: 1.5rem 0 0.5rem; }
+  .wz-done-icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 999px; background: var(--color-accent); color: #fff; }
+  .wz-done-icon svg { width: 1.6rem; height: 1.6rem; }
+
+  .wz-status { margin-top: 1rem; font-size: 0.85rem; color: #c2543d; text-align: center; }
+  .wz-status:empty { display: none; }
+
+  @media (prefers-reduced-motion: reduce) { .wz-step.is-active { animation: none; } }
 </style>
 
 <script>
-  // '주소 복사' → 클립보드에 이메일 주소를 넣고 잠깐 '복사됨' 표시
-  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
-    const label = btn.querySelector<HTMLElement>('[data-copy-label]')!;
-    btn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(btn.dataset.copy!);
-        label.textContent = '복사됨';
-      } catch {
-        label.textContent = btn.dataset.copy!;
+  const form = document.querySelector<HTMLFormElement>('[data-wizard]');
+  if (form) {
+    const steps = [...form.querySelectorAll<HTMLElement>('[data-step]')];
+    const head = form.querySelector<HTMLElement>('[data-head]')!;
+    const title = form.querySelector<HTMLElement>('[data-step-title]')!;
+    const count = form.querySelector<HTMLElement>('[data-step-count]')!;
+    const badge = form.querySelector<HTMLElement>('.wz-badge')!;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const titles = ['기본 정보 입력', '제작 정보 입력', '상세 내용 입력'];
+    let current = 1;
+
+    const go = (n: number, back = false) => {
+      current = n;
+      steps.forEach((s) => s.classList.toggle('is-active', Number(s.dataset.step) === n));
+      steps[n - 1].classList.toggle('is-back', back);
+      form.classList.remove('was-checked');
+      status.textContent = '';
+      if (n <= 3) {
+        title.textContent = titles[n - 1];
+        count.textContent = `(${n}/3)`;
+        badge.style.visibility = n === 1 ? 'visible' : 'hidden';
+      } else {
+        head.style.display = 'none';
       }
-      setTimeout(() => (label.textContent = '주소 복사'), 1800);
+    };
+
+    // 지금 단계의 필수 칸이 다 찼는지
+    const valid = (n: number) => {
+      const fields = [...steps[n - 1].querySelectorAll<HTMLInputElement>('input, textarea, select')];
+      const bad = fields.find((f) => !f.checkValidity());
+      if (bad) {
+        form.classList.add('was-checked');
+        status.textContent = '필수 항목을 확인해 주세요.';
+        bad.focus();
+        return false;
+      }
+      return true;
+    };
+
+    form.querySelectorAll('[data-next]').forEach((b) => b.addEventListener('click', () => valid(current) && go(current + 1)));
+    form.querySelectorAll('[data-prev]').forEach((b) => b.addEventListener('click', () => go(current - 1, true)));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      // 앞 단계에서 Enter 를 누르면 보내지 말고 다음 단계로
+      if (current < 3) { if (valid(current)) go(current + 1); return; }
+      if (!valid(3)) return;
+      if (!form.dataset.key) {
+        status.textContent = `지금은 폼 접수 준비 중입니다. ${form.dataset.email} 로 메일 보내주세요.`;
+        return;
+      }
+      submit.disabled = true;
+      status.textContent = '';
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ ...Object.fromEntries(new FormData(form)), access_key: form.dataset.key }),
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+        form.reset();
+        go(4);
+      } catch {
+        status.textContent = `전송에 실패했습니다. ${form.dataset.email} 로 직접 보내주세요.`;
+      } finally {
+        submit.disabled = false;
+      }
     });
-  });
+  }
 </script>

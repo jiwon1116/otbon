@@ -6,6 +6,8 @@ export const site = {
   description:
     '옷본은 브랜드 컬렉션, 아우터, OEM, 샘플 제작을 하는 의류 제작 기업입니다. 기획부터 생산, 납품까지 한 곳에서 책임집니다.',
   email: 'info@otbon.co.kr',
+  // 문의 폼 키 (Web3Forms, https://web3forms.com 에서 받는 이메일을 넣으면 키가 메일로 옴). 비워두면 폼 대신 이메일로 안내
+  formKey: '266ef106-5713-49dd-a999-5e5bc3c86fca',
   kakaoChannel: 'https://pf.kakao.com/_xxxxxx',
 
   // 회사 정보 (하단에 표시). bizNo 는 숫자만 적으면 화면엔 000-00-00000 모양으로 나옴
@@ -14,7 +16,8 @@ export const site = {
     ceo: '마성진',
     bizNo: '2928603861',
     address: '서울 성북구 보문로38길 11 동일하이빌 303호',
-    consult: '이메일 온라인 상담을 기본으로 하며, 방문 상담은 예약제로 운영합니다.',
+    phone: '070-8668-6390',
+    consult: '제작 문의는 이메일과 전화로 상담해 드립니다. 작업지시서나 참고 자료가 있으시면 이메일로 함께 보내주세요.',
   },
 
   // 첫 화면 배경 영상. public/videos/hero.mp4 를 넣으면 바로 적용됩니다.
@@ -135,15 +138,13 @@ export const gallery = [
 
 // 본사·지사 지도. 스크롤하면 위에서부터 순서대로 지도가 이동하며 나라가 강조됩니다.
 // code = 나라 번호(ISO 3166 숫자 코드). 한국 410, 중국 156, 베트남 704
-// 첫 번째가 본사이고, 선은 바로 앞 장면에서 이어집니다 (본사 → 단동 → 랴오닝성).
-// lineFrom = 선을 바로 앞 장면 말고 다른 곳에서 긋고 싶을 때 그 순번 (0 = 본사). 하노이는 본사에서 이어짐
-// 같은 나라 · 같은 행정구역이 연달아 나와도 되며, 그때는 같은 땅이 계속 강조됩니다.
+// 첫 번째가 본사이고, 나머지 지사에는 본사에서 선이 이어집니다.
 // cities = 지도에 점과 이름이 찍히는 도시. pin = [경도, 위도] (비우면 나라 한가운데),
 //   side = 이름을 점의 왼쪽/오른쪽 중 어디에 쓸지, sub = 이름 밑 작은 글씨
 type City = { name: string; sub?: string; pin?: [number, number]; side?: 'left' | 'right' };
 // zoom = 그 장면 확대 배율 (비우면 나라 크기에 맞춰 자동)
 // region = 나라 전체 대신 이 행정구역만 초록으로 칠함 (src/data/regions.json 의 id, 비우면 나라 전체)
-type Office = { code: number; name: string; role: string; caption: string[]; cities: City[]; zoom?: number; region?: string; lineFrom?: number };
+type Office = { code: number; name: string; role: string; caption: string[]; cities: City[]; zoom?: number; region?: string };
 
 // intro = 첫 장면(세계 지도 전체)에 나오는 글자
 export const network: { eyebrow: string; intro: { caption: string[]; name: string }; offices: Office[] } = {
@@ -156,18 +157,12 @@ export const network: { eyebrow: string; intro: { caption: string[]; name: strin
       cities: [{ name: '한국', side: 'right' }],
     },
     {
-      code: 156, name: 'China', role: 'BRANCH 01', zoom: 4, region: 'CN-LN', // 중국 전체 말고 랴오닝성만
+      code: 156, name: 'China', role: 'BRANCH 01', zoom: 2.6, region: 'CN-LN', // 중국 전체 말고 랴오닝성만
       caption: ['원단과 부자재, 대량 생산을 맡는', '옷본의 중국 단동 지사 입니다.'],
-      cities: [{ name: '단동', pin: [124.39, 40.13], side: 'left' }],
+      cities: [{ name: '단동', sub: '랴오닝성', pin: [124.39, 40.13], side: 'left' }],
     },
     {
-      // 단동 위쪽 랴오닝성 지사. 위치는 성도 선양 근처로 임시 지정 (정확한 도시를 알면 pin 좌표만 바꾸면 됨)
-      code: 156, name: 'Liaoning', role: 'BRANCH 02', zoom: 2.6, region: 'CN-LN',
-      caption: ['생산을 함께 맡는', '옷본의 중국 랴오닝성 지사 입니다.'],
-      cities: [{ name: '랴오닝성', pin: [123.43, 41.8], side: 'left' }],
-    },
-    {
-      code: 704, name: 'Vietnam', role: 'BRANCH 03', zoom: 7, region: 'VN-54', lineFrom: 0, // 베트남 전체 말고 박지앙성만
+      code: 704, name: 'Vietnam', role: 'BRANCH 02', zoom: 7, region: 'VN-54', // 베트남 전체 말고 박지앙성만
       caption: ['봉제와 시즌 생산을 맡는', '옷본의 베트남 하노이 박지앙 지사 입니다.'],
       cities: [{ name: '박지앙', sub: '하노이', pin: [106.2, 21.27], side: 'left' }],
     },
@@ -219,28 +214,28 @@ export const process = [
     en: 'Consultation',
     title: '대면 상담',
     photo: 34,
-    desc: '브랜드의 제작 목적과 요구 사항을 직접 확인하고, 제품의 디자인 사양과 원단, 부자재, 생산 조건 등을 구체적으로 협의합니다.',
+    desc: '브랜드의 제작 목적과 요구 사항을 상담을 통해 면밀히 파악하고, 제품의 디자인 사양과 원단, 부자재, 생산 조건 등을 구체적으로 협의합니다.',
   },
   {
     step: '02',
     en: 'Pattern Development',
     title: '패턴 개발',
     photo: 29,
-    desc: '협의된 디자인과 제품 사양을 바탕으로 패턴을 설계합니다. 제품의 실루엣과 사이즈, 착용감 등을 고려해 완성도 높은 샘플 제작의 기초를 마련합니다.',
+    desc: '의뢰된 디자인과 제품 사양을 바탕으로 패턴을 설계합니다. 제품의 실루엣과 사이즈, 디테일 등을 고려해 완성도 높은 샘플 제작의 기초를 마련합니다.',
   },
   {
     step: '03',
     en: 'Sample Making',
     title: '샘플 제작',
     photo: 3,
-    desc: '개발된 패턴을 바탕으로 샘플을 제작합니다. 봉제 방식과 디테일, 실루엣 등을 세밀하게 확인하고 필요한 수정 사항을 반영하여 최종 샘플을 완성합니다.',
+    desc: '개발된 패턴을 바탕으로 샘플을 제작합니다. 봉제 완성도와 마감 상태 등을 세밀하게 확인하고 필요한 수정 사항을 반영하여 최종 샘플을 완성합니다.',
   },
   {
     step: '04',
     en: 'Quality Control',
     title: '품질 검수',
     photo: 14,
-    desc: '완성된 제품의 사이즈, 봉제 상태, 워싱 및 마감 등을 종합적으로 검수합니다. 정해진 품질 기준에 부합하는 제품을 선별하여 안정적인 품질을 확보합니다.',
+    desc: '완성된 샘플의 세부 품질을 항목별로 꼼꼼하게 살핍니다. 제품 사양과 품질 기준에 부합하는지 확인하고, 보완이 필요한 부분을 최종 점검하여 샘플의 완성도를 높입니다.',
   },
 ];
 
