@@ -71,7 +71,7 @@ import { photo } from '../../../data/photos';
     position: relative;
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    border-radius: 2px;
+    border-radius: 14px;
     background: var(--color-soft);
     transition: opacity 0.4s ease;
   }
@@ -123,6 +123,10 @@ import { photo } from '../../../data/photos';
   .gallery-card:hover img { transform: scale(1.03); }
   .gallery-card:hover::after { opacity: 1; }
   .gallery-card:hover .gallery-cap { opacity: 1; transform: none; }
+
+  /* 한 장에 마우스를 올리면 두 줄의 다른 사진이 모두 살짝 어두워져서 그 사진만 돋보임 */
+  .gallery-card img { transition: transform 0.6s ease, filter 0.4s ease; }
+  .marquee-rows:has(.gallery-card:hover) .gallery-card:not(:hover) img { filter: brightness(0.6); }
   .gallery-card:hover .gallery-cap::before { transform: none; }
 
 </style>

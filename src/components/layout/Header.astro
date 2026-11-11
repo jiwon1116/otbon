@@ -64,8 +64,8 @@ const { transparent = false } = Astro.props;
 
     <div class="hidden justify-self-end md:block">
       <a
-        href="/contact"
-        class="inline-flex items-center gap-2 bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
+        href="#contact"
+        class="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
       >
         견적 문의
       </a>
@@ -95,7 +95,7 @@ const { transparent = false } = Astro.props;
           ))}
         </>
       ))}
-      <a href="/contact" class="mt-3 bg-accent py-3 text-center font-medium text-white">견적 문의</a>
+      <a href="#contact" class="mt-3 rounded-full bg-accent py-3 text-center font-medium text-white">견적 문의</a>
     </nav>
   </div>
 </header>
@@ -103,7 +103,7 @@ const { transparent = false } = Astro.props;
 <style>
   /* 헤더 로고: public/images/brand/logo-horizontal.svg 모양대로 글자색을 오려냄 (비율은 SVG viewBox 그대로) */
   .brand-mark {
-    aspect-ratio: 197.57 / 44.73;
+    aspect-ratio: 194.02 / 44.92;
     -webkit-mask: url('/images/brand/logo-horizontal.svg') center / contain no-repeat;
     mask: url('/images/brand/logo-horizontal.svg') center / contain no-repeat;
   }

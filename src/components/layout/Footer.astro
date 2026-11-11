@@ -2,40 +2,68 @@
 import { nav, site } from '../../data/site';
 
 const year = new Date().getFullYear();
+const { company } = site;
+// 2928603861 → 292-86-03861
+const bizNo = company.bizNo.replace(/^(\d{3})(\d{2})(\d{5})$/, '$1-$2-$3');
+// 공정거래위원회 사업자 정보 확인 페이지
+const bizCheck = `https://www.ftc.go.kr/bizCommPop.do?wrkr_no=${company.bizNo}`;
 ---
 
-<footer class="bg-ink text-white/70">
-  <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-    <div class="flex flex-col gap-10 md:flex-row md:justify-between">
-      <div>
+<!--
+  하단: 위는 로고 · 메뉴 · 문의, 가운데는 회사 정보, 맨 아래는 저작권 · 약관
+-->
+<footer class="bg-ink text-white/60">
+  <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+    <div class="grid gap-12 lg:grid-cols-12 lg:gap-8">
+      <div class="lg:col-span-5">
         <!-- 어두운 바탕이라 흰 가로형 로고 -->
         <a href="/" class="inline-block" aria-label={`${site.name} 홈`}>
           <img src="/images/brand/logo-horizontal-white.svg" alt={`${site.name} 로고`} class="h-8 w-auto lg:h-9" />
         </a>
-        <p class="mt-3 max-w-sm text-sm leading-relaxed">기획부터 생산까지, 옷 만드는 일을 한 곳에서.</p>
+        <p class="mt-4 max-w-sm text-sm leading-relaxed">기획부터 생산까지, 옷 만드는 일을 한 곳에서.</p>
       </div>
 
-      <div class="grid grid-cols-2 gap-10 text-sm sm:grid-cols-3">
+      <div class="grid grid-cols-2 gap-10 text-sm lg:col-span-6 lg:col-start-7">
         <div>
-          <p class="mb-3 font-semibold text-white">메뉴</p>
-          <ul class="space-y-2">
-            {nav.map((item) => <li><a href={item.href} class="hover:text-white">{item.label}</a></li>)}
+          <p class="mb-4 text-[11px] font-medium tracking-[0.2em] text-white/40">MENU</p>
+          <ul class="space-y-2.5">
+            {nav.map((item) => <li><a href={item.href} class="transition-colors hover:text-white">{item.label}</a></li>)}
           </ul>
         </div>
         <div>
-          <p class="mb-3 font-semibold text-white">문의</p>
-          <ul class="space-y-2">
-            <li><a href="/contact" class="hover:text-white">견적 문의</a></li>
-            <li><a href={site.kakaoChannel} target="_blank" rel="noopener" class="hover:text-white">카카오톡 채널</a></li>
-            <li><a href={`mailto:${site.email}`} class="hover:text-white">{site.email}</a></li>
+          <p class="mb-4 text-[11px] font-medium tracking-[0.2em] text-white/40">CONTACT</p>
+          <ul class="space-y-2.5">
+            <li><a href={`mailto:${site.email}`} class="text-white transition-colors hover:text-white/70">{site.email}</a></li>
+            <li><a href="#contact" class="transition-colors hover:text-white">견적 문의</a></li>
           </ul>
+          <p class="mt-4 max-w-[16rem] text-xs leading-relaxed text-white/45">
+            {company.consult} 방문을 원하시면 이메일로 먼저 연락해 주세요.
+          </p>
         </div>
       </div>
     </div>
 
-    <div class="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs sm:flex-row sm:justify-between">
+    <!-- 회사 정보 -->
+    <dl class="mt-14 grid gap-x-8 gap-y-3 border-t border-white/10 pt-8 text-xs sm:grid-cols-2 lg:flex lg:flex-wrap lg:gap-x-10">
+      <div class="flex gap-3"><dt class="text-white/35">브랜드명</dt><dd>{company.brand}</dd></div>
+      <div class="flex gap-3"><dt class="text-white/35">대표</dt><dd>{company.ceo}</dd></div>
+      <div class="flex gap-3">
+        <dt class="text-white/35">사업자등록번호</dt>
+        <dd>
+          {bizNo}
+          <a href={bizCheck} target="_blank" rel="noopener" class="ml-2 underline underline-offset-2 transition-colors hover:text-white">사업자정보확인</a>
+        </dd>
+      </div>
+      <div class="flex gap-3"><dt class="text-white/35">주소</dt><dd>{company.address}</dd></div>
+      <div class="flex gap-3"><dt class="text-white/35">이메일</dt><dd>{site.email}</dd></div>
+    </dl>
+
+    <div class="mt-8 flex flex-col gap-3 text-xs text-white/40 sm:flex-row sm:justify-between">
       <p>© {year} {site.name}. All rights reserved.</p>
-      <a href="/privacy" class="hover:text-white">개인정보처리방침</a>
+      <p class="flex gap-4">
+        <a href="/terms" class="transition-colors hover:text-white">이용약관</a>
+        <a href="/privacy" class="font-medium text-white/70 transition-colors hover:text-white">개인정보처리방침</a>
+      </p>
     </div>
   </div>
 </footer>

@@ -4,9 +4,18 @@ export const site = {
   // 한글 이름. 문장 안에서 "옷본은", "옷본과"처럼 씀
   nameKo: '옷본',
   description:
-    '옷본은 단체복, 아우터, OEM, 샘플 제작을 하는 의류 제작 기업입니다. 기획부터 생산, 납품까지 한 곳에서 책임집니다.',
-  email: 'hello@otbon.co.kr',
+    '옷본은 브랜드 컬렉션, 아우터, OEM, 샘플 제작을 하는 의류 제작 기업입니다. 기획부터 생산, 납품까지 한 곳에서 책임집니다.',
+  email: 'info@otbon.co.kr',
   kakaoChannel: 'https://pf.kakao.com/_xxxxxx',
+
+  // 회사 정보 (하단에 표시). bizNo 는 숫자만 적으면 화면엔 000-00-00000 모양으로 나옴
+  company: {
+    brand: 'OTBON (옷본)',
+    ceo: '마성진',
+    bizNo: '2928603861',
+    address: '서울 성북구 보문로38길 11 동일하이빌 303호',
+    consult: '이메일 온라인 상담을 기본으로 하며, 방문 상담은 예약제로 운영합니다.',
+  },
 
   // 첫 화면 배경 영상. public/videos/hero.mp4 를 넣으면 바로 적용됩니다.
   // 영상이 없거나 로딩 중일 땐 poster 사진(src/assets/factory/ 번호)이 보입니다.
@@ -40,42 +49,60 @@ export const nav: {
 
 // 회사 소개 섹션 문구. **굵게** 로 감싼 부분은 진하게 표시됩니다.
 export const about = {
-  eyebrow: 'MADE IN OUR FACTORY',
+  eyebrow: 'ABOUT OTBON',
   headline: [
-    '디자인이 **한 벌의 옷이 되기까지,**',
-    '모든 과정을 직접 책임지는 의류 제작 기업 **옷본**입니다.',
+    '**한 벌의 옷이 완성되기까지,**',
+    '제작의 모든 과정을 함께하는 의류 프로모션 기업, **OTBON**입니다.',
   ],
   body: [
-    '**재단**, **봉제**, **세탁**, **검수**까지 생산 라인을 직접 운영합니다. 공정마다 사람이 직접 확인하기 때문에, 처음 약속한 품질과 납기를 지킬 수 있습니다.',
-    '빠르고 싼 옷보다 오래 입는 옷을 만듭니다. 원단 선택부터 마지막 실밥 정리까지, 브랜드의 이름을 걸 수 있는 품질만 내보냅니다.',
+    '제품의 완성도와 품질, 합리적인 생산 비용의 균형을 중요하게 생각합니다.',
+    '옷본은 패턴 제작부터 샘플 개발, 본생산, 납품까지 각 분야의 전문 협력업체와 긴밀하게 협업하며 의류 제작 전반을 관리합니다. 패턴의 정밀함부터 봉제, 워싱, 마감 및 품질 검수에 이르기까지 각 공정의 전문성을 바탕으로 제품의 완성도를 높입니다.',
+    '체계적인 생산 관리와 효율적인 일정 운영을 통해 합리적인 비용과 안정적인 품질을 제공하며, 신뢰할 수 있는 제작 파트너가 되겠습니다.',
   ],
 };
 
-// 생산 분야. photo 는 src/assets/factory/factory-번호.jpg 의 번호
+// 생산 분야(메인 화면 목록 + 사진). photo 는 src/assets/factory/factory-번호.jpg 의 번호
+export const servicesIntro = {
+  eyebrow: 'OUR CAPABILITIES',
+  title: '브랜드에 필요한 생산을 한 곳에서',
+  desc: '원단과 부자재 선정부터 패턴 개발, 재단, 봉제, 워싱 및 최종 패킹까지. 각 분야의 전문 협력업체와 긴밀하게 협업하여 안정적인 생산 과정을 지원합니다.',
+};
 export const services = [
   {
-    title: '단체복',
-    en: 'Team Wear',
-    desc: '기업, 학교, 단체를 위한 티셔츠와 후드를 브랜드 의류와 같은 기준으로 제작합니다.',
-    photo: 31,
+    title: '원단 · 부자재',
+    en: 'Fabric & Trims',
+    desc: '제품 특성에 적합한 원단과 부자재를 확인하고 생산 사양에 맞춰 관리합니다.',
+    photo: 23,
   },
   {
-    title: '아우터',
-    en: 'Outerwear',
-    desc: '바람막이, 점퍼, 플리스 등 원단 선택부터 부자재까지 맞춤으로 제작합니다.',
-    photo: 18,
+    title: '패턴 개발',
+    en: 'Pattern Development',
+    desc: '디자인과 사이즈 사양을 바탕으로 제품의 형태와 실루엣을 구현합니다.',
+    photo: 9,
   },
   {
-    title: 'OEM',
-    en: 'OEM Production',
-    desc: '브랜드의 디자인을 받아 패턴, 원단, 생산, 검수까지 대신 진행합니다.',
+    title: '재단 · 봉제',
+    en: 'Cutting & Sewing',
+    desc: '확정된 패턴과 작업 사양에 따라 재단 및 봉제 공정을 진행합니다.',
+    photo: 17,
+  },
+  {
+    title: '워싱 · 후가공',
+    en: 'Washing & Finishing',
+    desc: '제품의 소재와 디자인 특성에 맞는 워싱 및 후가공을 진행합니다.',
+    photo: 21,
+  },
+  {
+    title: '품질 검수',
+    en: 'Quality Control',
+    desc: '사이즈, 봉제 상태, 마감 등 제품의 주요 품질 항목을 확인합니다.',
     photo: 15,
   },
   {
-    title: '샘플 제작',
-    en: 'Sampling',
-    desc: '본 생산 전, 핏과 원단을 직접 확인할 수 있도록 샘플을 먼저 만들어 드립니다.',
-    photo: 9,
+    title: '패킹 · 납품',
+    en: 'Packing & Delivery',
+    desc: '검수가 완료된 제품을 기준에 맞게 포장하고 지정된 장소에 납품합니다.',
+    photo: 5,
   },
 ];
 
@@ -172,44 +199,40 @@ export const partners = [
   { name: '', logo: '' },
 ];
 
-// 제작 과정 (메인 화면, 옆으로 넘어가는 카드)
-// time = 카드 아래 '기간' 칸에 들어가는 글, photo = src/assets/factory/factory-번호.jpg
+// 제작 과정 (메인 화면, 네 칸)
+// photo = src/assets/factory/factory-번호.jpg
 export const processIntro = {
-  title: '제작은 네 단계로 진행됩니다',
-  desc: '첫 상담부터 납품까지, 단계마다 확인 기준을 세워 두고 하나씩 짚어 갑니다.',
+  title: '하나의 샘플을 완성하는 체계적인 네 단계',
+  desc: '각 단계의 진행 사항을 면밀하게 확인하며 샘플 한 벌부터 완제품까지 완성도 높은 결과를 만들어갑니다.',
 };
 export const process = [
   {
     step: '01',
-    en: 'Consulting',
-    title: '기획 상담',
+    en: 'Consultation',
+    title: '대면 상담',
     photo: 34,
-    time: '자료 검토 후 일정 안내',
-    desc: '브랜드가 그리는 스타일과 입을 사람을 먼저 이해한 뒤, 그에 맞는 원단과 디자인 방향을 함께 정합니다.',
+    desc: '브랜드의 제작 목적과 요구 사항을 직접 확인하고, 제품의 디자인 사양과 원단, 부자재, 생산 조건 등을 구체적으로 협의합니다.',
   },
   {
     step: '02',
-    en: 'Sampling',
-    title: '샘플 제작',
-    photo: 3,
-    time: '3~14일 · 국내 최단 3일',
-    desc: '패턴을 뜨고 가봉을 거치며, 머릿속에 그린 핏이 실물로 나올 때까지 다듬습니다.',
+    en: 'Pattern Development',
+    title: '패턴 개발',
+    photo: 29,
+    desc: '협의된 디자인과 제품 사양을 바탕으로 패턴을 설계합니다. 제품의 실루엣과 사이즈, 착용감 등을 고려해 완성도 높은 샘플 제작의 기초를 마련합니다.',
   },
   {
     step: '03',
-    en: 'Production',
-    title: '본 생산',
-    photo: 32,
-    time: '2~4주',
-    desc: '품목에 맞는 전문 라인에서, 확정된 샘플과 똑같은 사양으로 흔들림 없이 생산합니다.',
+    en: 'Sample Making',
+    title: '샘플 제작',
+    photo: 3,
+    desc: '개발된 패턴을 바탕으로 샘플을 제작합니다. 봉제 방식과 디테일, 실루엣 등을 세밀하게 확인하고 필요한 수정 사항을 반영하여 최종 샘플을 완성합니다.',
   },
   {
     step: '04',
-    en: 'Delivery',
-    title: '검품 · 납품',
-    photo: 5,
-    time: '행거 배송 또는 폴리백 포장',
-    desc: '한 벌씩 최종 검품을 마친 뒤 포장해, 원하시는 곳까지 배송해 드립니다.',
+    en: 'Quality Control',
+    title: '품질 검수',
+    photo: 14,
+    desc: '완성된 제품의 사이즈, 봉제 상태, 워싱 및 마감 등을 종합적으로 검수합니다. 정해진 품질 기준에 부합하는 제품을 선별하여 안정적인 품질을 확보합니다.',
   },
 ];
 

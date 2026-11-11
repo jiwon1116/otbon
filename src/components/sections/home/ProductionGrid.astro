@@ -1,111 +1,55 @@
 ---
-import { Image } from 'astro:assets';
-import { services } from '../../../data/site';
-import { photo } from '../../../data/photos';
+import { services, servicesIntro } from '../../../data/site';
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
 ---
 
 <!--
-  생산 분야: 왼쪽 큰 목록 + 오른쪽 사진 한 장
-  - 목록에 마우스를 올리거나(터치 화면은 누르면) 그 분야 사진으로 바뀌고, 설명이 펼쳐짐
-  - 큰 화면에선 사진이 스크롤을 따라 붙어 있음, 작은 화면에선 사진이 목록 위에 옴
+  생산 분야: 제목 + 번호 카드 6장 (큰 화면 3칸 × 2줄, 태블릿 2칸, 휴대폰 1칸)
+  - 사진은 빼고 글 중심으로. 카드마다 굵은 초록 번호 · 제목 · 영어 이름 · 설명
+  - 마우스를 올리면 카드가 살짝 떠오름
 -->
-<section id="production" class="scroll-mt-20 bg-paper" data-prod>
-  <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-40">
-    <div data-reveal>
-      <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">WHAT WE MAKE</p>
-      <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">브랜드에 필요한 생산을 한 곳에서</h2>
+<section id="production" class="scroll-mt-20 bg-paper">
+  <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-32">
+    <div class="mx-auto max-w-2xl text-center" data-reveal>
+      <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">{servicesIntro.eyebrow}</p>
+      <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">{servicesIntro.title}</h2>
+      <p class="mt-5 leading-relaxed text-muted">{servicesIntro.desc}</p>
     </div>
 
-    <div class="mt-12 grid gap-8 lg:mt-16 lg:grid-cols-12 lg:gap-12">
-      <!-- 사진: 겹쳐 놓고 고른 것만 보이게 -->
-      <div class="lg:order-2 lg:col-span-5 lg:col-start-8">
-        <div class="relative aspect-[3/2] overflow-hidden rounded-[2px] bg-soft lg:sticky lg:top-28 lg:aspect-square" data-reveal>
-          {services.map((s, i) => (
-            <Image
-              src={photo(s.photo)}
-              alt={`${s.title} 생산 현장`}
-              widths={[480, 800, 1100]}
-              sizes="(min-width: 1024px) 38vw, 100vw"
-              class:list={['prod-photo absolute inset-0 h-full w-full object-cover', i === 0 && 'is-on']}
-              data-prod-photo={i}
-            />
-          ))}
-        </div>
-      </div>
-
-      <!-- 목록 -->
-      <ol class="border-t border-ink/15 lg:order-1 lg:col-span-6">
-        {services.map((s, i) => (
-          <li class="border-b border-ink/15" data-reveal style={`--reveal-delay: ${i * 100}ms`}>
-            <button
-              type="button"
-              class:list={['prod-row group block w-full py-6 text-left sm:py-8', i === 0 && 'is-on']}
-              data-prod-row={i}
-              aria-pressed={i === 0 ? 'true' : 'false'}
-            >
-              <span class="flex items-baseline gap-4 sm:gap-6">
-                <span class="prod-num text-sm tabular-nums">{pad(i + 1)}</span>
-                <span class="prod-title text-3xl font-semibold tracking-tight sm:text-5xl">{s.title}</span>
-                <span class="prod-en ml-auto hidden text-sm font-medium tracking-wide sm:inline">{s.en}</span>
-                <svg class="prod-arrow h-5 w-5 shrink-0 self-center sm:h-6 sm:w-6" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
-              </span>
-              <span class="prod-desc grid">
-                <span class="overflow-hidden">
-                  <span class="block max-w-md pt-4 pl-9 leading-relaxed text-muted sm:pl-12">{s.desc}</span>
-                </span>
-              </span>
-            </button>
-          </li>
-        ))}
-      </ol>
-    </div>
+    <ul class="mx-auto mt-10 grid max-w-6xl gap-3 sm:grid-cols-2 lg:mt-12 lg:grid-cols-3 lg:gap-4">
+      {services.map((s, i) => (
+        <li data-reveal style={`--reveal-delay: ${(i % 3) * 90}ms`}>
+          <article class="cap-card">
+            <span class="block text-2xl font-bold leading-none tracking-tight text-accent tabular-nums lg:text-3xl">{pad(i + 1)}</span>
+            <h3 class="mt-4 text-lg font-semibold tracking-tight lg:text-xl">{s.title}</h3>
+            <p class="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted lg:text-[11px]">{s.en}</p>
+            <p class="mt-3 text-sm leading-relaxed text-muted">{s.desc}</p>
+          </article>
+        </li>
+      ))}
+    </ul>
   </div>
 </section>
 
-<style is:global>
-  /* 사진 바뀜: 겹친 사진끼리 서서히 교차 */
-  .prod-photo { opacity: 0; transform: scale(1.04); transition: opacity 0.6s ease, transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .prod-photo.is-on { opacity: 1; transform: none; }
+<style>
+  /* 카드: 바탕보다 밝은 따뜻한 흰색 + 얇은 테두리, 마우스를 올리면 살짝 떠오름 */
+  .cap-card {
+    height: 100%;
+    padding: 1.25rem 1.4rem;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: #fdfbf7;
+    box-shadow: 0 1px 2px rgb(40 40 40 / 0.04);
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.4s ease;
+  }
+  @media (min-width: 1024px) { .cap-card { padding: 1.5rem 1.75rem; } }
+  .cap-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px -16px rgb(40 40 40 / 0.18); }
 
-  /* 목록: 고른 줄만 진하고, 나머지는 흐리게 */
-  .prod-row { cursor: pointer; }
-  .prod-title, .prod-num, .prod-en { color: rgb(40 40 40 / 0.25); transition: color 0.35s ease; }
-  .prod-row.is-on .prod-title { color: var(--color-ink); }
-  .prod-row.is-on .prod-num { color: var(--color-accent); }
-  .prod-row.is-on .prod-en { color: rgb(40 40 40 / 0.5); }
-  .prod-arrow { color: var(--color-accent); opacity: 0; transform: translateX(-8px); transition: opacity 0.35s ease, transform 0.35s ease; }
-  .prod-row.is-on .prod-arrow { opacity: 1; transform: none; }
-
-  /* 설명 펼침 (높이 0 → 자기 높이) */
-  .prod-desc { grid-template-rows: 0fr; transition: grid-template-rows 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .prod-row.is-on .prod-desc { grid-template-rows: 1fr; }
 
   @media (prefers-reduced-motion: reduce) {
-    .prod-photo, .prod-desc, .prod-arrow { transition: none; }
+    .cap-card { transition: none; }
+    .cap-card:hover { transform: none; }
   }
 </style>
-
-<script>
-  const root = document.querySelector<HTMLElement>('[data-prod]');
-  if (root) {
-    const rows = [...root.querySelectorAll<HTMLElement>('[data-prod-row]')];
-    const photos = [...root.querySelectorAll<HTMLElement>('[data-prod-photo]')];
-
-    const select = (n: number) => {
-      rows.forEach((r, i) => {
-        r.classList.toggle('is-on', i === n);
-        r.setAttribute('aria-pressed', String(i === n));
-      });
-      photos.forEach((p, i) => p.classList.toggle('is-on', i === n));
-    };
-
-    rows.forEach((r, i) => {
-      // 마우스가 있는 화면에선 올리기만 해도, 터치 화면에선 눌러서 바꿈
-      r.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') select(i); });
-      r.addEventListener('focus', () => select(i));
-      r.addEventListener('click', () => select(i));
-    });
-  }
-</script>
