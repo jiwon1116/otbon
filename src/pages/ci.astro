@@ -4,14 +4,13 @@ import BrandLogo from '../components/ui/BrandLogo.astro';
 import BrandStory from '../components/sections/brand/BrandStory.astro';
 import { brandStory } from '../data/site';
 
-const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(' · ');
 ---
 
 <!--
   CI 페이지 (회사소개 > CI)
   1) 첫 화면: 왼쪽 제목 · 소개 · 목차, 오른쪽 로고 판 (#logo)
   3) 02 Symbol: 초록 실이 심볼을 그리며 의미 풀이 (BrandStory, 브랜드 이야기도 여기에 담음)
-  4) 03 Color: 브랜드 컬러 3가지
+  4) 03 Color: 브랜드 컬러 3가지 (겹친 원 + 목록)
   5) 맺음말
 -->
 <Layout title="CI" description="옷본(OTBON)의 로고와 심볼에 담긴 의미를 소개합니다.">
@@ -41,33 +40,31 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
   <!-- 3) 심볼 풀이 -->
   <BrandStory />
 
-  <!-- 4) 브랜드 컬러 -->
-  <section id="color" class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-36">
+  <!-- 4) 브랜드 컬러: 왼쪽 겹친 원 세 개, 오른쪽 이름 · 설명 · HEX -->
+  <section id="color" class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
     <div data-reveal>
       <p class="ci-eyebrow"><span>03</span>Color</p>
       <h2 class="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">브랜드 컬러</h2>
     </div>
-    <ul class="mt-10 grid gap-4 md:grid-cols-3 lg:mt-14">
-      {brandStory.colors.map((c, i) => (
-        <li
-          class:list={['ci-chip', c.dark ? 'text-white' : 'border border-line text-ink']}
-          style={`background:${c.hex}; --reveal-delay:${i * 120}ms`}
-          data-reveal
-        >
-          <div>
-            <p class="text-2xl font-semibold">{c.name}</p>
-            <p class:list={['mt-1 text-sm', c.dark ? 'text-white/70' : 'text-muted']}>{c.ko}</p>
-          </div>
-          <div>
-            <p class:list={['text-sm leading-relaxed', c.dark ? 'text-white/70' : 'text-muted']}>{c.desc}</p>
-            <dl class:list={['mt-5 grid grid-cols-[3rem_1fr] gap-y-1 border-t pt-5 text-sm tabular-nums', c.dark ? 'border-white/20' : 'border-ink/15']}>
-              <dt class="opacity-60">HEX</dt><dd class="font-semibold">{c.hex}</dd>
-              <dt class="opacity-60">RGB</dt><dd class="font-semibold">{rgb(c.hex)}</dd>
-            </dl>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div class="mt-12 grid items-center gap-12 lg:grid-cols-12">
+      <div class="flex justify-center lg:col-span-6" data-reveal>
+        {brandStory.colors.map((c, i) => (
+          <span class="h-32 w-32 rounded-full sm:h-44 sm:w-44" style={`background:${c.hex}; margin-left:${i ? '-2.25rem' : '0'}; ${c.dark ? '' : 'box-shadow: inset 0 0 0 1px #e2d9c9'}`}></span>
+        ))}
+      </div>
+      <ul class="space-y-5 lg:col-span-5 lg:col-start-8">
+        {brandStory.colors.map((c) => (
+          <li class="flex items-start gap-4">
+            <span class="mt-1.5 h-3 w-3 shrink-0 rounded-full" style={`background:${c.hex}; box-shadow: inset 0 0 0 1px rgb(40 40 40 / 0.15)`}></span>
+            <div>
+              <p class="font-semibold">{c.name} <span class="ml-1 text-sm font-normal text-muted">{c.ko}</span></p>
+              <p class="mt-0.5 text-sm text-muted">{c.desc}</p>
+              <p class="mt-1.5 text-xs tabular-nums text-muted"><span class="font-semibold text-ink">{c.hex}</span></p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   </section>
 
   <!-- 5) 맺음말 한 문장 -->
@@ -101,8 +98,6 @@ const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 
   @media (min-width: 768px) { .ci-stage { aspect-ratio: 16 / 8; } }
 
 
-  /* 컬러 칩: 위에 이름, 아래 값 */
-  .ci-chip { display: flex; flex-direction: column; justify-content: space-between; gap: 56px; min-height: 340px; border-radius: 20px; padding: 32px; }
 
 </style>
 

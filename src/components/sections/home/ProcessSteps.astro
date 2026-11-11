@@ -5,7 +5,8 @@ import { photo } from '../../../data/photos';
 ---
 
 <!--
-  제작 과정: 위에 제목과 설명, 아래 4단계를 네 칸으로 (태블릿 2칸, 휴대폰 1칸)
+  제작 과정: 위에 제목과 설명, 아래 4단계를 네 칸으로 (태블릿 2칸)
+  - 휴대폰: 번호 + 제목 줄만 보이는 접는 목록. 줄을 누르면 사진과 설명이 펼쳐짐 (처음엔 01만 열림)
   - 칸마다: 번호 + 얇은 선 → 사진 → 제목 → 설명
   - 화면에 들어오면 칸이 차례로 살짝 떠오름. 마우스를 올리면 선이 초록으로, 사진이 아주 살짝 커짐
 -->
@@ -19,9 +20,9 @@ import { photo } from '../../../data/photos';
       <p class="max-w-sm leading-relaxed text-muted lg:col-span-4 lg:col-start-9">{processIntro.desc}</p>
     </div>
 
-    <ol class="mt-16 grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:mt-20 lg:grid-cols-4 lg:gap-x-8">
+    <ol class="mt-12 grid gap-x-6 gap-y-8 sm:mt-16 sm:gap-y-14 sm:grid-cols-2 lg:mt-20 lg:grid-cols-4 lg:gap-x-8">
       {process.map((p, i) => (
-        <li class="step" data-reveal style={`--reveal-delay: ${i * 110}ms`}>
+        <li class:list={["step", i === 0 && "is-on"]} data-step-item data-reveal style={`--reveal-delay: ${i * 110}ms`}>
           <div class="step-head flex items-center gap-4 text-sm tabular-nums">
             <span class="font-medium text-ink">{p.step}</span>
             <span class="step-rule h-px flex-1" aria-hidden="true"></span>
@@ -36,8 +37,8 @@ import { photo } from '../../../data/photos';
               class="h-full w-full object-cover"
             />
           </div>
-          <h3 class="mt-6 text-xl font-semibold tracking-tight">{p.title}</h3>
-          <p class="mt-3 text-[15px] leading-relaxed text-muted">{p.desc}</p>
+          <h3 class="step-title mt-6 text-xl font-semibold tracking-tight">{p.title}</h3>
+          <p class="step-desc mt-3 text-[15px] leading-relaxed text-muted">{p.desc}</p>
         </li>
       ))}
     </ol>
@@ -54,6 +55,34 @@ import { photo } from '../../../data/photos';
     border-radius: 14px;
     background: var(--color-soft);
   }
+  /* 휴대폰: 접는 목록 */
+  @media (max-width: 639px) {
+    #process ol { gap: 0; }
+    .step { display: grid; grid-template-columns: 2.25rem 1fr 1rem; grid-template-areas: 'head title arrow' '. photo photo' '. desc desc'; align-items: center; padding: 1.1rem 0; border-top: 1px solid var(--color-line); cursor: pointer; }
+    .step:last-child { border-bottom: 1px solid var(--color-line); }
+    .step-head { grid-area: head; }
+    .step-head .step-rule, .step-head span:last-child { display: none; }
+    .step-title { grid-area: title; margin: 0; font-size: 1.05rem; }
+    .step::after { content: ''; grid-area: arrow; justify-self: center; width: 0.5rem; height: 0.5rem; border-right: 1.5px solid var(--color-muted); border-bottom: 1.5px solid var(--color-muted); transform: rotate(45deg); transition: transform 0.3s ease; }
+    .step.is-on::after { transform: rotate(-135deg); }
+    .step-photo { grid-area: photo; display: none; margin-top: 1rem; aspect-ratio: 16 / 10; border-radius: 12px; }
+    .step-desc { grid-area: desc; display: none; margin-top: 0.75rem; font-size: 0.875rem; }
+    .step.is-on :is(.step-photo, .step-desc) { display: block; animation: reveal-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  }
+
   .step-photo img { transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
   .step:hover .step-photo img { transform: scale(1.03); }
 </style>
+
+<script>
+  // 휴대폰 접는 목록: 누른 단계만 펼치고, 열린 걸 다시 누르면 접힘
+  const items = [...document.querySelectorAll<HTMLElement>('#process [data-step-item]')];
+  items.forEach((li) =>
+    li.addEventListener('click', () => {
+      if (window.innerWidth >= 640) return;
+      const open = li.classList.contains('is-on');
+      items.forEach((x) => x.classList.remove('is-on'));
+      if (!open) li.classList.add('is-on');
+    }),
+  );
+</script>
