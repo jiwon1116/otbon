@@ -66,10 +66,10 @@ const offices = network.offices.map((o) => {
   return { ...o, d: path(f) ?? '', area: r ? path(r) ?? '' : '', cities, cx, cy, k };
 });
 
-// 본사 → 지사 곡선 (본사 첫 도시 → 지사에서 본사와 가장 가까운 도시)
-const [hq, ...branches] = offices;
-const from = hq.cities[0];
-const lines = branches.map((b) => {
+// 곡선: 앞 장면(lineFrom이 있으면 그 장면)의 마지막 도시 → 다음 장면에서 그 도시와 가장 가까운 도시
+const lines = offices.slice(1).map((b, j) => {
+  const prev = offices[b.lineFrom ?? j].cities;
+  const from = prev[prev.length - 1];
   const to = [...b.cities].sort((p, q) => Math.hypot(p.x - from.x, p.y - from.y) - Math.hypot(q.x - from.x, q.y - from.y))[0];
   const mx = (from.x + to.x) / 2;
   const my = (from.y + to.y) / 2;
@@ -92,7 +92,16 @@ const overview = {
 const toTransform = (c: { cx: number; cy: number; k: number }) =>
   `translate(${(W / 2 - c.k * c.cx).toFixed(1)} ${(H * 0.42 - c.k * c.cy).toFixed(1)}) scale(${c.k.toFixed(3)})`;
 
-// 장면 순서: 세계 전체 → 한국 → 중국 → 베트남
+// 강조할 땅: 같은 땅(행정구역 또는 나라)을 쓰는 장면끼리 하나로 묶음 → 그 장면들 동안 계속 초록
+const shapes: { d: string; scenes: number[] }[] = [];
+offices.forEach((o, i) => {
+  const d = o.area || o.d;
+  const same = shapes.find((x) => x.d === d);
+  if (same) same.scenes.push(i);
+  else shapes.push({ d, scenes: [i] });
+});
+
+// 장면 순서: 세계 전체 → 한국 → 단동 → 랴오닝성 → 베트남
 const camera = JSON.stringify([worldCam, ...offices.map(({ cx, cy, k }) => ({ cx, cy, k }))]);
 const intro = network.intro;
 ---
@@ -120,10 +129,10 @@ const intro = network.intro;
         </g>
         <!-- region이 있는 나라는 땅은 회색 그대로 두고, 그 행정구역만 칠함 -->
         <g class="net-land">
-          {offices.map((o) => o.area && <path d={o.d} />)}
+          {offices.filter((o, i) => o.area && offices.findIndex((x) => x.code === o.code) === i).map((o) => <path d={o.d} />)}
         </g>
         <g class="net-offices">
-          {offices.map((o) => <path class="net-office" d={o.area || o.d} />)}
+          {shapes.map((x) => <path class="net-office" d={x.d} data-scenes={x.scenes.join(',')} />)}
         </g>
         <g class="net-lines">
           {lines.map((d) => <path class="net-line" d={d} pathLength="1" />)}
@@ -235,7 +244,7 @@ const intro = network.intro;
   .net-panel { display: none; text-shadow: 0 2px 16px rgb(0 0 0 / 0.45); }
 
   /* 움직임 모드: 긴 섹션 안에서 화면이 고정되고, 스크롤로 장면이 넘어감 */
-  .motion .net { height: 500vh; }
+  .motion .net { height: 600vh; }
   .net-world { opacity: 0; }
   .motion .net-stage { position: sticky; top: 0; }
   .motion .net-static { display: none; }
@@ -317,9 +326,16 @@ const intro = network.intro;
       dotInner.forEach((g) => g.setAttribute('transform', `scale(${1 / k})`));
 
       // 본사 → 지사 선: 해당 지사로 넘어가는 동안 그려짐 (장면 0은 세계, 1부터 나라)
+      // 선 끝이 카메라 중심을 따라가게 그림 → 확대되면서 이동해도 선 끝이 늘 화면 가운데에 있음
+      // (그냥 시간에 비례해 그리면 멀리 가는 구간(랴오닝성 → 박지앙)에서 선 끝이 화면 밖으로 나가 안 보였음)
       lines.forEach((line, j) => {
         line.style.strokeWidth = String(1.6 / k);
-        line.style.strokeDashoffset = String(1 - clamp01(s - 1 - j));
+        const lt = clamp01(s - 1 - j);
+        const ka = cams[j + 1].k;
+        const kb = cams[j + 2].k;
+        const lk = Math.exp(lerp(Math.log(ka), Math.log(kb), lt));
+        const u = lt >= 1 ? 1 : clamp01(1 - ((1 - lt) * ka) / lk);
+        line.style.strokeDashoffset = String(1 - u);
       });
 
       // 글자: 지금 나라와 가까울수록 진하게
@@ -334,9 +350,10 @@ const intro = network.intro;
       const active = Math.round(s) - 1;
       if (active !== current) {
         current = active;
-        countries.forEach((c, j) => {
-          c.classList.toggle('is-active', j === active);
-          c.classList.toggle('is-past', j < active);
+        countries.forEach((c) => {
+          const scenes = c.dataset.scenes!.split(',').map(Number);
+          c.classList.toggle('is-active', scenes.includes(active));
+          c.classList.toggle('is-past', Math.max(...scenes) < active);
         });
         dots.forEach((dot) => dot.classList.toggle('is-shown', Number(dot.dataset.office) <= active));
       }

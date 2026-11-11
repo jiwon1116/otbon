@@ -135,13 +135,15 @@ export const gallery = [
 
 // 본사·지사 지도. 스크롤하면 위에서부터 순서대로 지도가 이동하며 나라가 강조됩니다.
 // code = 나라 번호(ISO 3166 숫자 코드). 한국 410, 중국 156, 베트남 704
-// 첫 번째가 본사이고, 나머지 지사에는 본사에서 선이 이어집니다.
+// 첫 번째가 본사이고, 선은 바로 앞 장면에서 이어집니다 (본사 → 단동 → 랴오닝성).
+// lineFrom = 선을 바로 앞 장면 말고 다른 곳에서 긋고 싶을 때 그 순번 (0 = 본사). 하노이는 본사에서 이어짐
+// 같은 나라 · 같은 행정구역이 연달아 나와도 되며, 그때는 같은 땅이 계속 강조됩니다.
 // cities = 지도에 점과 이름이 찍히는 도시. pin = [경도, 위도] (비우면 나라 한가운데),
 //   side = 이름을 점의 왼쪽/오른쪽 중 어디에 쓸지, sub = 이름 밑 작은 글씨
 type City = { name: string; sub?: string; pin?: [number, number]; side?: 'left' | 'right' };
 // zoom = 그 장면 확대 배율 (비우면 나라 크기에 맞춰 자동)
 // region = 나라 전체 대신 이 행정구역만 초록으로 칠함 (src/data/regions.json 의 id, 비우면 나라 전체)
-type Office = { code: number; name: string; role: string; caption: string[]; cities: City[]; zoom?: number; region?: string };
+type Office = { code: number; name: string; role: string; caption: string[]; cities: City[]; zoom?: number; region?: string; lineFrom?: number };
 
 // intro = 첫 장면(세계 지도 전체)에 나오는 글자
 export const network: { eyebrow: string; intro: { caption: string[]; name: string }; offices: Office[] } = {
@@ -154,12 +156,18 @@ export const network: { eyebrow: string; intro: { caption: string[]; name: strin
       cities: [{ name: '한국', side: 'right' }],
     },
     {
-      code: 156, name: 'China', role: 'BRANCH 01', zoom: 2.6, region: 'CN-LN', // 중국 전체 말고 랴오닝성만
+      code: 156, name: 'China', role: 'BRANCH 01', zoom: 4, region: 'CN-LN', // 중국 전체 말고 랴오닝성만
       caption: ['원단과 부자재, 대량 생산을 맡는', '옷본의 중국 단동 지사 입니다.'],
-      cities: [{ name: '단동', sub: '랴오닝성', pin: [124.39, 40.13], side: 'left' }],
+      cities: [{ name: '단동', pin: [124.39, 40.13], side: 'left' }],
     },
     {
-      code: 704, name: 'Vietnam', role: 'BRANCH 02', zoom: 7, region: 'VN-54', // 베트남 전체 말고 박지앙성만
+      // 단동 위쪽 랴오닝성 지사. 위치는 성도 선양 근처로 임시 지정 (정확한 도시를 알면 pin 좌표만 바꾸면 됨)
+      code: 156, name: 'Liaoning', role: 'BRANCH 02', zoom: 2.6, region: 'CN-LN',
+      caption: ['생산을 함께 맡는', '옷본의 중국 랴오닝성 지사 입니다.'],
+      cities: [{ name: '랴오닝성', pin: [123.43, 41.8], side: 'left' }],
+    },
+    {
+      code: 704, name: 'Vietnam', role: 'BRANCH 03', zoom: 7, region: 'VN-54', lineFrom: 0, // 베트남 전체 말고 박지앙성만
       caption: ['봉제와 시즌 생산을 맡는', '옷본의 베트남 하노이 박지앙 지사 입니다.'],
       cities: [{ name: '박지앙', sub: '하노이', pin: [106.2, 21.27], side: 'left' }],
     },
