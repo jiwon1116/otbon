@@ -172,6 +172,8 @@ export const network: { eyebrow: string; intro: { caption: string[]; name: strin
 // 브랜드 스토리 섹션 문구. icon = 카드 아이콘 종류 (thread 실뭉치 / globe 지구 / symbol 원형 심볼)
 export const brandStory = {
   label: 'BRAND STORY',
+  // CI 심볼 풀이 제목 아래 한 줄
+  lead: 'OTBON의 심볼은 이니셜 O와 B, 그리고 지구를 하나의 원 안에 담았습니다.',
   title: ['실 한 가닥에서 시작해', '세계를 잇습니다'],
   body: [
     'OTBON의 심볼은 이니셜 O와 B, 그리고 지구를 하나의 원 안에 담았습니다. O의 원형 구조 안에 B의 형태를 배치하고, 실을 연상시키는 반복적인 수평선으로 의류 생산 브랜드의 정체성을 표현했습니다.',
@@ -179,9 +181,9 @@ export const brandStory = {
     '간결한 기하학적 형태로 전문적이고 안정적인 브랜드 이미지를 전합니다.',
   ],
   cards: [
-    { icon: 'thread', title: 'Thread · 실', desc: '한 가닥의 실에서 시작되는 정교한 제작 과정' },
-    { icon: 'globe', title: 'Global · 세계', desc: '국내를 넘어 세계로 이어지는 생산 네트워크' },
-    { icon: 'symbol', title: 'OTBON', desc: '브랜드 이니셜 O와 B의 형태' },
+    { icon: 'thread', title: 'Thread · 실', desc: '실을 연상시키는 반복적인 수평선은 원단의 결처럼 촘촘히 이어져, 한 벌의 옷이 완성되기까지의 정직한 과정을 담았습니다.' },
+    { icon: 'globe', title: 'Global · 세계', desc: '선을 감싼 둥근 지구는 국내를 넘어 세계로, 고객과 함께 넓혀가는 생산 네트워크를 의미합니다.' },
+    { icon: 'symbol', title: 'OTBON', desc: 'O의 원형 구조 안에 B의 형태를 배치한 이니셜. 간결한 기하학적 형태로 전문적이고 안정적인 브랜드 이미지를 전합니다.' },
   ] as { icon: 'thread' | 'globe' | 'symbol'; title: string; desc: string }[],
   closing: '보이지 않는 한 땀까지, OTBON이 책임집니다.',
   // CI 페이지 브랜드 컬러. hex 만 바꾸면 RGB 는 자동 계산. dark = 글자를 흰색으로
