@@ -81,7 +81,7 @@ export const services = [
   {
     title: '패턴 개발',
     en: 'Pattern Development',
-    desc: '디자인과 사이즈 사양을 바탕으로 제품의 형태와 실루엣을 구현합니다.',
+    desc: '디자인 의도를 반영해 각 부위의 형태와 치수를 설계하고, 실제 제품 제작을 위한 패턴을 완성합니다.',
     photo: 9,
   },
   {
