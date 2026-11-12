@@ -66,10 +66,11 @@ const offices = network.offices.map((o) => {
   return { ...o, d: path(f) ?? '', area: r ? path(r) ?? '' : '', cities, cx, cy, k };
 });
 
-// 본사 → 지사 곡선 (본사 첫 도시 → 지사에서 본사와 가장 가까운 도시)
-const [hq, ...branches] = offices;
-const from = hq.cities[0];
-const lines = branches.map((b) => {
+// 이동 경로 곡선: 본사 → 첫 지사 → 다음 지사 순으로 이어짐 (한국 → 단동 → 박지앙)
+// (바로 앞 장소의 첫 도시 → 이번 지사에서 그 도시와 가장 가까운 도시)
+const branches = offices.slice(1);
+const lines = branches.map((b, idx) => {
+  const from = offices[idx].cities[0];
   const to = [...b.cities].sort((p, q) => Math.hypot(p.x - from.x, p.y - from.y) - Math.hypot(q.x - from.x, q.y - from.y))[0];
   const mx = (from.x + to.x) / 2;
   const my = (from.y + to.y) / 2;
@@ -317,9 +318,13 @@ const intro = network.intro;
       dotInner.forEach((g) => g.setAttribute('transform', `scale(${1 / k})`));
 
       // 본사 → 지사 선: 해당 지사로 넘어가는 동안 그려짐 (장면 0은 세계, 1부터 나라)
+      // 화면이 확대되며 다가가는 속도에 맞춰 선 끝이 늘 화면 안에서 목적지로 다가가게 함
+      // (일정한 속도로 그리면 확대가 빨라서 선 끝이 화면 밖으로 빠져나감)
       lines.forEach((line, j) => {
         line.style.strokeWidth = String(1.6 / k);
-        line.style.strokeDashoffset = String(1 - clamp01(s - 1 - j));
+        const tt = clamp01(s - 1 - j);
+        const u = tt > 0 && tt < 1 ? 1 - (cams[j + 1].k / k) * (1 - tt) : tt;
+        line.style.strokeDashoffset = String(1 - clamp01(u));
       });
 
       // 글자: 지금 나라와 가까울수록 진하게
