@@ -150,7 +150,7 @@ const bCurve = pts
     inset: 0;
     text-align: center;
     white-space: nowrap;
-    color: rgb(40 40 40 / 0.05);
+    color: rgb(40 40 40 / 0.09);
     opacity: 0;
     transform: translateY(18%);
     transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -178,6 +178,16 @@ const bCurve = pts
   /* 움직임 모드: 긴 트랙 안에서 화면이 멈춘 채 부분별로 풀이 */
   .motion .bs-track { height: 360vh; }
   .motion .bs-stage { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; }
+  /* 큰 화면: 위쪽 헤더(80px)를 뺀 자리의 가운데에 오게 */
+  @media (min-width: 1024px) { .motion .bs-stage { padding-top: 5rem; } }
+  /* 큰 모니터(가로 1536px · 세로 1000px 이상): 심볼 · 제목을 키워서 위아래가 휑하지 않게 */
+  @media (min-width: 1536px) and (min-height: 1000px) {
+    /* 아래쪽 큰 배경 글자만큼 내용을 조금 위로 올려 위아래 무게를 맞춤 */
+    .motion .bs-stage { padding-bottom: 10vh; }
+    .bs-art { max-width: 600px !important; }
+    .bs h2 { font-size: 3rem; }
+    .bs-steps { margin-top: 3rem; }
+  }
   .motion .bs-line { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
   .motion .bs-stripe { transform: scaleX(0); }
 

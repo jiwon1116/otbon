@@ -24,7 +24,7 @@ const plain = (para: string) => para.replaceAll('**', '');
           {toParts(line).map((part) =>
             part.strong ? (
               <strong class="font-semibold">
-                {part.words.map((w) => (/^\s+$/.test(w) ? w : <span class="about-word is-strong">{w}</span>))}
+                {part.words.map((w) => (/^\s+$/.test(w) ? w : <span class:list={['about-word is-strong', w === 'OTBON' && 'about-brand']}>{w}</span>))}
               </strong>
             ) : (
               part.words.map((w) => (/^\s+$/.test(w) ? w : <span class="about-word">{w}</span>))
@@ -45,6 +45,8 @@ const plain = (para: string) => para.replaceAll('**', '');
 <style is:global>
   .about-word { color: rgb(40 40 40 / 0.75); transition: color 0.35s ease; }
   .about-word.is-strong { color: var(--color-ink); }
+  /* 'OTBON' 글자만 1.3배 크게 */
+  .about-brand { font-size: 1.1em; margin-right: 0.1em; }
 
   /* 움직임 모드 */
   .motion .about-word { color: rgb(40 40 40 / 0.14); }

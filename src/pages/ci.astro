@@ -2,75 +2,70 @@
 import Layout from '../layouts/Layout.astro';
 import BrandLogo from '../components/ui/BrandLogo.astro';
 import BrandStory from '../components/sections/brand/BrandStory.astro';
-import { brandStory } from '../data/site';
+
+// 로고 활용 4가지: [파일, 바탕, 이름, 설명]
+const logoUses = [
+  ['/images/brand/logo.svg', 'beige', '세로형', '기본 로고'],
+  ['/images/brand/logo-horizontal.svg', 'beige', '가로형', '헤더 · 문서처럼 좁은 자리'],
+  ['/images/brand/logo-white.svg', 'ink', '반전형', '어두운 바탕 위'],
+  ['/images/brand/symbol-white.svg', 'green', '심볼', '작은 자리 · 아이콘'],
+];
 
 ---
 
 <!--
   CI 페이지 (회사소개 > CI)
-  1) 첫 화면: 왼쪽 제목 · 소개 · 목차, 오른쪽 로고 판 (#logo)
+  1) 첫 화면: 왼쪽 제목 · 소개 · 목차, 오른쪽 큰 로고 판 + 로고 활용 4가지 (#logo)
   3) 02 Symbol: 초록 실이 심볼을 그리며 의미 풀이 (BrandStory, 브랜드 이야기도 여기에 담음)
-  4) 03 Color: 브랜드 컬러 3가지 (겹친 원 + 목록)
-  5) 맺음말
 -->
 <Layout title="CI" description="옷본(OTBON)의 로고와 심볼에 담긴 의미를 소개합니다.">
-  <section id="logo" class="mx-auto max-w-7xl px-4 pb-24 pt-28 sm:px-6 lg:px-8 lg:pb-36 lg:pt-28">
+  <section id="logo" class="mx-auto max-w-7xl px-4 pb-24 pt-28 sm:px-6 lg:flex lg:min-h-svh lg:flex-col lg:px-8 lg:pb-16 lg:pt-28">
     <p class="text-sm text-muted" data-reveal>
       <a href="/about" class="transition-colors hover:text-ink">회사소개</a>
       <span class="mx-2 text-line">/</span>
       <span class="text-ink">CI</span>
     </p>
-    <div class="mt-6 grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
+    <!-- 큰 화면: 첫 화면 높이에 맞춰 위아래 가운데 -->
+    <div class="mt-6 grid items-center gap-10 lg:flex-1 lg:grid-cols-12 lg:content-center lg:gap-12">
       <div class="lg:col-span-5" data-reveal>
         <p class="ci-eyebrow">Corporate Identity</p>
         <h1 class="mt-5 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">OTBON<br />브랜드 아이덴티티</h1>
-        <p class="mt-6 max-w-md leading-relaxed text-muted">옷본의 로고와 심볼, 브랜드 컬러를 소개합니다. 실 한 가닥에서 시작해 세계를 잇는 의류 제작 기업의 정체성을 담았습니다.</p>
+        <p class="mt-6 max-w-md leading-relaxed text-muted">옷본의 로고와 심볼을 소개합니다. 실 한 가닥에서 시작해 세계를 잇는 의류 제작 기업의 정체성을 담았습니다.</p>
         <!-- 페이지 목차 -->
         <ul class="mt-10 space-y-1 border-t border-ink/15 pt-5 text-sm">
           <li><a href="#logo" class="ci-toc"><span>01</span>로고</a></li>
           <li><a href="#symbol" class="ci-toc"><span>02</span>심볼에 담긴 의미</a></li>
-          <li><a href="#color" class="ci-toc"><span>03</span>브랜드 컬러</a></li>
         </ul>
       </div>
-      <!-- 로고 판 (화면에 들어오면 심볼이 그어짐) -->
-      <figure class="ci-stage ci-stage-hero lg:col-span-7" data-reveal style="--reveal-delay: 100ms"><BrandLogo class="aspect-square max-w-[200px] sm:max-w-[260px] lg:max-w-[300px]" animate fill="currentColor" /></figure>
+      <!-- 오른쪽: 큰 로고 판 + 아래 로고 활용 4가지. 아래 칸을 누르면 큰 판이 그 로고로 바뀜
+           (세로형 · 반전형 · 심볼은 같은 로고 그림에서 바탕 · 색만 바꾸고 심볼 줄이 다시 그어짐, 가로형은 따로 떠오름) -->
+      <div class="lg:col-span-7" data-ci-logos>
+        <figure class="ci-stage ci-stage-hero" data-view="0" data-reveal style="--reveal-delay: 100ms">
+          <div class="ci-layer ci-layer-main"><BrandLogo class="ci-main-logo aspect-square max-w-[180px] sm:max-w-[220px] lg:max-w-[230px]" animate fill="currentColor" /></div>
+          <div class="ci-layer ci-layer-h"><img src="/images/brand/logo-horizontal.svg" alt="" class="w-[62%] max-w-[420px]" /></div>
+          <!-- 바꿀 때 덮는 가로줄 12개 (심볼 가로줄처럼 왼쪽 · 오른쪽에서 번갈아 그어짐) -->
+          <div class="ci-wipe" aria-hidden="true">{Array.from({ length: 12 }, (_, i) => <i style={`--i:${i}`}></i>)}</div>
+        </figure>
+        <ul class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {logoUses.map(([src, bg, name, desc], i) => (
+            <li data-reveal style={`--reveal-delay: ${180 + i * 70}ms`}>
+              <button type="button" class:list={['ci-use-btn', i === 0 && 'is-on']} data-i={i} aria-pressed={i === 0 ? 'true' : 'false'}>
+                <span class={`ci-use ci-use-${bg}`}><img src={src} alt={`OTBON ${name} 로고`} class={name === '가로형' ? 'w-[74%]' : name === '심볼' ? 'h-[36%]' : 'h-[54%]'} /></span>
+                <span class="mt-2.5 block text-[13px] font-semibold">{name}</span>
+                <span class="block text-[11px] text-muted">{desc}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   </section>
 
   <!-- 3) 심볼 풀이 -->
   <BrandStory />
+  <!-- 심볼 풀이와 푸터 사이 여백 -->
+  <div class="h-24 lg:h-40" aria-hidden="true"></div>
 
-  <!-- 4) 브랜드 컬러: 왼쪽 겹친 원 세 개, 오른쪽 이름 · 설명 · HEX -->
-  <section id="color" class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-    <div data-reveal>
-      <p class="ci-eyebrow"><span>03</span>Color</p>
-      <h2 class="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">브랜드 컬러</h2>
-    </div>
-    <div class="mt-12 grid items-center gap-12 lg:grid-cols-12">
-      <div class="flex justify-center lg:col-span-6" data-reveal>
-        {brandStory.colors.map((c, i) => (
-          <span class="h-32 w-32 rounded-full sm:h-44 sm:w-44" style={`background:${c.hex}; margin-left:${i ? '-2.25rem' : '0'}; ${c.dark ? '' : 'box-shadow: inset 0 0 0 1px #e2d9c9'}`}></span>
-        ))}
-      </div>
-      <ul class="space-y-5 lg:col-span-5 lg:col-start-8">
-        {brandStory.colors.map((c) => (
-          <li class="flex items-start gap-4">
-            <span class="mt-1.5 h-3 w-3 shrink-0 rounded-full" style={`background:${c.hex}; box-shadow: inset 0 0 0 1px rgb(40 40 40 / 0.15)`}></span>
-            <div>
-              <p class="font-semibold">{c.name} <span class="ml-1 text-sm font-normal text-muted">{c.ko}</span></p>
-              <p class="mt-0.5 text-sm text-muted">{c.desc}</p>
-              <p class="mt-1.5 text-xs tabular-nums text-muted"><span class="font-semibold text-ink">{c.hex}</span></p>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-
-  <!-- 5) 맺음말 한 문장 -->
-  <section class="px-4 pb-28 text-center lg:pb-40">
-    <p class="mx-auto max-w-3xl text-2xl font-semibold leading-snug tracking-tight sm:text-4xl" data-reveal>{brandStory.closing}</p>
-  </section>
 
 </Layout>
 
@@ -81,8 +76,8 @@ import { brandStory } from '../data/site';
   .ci-eyebrow span { letter-spacing: 0; padding-right: 12px; border-right: 1px solid currentColor; }
 
   /* 첫 화면 오른쪽 로고 판: 휴대폰은 정사각, 큰 화면은 살짝 가로로 */
-  .ci-stage-hero { aspect-ratio: 1 / 1 !important; }
-  @media (min-width: 1024px) { .ci-stage-hero { aspect-ratio: 5 / 4 !important; } }
+  .ci-stage-hero { aspect-ratio: 4 / 3 !important; }
+  @media (min-width: 1024px) { .ci-stage-hero { aspect-ratio: 16 / 9 !important; } }
 
   /* 목차: 마우스를 올리면 초록 */
   .ci-toc { display: flex; gap: 1rem; padding: 0.35rem 0; transition: color 0.2s ease; }
@@ -97,7 +92,99 @@ import { brandStory } from '../data/site';
   }
   @media (min-width: 768px) { .ci-stage { aspect-ratio: 16 / 8; } }
 
+  /* 로고 활용 칸 */
+  .ci-use { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; border-radius: 16px; }
+  .ci-use img { object-fit: contain; transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+  /* 로고 활용 칸 버튼: 고른 칸은 초록 테두리, 마우스를 올리면 로고가 살짝 커짐 */
+  .ci-use-btn { display: block; width: 100%; text-align: left; cursor: pointer; }
+  .ci-use-btn .ci-use { transition: box-shadow 0.3s ease; }
+  .ci-use-btn:hover .ci-use img { transform: scale(1.06); }
+  .ci-use-btn.is-on .ci-use { box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-accent); }
+  .ci-use-btn.is-on > span:nth-child(2) { color: var(--color-accent); }
+
+  /* 큰 로고 판: 고른 칸에 따라 바탕 · 로고 색이 부드럽게 바뀜 */
+  .ci-stage-hero { overflow: hidden; transition: background-color 0.6s ease, color 0.6s ease; }
+  .ci-stage-hero[data-view='2'] { background: var(--color-ink); color: #f5f1e8; }
+  .ci-stage-hero[data-view='3'] { background: var(--color-accent); color: #f5f1e8; }
+  .ci-layer { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .ci-layer-main .ci-main-logo { transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .ci-layer-h { opacity: 0; transform: translateY(16px); pointer-events: none; }
+  .ci-stage-hero[data-view='1'] .ci-layer-main { opacity: 0; transform: scale(0.94); }
+  .ci-stage-hero[data-view='1'] .ci-layer-h { opacity: 1; transform: none; }
+  /* 심볼만: 글자는 사라지고 심볼이 가운데로 내려오며 커짐 */
+  .ci-stage-hero[data-view='3'] .ci-main-logo { transform: translateY(26%) scale(1.3); }
+  .ci-stage-hero .logo-type { transition: opacity 0.4s ease; }
+  .ci-stage-hero[data-view='3'] .logo-type { opacity: 0 !important; animation: none !important; }
+  .ci-stage-hero.no-tr, .ci-stage-hero.no-tr .ci-layer { transition: none; }
+
+  /* 바꿀 때: 새 바탕색 가로줄이 번갈아 그어져 판을 덮고(is-in), 다시 반대쪽으로 빠져나가며(is-out) 새 로고가 드러남 */
+  .ci-wipe { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; pointer-events: none; }
+  .ci-wipe i { flex: 1; margin: -0.5px 0; background: var(--c, #faf6ee); transform: scaleX(0); transform-origin: left center; }
+  .ci-wipe i:nth-child(even) { transform-origin: right center; }
+  .ci-wipe.is-in i { animation: ci-bar 0.45s cubic-bezier(0.65, 0, 0.35, 1) calc(var(--i) * 35ms) both; }
+  .ci-wipe.is-out i { transform-origin: right center; animation: ci-bar 0.45s cubic-bezier(0.65, 0, 0.35, 1) calc(var(--i) * 35ms) reverse both; }
+  .ci-wipe.is-out i:nth-child(even) { transform-origin: left center; }
+  @keyframes ci-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  /* 마우스를 따라 로고가 살짝 움직임 */
+  .ci-layer { translate: calc(var(--mx, 0) * 14px) calc(var(--my, 0) * 10px); transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), translate 0.4s ease-out; }
+  @media (prefers-reduced-motion: reduce) { .ci-stage-hero, .ci-layer, .ci-main-logo { transition: none !important; } .ci-wipe { display: none; } }
+  .ci-use-beige { background: #faf6ee; }
+  .ci-use-ink { background: var(--color-ink); }
+  .ci-use-green { background: var(--color-accent); }
+
+
 
 
 </style>
+
+<script>
+  // 로고 활용 칸을 누르면: 새 바탕색 가로줄이 판을 덮었다가 빠져나가며 그 로고로 바뀜
+  // 세로형 · 반전형 · 심볼은 같은 로고 그림이라 심볼 줄이 다시 그어지고, 가로형은 따로 떠오름
+  const BG = ['#faf6ee', '#faf6ee', '#282828', '#2e5b45'];
+  const T = 450 + 11 * 35; // 줄 12개가 다 그어지는 시간(ms)
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('[data-ci-logos]').forEach((box) => {
+    const stage = box.querySelector<HTMLElement>('.ci-stage-hero')!;
+    const wipe = stage.querySelector<HTMLElement>('.ci-wipe')!;
+    const btns = [...box.querySelectorAll<HTMLButtonElement>('.ci-use-btn')];
+    let busy = false;
+
+    const show = (v: string) => {
+      stage.classList.add('no-tr');
+      stage.dataset.view = v;
+      // 로고 그림을 새로 갈아 끼워서 그어지는 애니메이션을 처음부터 다시 재생
+      const anim = stage.querySelector('.logo-anim');
+      if (anim && v !== '1') anim.replaceWith(anim.cloneNode(true));
+      void stage.offsetWidth;
+      stage.classList.remove('no-tr');
+    };
+
+    btns.forEach((b) => b.addEventListener('click', () => {
+      const v = b.dataset.i!;
+      if (busy || stage.dataset.view === v) return;
+      btns.forEach((x) => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+      if (still) return show(v);
+      busy = true;
+      wipe.style.setProperty('--c', BG[+v]);
+      wipe.className = 'ci-wipe is-in';
+      setTimeout(() => {
+        show(v);
+        wipe.className = 'ci-wipe is-out';
+        setTimeout(() => { wipe.className = 'ci-wipe'; busy = false; }, T);
+      }, T + 60);
+    }));
+
+    // 마우스 위치에 따라 로고가 살짝 따라 움직임 (마우스 쓰는 화면에서만)
+    if (!still && matchMedia('(pointer: fine)').matches) {
+      stage.addEventListener('pointermove', (e) => {
+        const r = stage.getBoundingClientRect();
+        stage.style.setProperty('--mx', String(((e.clientX - r.left) / r.width - 0.5) * 2));
+        stage.style.setProperty('--my', String(((e.clientY - r.top) / r.height - 0.5) * 2));
+      });
+      stage.addEventListener('pointerleave', () => { stage.style.setProperty('--mx', '0'); stage.style.setProperty('--my', '0'); });
+    }
+  });
+</script>
 

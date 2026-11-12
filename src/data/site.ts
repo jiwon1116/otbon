@@ -200,13 +200,6 @@ export const brandStory = {
     { icon: 'globe', title: 'Global · 세계', desc: '선을 감싼 둥근 지구는 국내를 넘어 세계로, 고객과 함께 넓혀가는 생산 네트워크를 의미합니다.' },
     { icon: 'symbol', title: 'OTBON', desc: 'O의 원형 구조 안에 B의 형태를 배치한 이니셜. 간결한 기하학적 형태로 전문적이고 안정적인 브랜드 이미지를 전합니다.' },
   ] as { icon: 'thread' | 'globe' | 'symbol'; title: string; desc: string }[],
-  closing: '보이지 않는 한 땀까지, OTBON이 책임집니다.',
-  // CI 페이지 브랜드 컬러. hex 만 바꾸면 RGB 는 자동 계산. dark = 글자를 흰색으로
-  colors: [
-    { name: 'Forest Green', ko: '포레스트 그린', hex: '#2E5B45', desc: '옷본의 대표 색. 로고와 강조에 씁니다.', dark: true },
-    { name: 'Ink Black', ko: '잉크 블랙', hex: '#282828', desc: '로고와 글자. 단단하고 정직한 인상', dark: true },
-    { name: 'Linen Beige', ko: '린넨 베이지', hex: '#F5F1E8', desc: '원단의 바탕처럼 편안한 배경색', dark: false },
-  ],
 };
 
 // 함께한 업체. logo 에 public/ 기준 이미지 경로를 적으면 로고가 나옵니다. (예: '/images/partners/abc.png')
@@ -356,7 +349,7 @@ export const standards = {
       { title: '납기', desc: '희망 입고일과 시즌 일정. 정해진 날짜가 있다면 견적 단계에서 함께 알려 주세요. 가능한 가장 빠른 라인을 배정해 드립니다.' },
     ],
     terms: [
-      { title: '샘플 · 패턴비', desc: '샘플만 제작하는 경우 디자인 난이도와 원단에 따라 실비로 책정됩니다.' },
+      { title: '샘플 · 패턴비', desc: '샘플 · 패턴비는 디자인 난이도에 따라 스타일별로 책정됩니다.' },
       { title: '세금계산서', desc: '세금계산서를 발행하며 사업자 지출 증빙을 지원합니다.' },
       { title: '불량 책임', desc: '출고 전 00차 검품을 거치고도 불량이 발견되면 교환 · 수선 · 환불 등 상황에 맞춰 책임지고 처리합니다.' },
     ],
