@@ -2,6 +2,9 @@
 import { Image } from 'astro:assets';
 import { process, processIntro } from '../../../data/site';
 import { photo } from '../../../data/photos';
+
+// more: 메인 화면에서 '제작 기준' 페이지로 가는 링크를 설명 아래에 붙일 때
+const { more } = Astro.props as { more?: { href: string; label: string } };
 ---
 
 <!--
@@ -17,7 +20,10 @@ import { photo } from '../../../data/photos';
         <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">PROCESS</p>
         <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">{processIntro.title}</h2>
       </div>
-      <p class="max-w-sm leading-relaxed text-muted lg:col-span-4 lg:col-start-9">{processIntro.desc}</p>
+      <div class="max-w-sm lg:col-span-4 lg:col-start-9">
+        <p class="leading-relaxed text-muted">{processIntro.desc}</p>
+        {more && <a href={more.href} class="more-link mt-5">{more.label}<span aria-hidden="true">→</span></a>}
+      </div>
     </div>
 
     <ol class="mt-12 grid gap-x-6 gap-y-8 sm:mt-16 sm:gap-y-14 sm:grid-cols-2 lg:mt-20 lg:grid-cols-4 lg:gap-x-8">
@@ -46,6 +52,12 @@ import { photo } from '../../../data/photos';
 </section>
 
 <style is:global>
+  /* 자세히 보기 링크 (메인 화면 요약 섹션 공통) */
+  .more-link { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 999px; background: var(--color-accent); color: #f5f1e8; font-size: 14px; font-weight: 600; transition: background-color 0.25s ease; }
+  .more-link span { transition: transform 0.25s ease; }
+  .more-link:hover { background: var(--color-accent-dark); }
+  .more-link:hover span { transform: translateX(3px); }
+
   .step-rule { background: rgb(40 40 40 / 0.2); transition: background-color 0.4s ease; }
   .step:hover .step-rule { background: var(--color-accent); }
 

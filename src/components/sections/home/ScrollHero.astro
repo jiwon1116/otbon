@@ -15,6 +15,8 @@ const poster = await getImage({ src: photo(site.hero.poster), width: 1920, forma
   - '동작 줄이기' 설정 사용자나 JS가 꺼진 환경에선 처음부터 꽉 찬 영상으로 보임
 -->
 <section id="hero" data-hero class="hero relative bg-ink">
+  <!-- 로고를 누르면 오는 자리(/#home): 첫 로고 화면을 건너뛰고 영상이 화면을 꽉 채운 지점 -->
+  <span id="home" class="hero-anchor" aria-hidden="true"></span>
   <div class="hero-stage sticky top-0 h-svh min-h-[560px] overflow-hidden">
     <div class="hero-media absolute inset-0 overflow-hidden bg-ink">
       <video
@@ -48,29 +50,19 @@ const poster = await getImage({ src: photo(site.hero.poster), width: 1920, forma
       <span class="hero-cue-line relative block h-12 w-px overflow-hidden bg-ink/15"></span>
     </div>
 
-    <!-- 영상 위 글씨 -->
-    <div class="hero-copy absolute inset-x-0 top-[38%] -translate-y-1/2 px-4 text-center sm:px-6">
-      <p class="hero-line text-xs font-medium tracking-[0.25em] sm:text-sm">기획부터 납품까지, 한 곳에서</p>
-      <h1 class="mt-5 text-4xl font-semibold leading-[1.15] tracking-tight sm:mt-6 sm:text-6xl lg:text-7xl">
-        <span class="hero-line block">생각한 그대로,</span>
-        <span class="hero-line block">입을 수 있는 옷으로.</span>
-      </h1>
-      <p class="hero-line mx-auto mt-8 max-w-md text-sm leading-relaxed text-white/85 sm:text-base">
-        시즌 컬렉션부터 브랜드 OEM까지. 기획, 샘플, 생산, 납품을 {site.nameKo}이 한 번에 맡습니다.
-      </p>
-    </div>
+    <!-- 화면엔 안 보이는 페이지 제목 (검색엔진 · 화면낭독기용) -->
+    <h1 class="sr-only">옷의 본(本)을 세우다.</h1>
   </div>
 </section>
 
 <style is:global>
-  /* 기본(움직임 없음): 꽉 찬 영상 위에 흰 글씨 */
-  .hero-copy { color: #fff; }
-
   /* 움직임 모드: Layout의 head 스크립트가 <html>에 .motion 을 붙임 */
   .motion .hero { height: 240vh; background: var(--color-paper); }
+  /* 영상이 꽉 차는 건 진행도 65% 지점. 여유 있게 75% 지점(= (섹션 높이 - 화면 높이) × 0.75)에 둠 */
+  .hero-anchor { position: absolute; left: 0; top: 0; width: 1px; height: 1px; scroll-margin-top: 0; }
+  .motion .hero-anchor { top: calc((240vh - 100svh) * 0.75); }
   .hero-logo { display: none; }
   .motion .hero-logo { display: block; will-change: transform, opacity; }
-  .motion .hero-line { opacity: 0; will-change: transform, opacity; }
 
   /* 스크롤 안내 (움직임 모드에서만). 영상 원 윗부분(화면 72%)보다 조금 위 */
   .hero-cue { display: none; bottom: calc(28% + 28px); }
@@ -117,7 +109,6 @@ const poster = await getImage({ src: photo(site.hero.poster), width: 1920, forma
     const shade = hero.querySelector<HTMLElement>('.hero-shade')!;
     const logo = hero.querySelector<HTMLElement>('.hero-logo')!;
     const cue = hero.querySelector<HTMLElement>('.hero-cue')!;
-    const lines = [...hero.querySelectorAll<HTMLElement>('.hero-line')];
     const header = document.getElementById('site-header');
 
     const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -157,13 +148,6 @@ const poster = await getImage({ src: photo(site.hero.poster), width: 1920, forma
       // 스크롤 안내는 조금만 내려도 바로 사라짐
       cue.style.opacity = String(1 - clamp01(p / 0.05));
       logo.style.transform = `scale(${1 - 0.6 * g})`; // 위치 보정(-50%)은 Tailwind translate 속성이 따로 맡음
-
-      // 영상이 거의 다 차면 제목 · 설명이 한 줄씩 아래에서 떠오름
-      lines.forEach((line, i) => {
-        const q = easeOut(clamp01((p - 0.5 - i * 0.04) / 0.14));
-        line.style.opacity = String(q);
-        line.style.transform = `translateY(${(1 - q) * 28}px)`;
-      });
 
       // 첫 화면(로고만 있을 때)엔 헤더를 숨기고, 영상 원이 커지기 시작하면 내려오게
       if (header) header.classList.toggle('is-hero-hidden', e < 0.12);

@@ -2,6 +2,8 @@
 import { services, servicesIntro } from '../../../data/site';
 
 const pad = (n: number) => String(n).padStart(2, '0');
+// hideHead: 생산 분야 페이지처럼 위에 따로 큰 제목이 있을 때 이 섹션 제목줄을 숨김
+const { hideHead = false } = Astro.props as { hideHead?: boolean };
 
 ---
 
@@ -12,13 +14,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
 -->
 <section id="production" class="scroll-mt-20 bg-paper">
   <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-32">
-    <div class="mx-auto max-w-2xl text-center" data-reveal>
+    {!hideHead && <div class="mx-auto max-w-2xl text-center" data-reveal>
       <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">{servicesIntro.eyebrow}</p>
       <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">{servicesIntro.title}</h2>
       <p class="mt-5 leading-relaxed text-muted">{servicesIntro.desc}</p>
-    </div>
+    </div>}
 
-    <ul class="mx-auto mt-10 grid max-w-6xl gap-3 sm:grid-cols-2 lg:mt-12 lg:grid-cols-3 lg:gap-4">
+    <ul class:list={["mx-auto grid max-w-6xl gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4", !hideHead && "mt-10 lg:mt-12"]}>
       {services.map((s, i) => (
         <li data-reveal style={`--reveal-delay: ${(i % 3) * 90}ms`}>
           <article class="cap-card">

@@ -21,7 +21,7 @@ const { transparent = false } = Astro.props;
   <!-- 로고(왼쪽) · 메뉴(가운데) · 견적 문의(오른쪽) -->
   <div class="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto] items-center px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr] lg:h-20 lg:px-8">
     <!-- 가로형 로고. 그림을 글자색(currentColor)으로 칠해서, 영상 위 흰 헤더 · 베이지 헤더 어디서든 글자색을 따라감 -->
-    <a href="/" class="justify-self-start" aria-label={`${site.name} 홈`}>
+    <a href="/#home" class="justify-self-start" aria-label={`${site.name} 홈`}>
       <span class="brand-mark block h-7 bg-current lg:h-8" aria-hidden="true"></span>
     </a>
 
@@ -79,23 +79,40 @@ const { transparent = false } = Astro.props;
       aria-expanded="false"
       aria-controls="mobile-menu"
     >
-      <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
-      </svg>
+      <!-- 메뉴가 열리면 세 줄이 X 로 바뀜 -->
+      <span class="mm-burger" aria-hidden="true"><i></i><i></i><i></i></span>
     </button>
   </div>
 
-  <div id="mobile-menu" class="hidden border-t border-line bg-paper text-ink md:hidden">
-    <nav class="flex flex-col px-4 py-4" aria-label="모바일 메뉴">
-      {nav.map((item) => (
-        <>
-          <a href={item.href} class="py-3 text-lg font-medium">{item.label}</a>
-          {item.children?.filter((c) => c.href !== item.href).map((c) => (
-            <a href={c.href} class="-mt-1 py-2 pl-4 text-base text-muted">— {c.label}</a>
-          ))}
-        </>
-      ))}
-      <a href="#contact" class="mt-3 rounded-full bg-accent py-3 text-center font-medium text-white">견적 문의</a>
+  <!-- 휴대폰 메뉴: 헤더 아래 화면 전체를 덮는 판. 메뉴마다 이름 · 영어, 하위 메뉴는 그 아래 작은 칸으로
+       아래쪽에 견적 문의 버튼과 연락처. 열릴 때 항목이 차례로 떠오름 -->
+  <div id="mobile-menu" class="mm hidden md:hidden" data-v="a">
+    <nav class="mm-inner" aria-label="모바일 메뉴">
+      <ul class="mm-list">
+        {nav.map((item, i) => (
+          <li class="mm-group" style={`--i:${i}`}>
+            <a href={item.href} class="mm-main">
+              <span class="mm-label">{item.label}</span>
+              <span class="mm-en">{item.en}</span>
+              <svg class="mm-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </a>
+            {item.children && (
+              <ul class="mm-subs">
+                {item.children.map((c) => (
+                  <li><a href={c.href} class="mm-sub">{c.label}</a></li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+      <div class="mm-foot" style={`--i:${nav.length}`}>
+        <a href="#contact" class="mm-cta">견적 문의<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" /></svg></a>
+        <div class="mm-contact">
+          <a href={`tel:${site.company.phone}`}>{site.company.phone}</a>
+          <a href={`mailto:${site.email}`}>{site.email}</a>
+        </div>
+      </div>
     </nav>
   </div>
 </header>
@@ -123,9 +140,9 @@ const { transparent = false } = Astro.props;
   .nav-drop:hover .nav-sub-item,
   .nav-drop:focus-within .nav-sub-item { opacity: 1; transform: none; transition-delay: calc(120ms + var(--i) * 70ms); }
   /* 메뉴 글씨에서 패널까지 마우스가 내려가는 동안 끊기지 않게 보이지 않는 다리를 놓음 */
-  .nav-drop-link::after { content: ; position: absolute; left: -24px; right: -24px; top: 100%; height: 40px; }
+  .nav-drop-link::after { content: ''; position: absolute; left: -24px; right: -24px; top: 100%; height: 40px; }
   /* 열린 메뉴 아래 밑줄 */
-  .nav-drop-link::before { content: ; position: absolute; left: 0; right: 0; bottom: -6px; height: 1.5px; background: currentColor; transform: scaleX(0); transition: transform 0.3s; }
+  .nav-drop-link::before { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1.5px; background: currentColor; transform: scaleX(0); transition: transform 0.3s; }
   .nav-drop:hover .nav-drop-link::before { transform: scaleX(1); }
   /* 패널이 열리면 영상 위 투명 헤더도 베이지 바탕으로 */
   #site-header[data-transparent=true]:has(.nav-drop:hover, .nav-drop:focus-within) {
@@ -154,6 +171,62 @@ const { transparent = false } = Astro.props;
   :global(.motion) #site-header[data-transparent='true'][data-tone='light']:not(.is-solid) {
     color: var(--color-ink);
   }
+
+  /* ───── 휴대폰 메뉴 ───── */
+  .mm-burger { position: relative; display: block; width: 22px; height: 16px; }
+  .mm-burger i { position: absolute; left: 0; right: 0; height: 2px; border-radius: 2px; background: currentColor; transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.2s, top 0.35s; }
+  .mm-burger i:nth-child(1) { top: 0; }
+  .mm-burger i:nth-child(2) { top: 7px; }
+  .mm-burger i:nth-child(3) { top: 14px; }
+  [aria-expanded='true'] .mm-burger i:nth-child(1) { top: 7px; transform: rotate(45deg); }
+  [aria-expanded='true'] .mm-burger i:nth-child(2) { opacity: 0; }
+  [aria-expanded='true'] .mm-burger i:nth-child(3) { top: 7px; transform: rotate(-45deg); }
+
+  .mm { position: fixed; left: 0; right: 0; top: 4rem; bottom: 0; overflow-y: auto; background: var(--color-paper); color: var(--color-ink); }
+  .mm-inner { display: flex; min-height: 100%; flex-direction: column; padding: 12px 20px 28px; }
+  .mm-list { flex: 1; }
+  .mm-group { border-bottom: 1px solid rgb(40 40 40 / 0.1); }
+  .mm-main { display: grid; grid-template-columns: 1fr auto 1rem; align-items: center; gap: 8px; padding: 22px 0; }
+  .mm-num { font-size: 12px; font-weight: 600; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+  .mm-label { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+  .mm-en { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--color-muted); }
+  .mm-arrow { width: 16px; height: 16px; color: var(--color-accent); }
+  .mm-subs { display: flex; flex-wrap: wrap; gap: 8px; margin: -6px 0 20px; }
+  .mm-sub { display: inline-block; padding: 8px 16px; border-radius: 999px; background: #faf6ee; box-shadow: inset 0 0 0 1px rgb(40 40 40 / 0.08); font-size: 14px; font-weight: 500; }
+  .mm-foot { margin-top: 28px; }
+  .mm-cta { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-radius: 999px; background: var(--color-accent); color: #f5f1e8; font-weight: 600; }
+  .mm-cta svg { width: 18px; height: 18px; }
+  .mm-contact { display: flex; justify-content: center; gap: 16px; margin-top: 16px; font-size: 13px; color: var(--color-muted); }
+
+  /* 시안 B: 진한 초록 판 + 베이지 글씨 */
+  .mm[data-v='b'] { background: var(--color-accent); color: #f5f1e8; }
+  .mm[data-v='b'] .mm-group { border-color: rgb(245 241 232 / 0.16); }
+  .mm[data-v='b'] :is(.mm-num, .mm-arrow) { color: #c9dccf; }
+  .mm[data-v='b'] .mm-en { color: rgb(245 241 232 / 0.55); }
+  .mm[data-v='b'] .mm-sub { background: rgb(245 241 232 / 0.1); box-shadow: inset 0 0 0 1px rgb(245 241 232 / 0.18); }
+  .mm[data-v='b'] .mm-cta { background: #f5f1e8; color: var(--color-accent); }
+  .mm[data-v='b'] .mm-contact { color: rgb(245 241 232 / 0.6); }
+
+  /* 시안 C: 메뉴마다 카드 (2칸 바둑판, 첫 칸은 초록 넓게), 하위 메뉴는 카드 안 작은 칸 */
+  .mm[data-v='c'] .mm-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; padding-top: 8px; }
+  .mm[data-v='c'] .mm-group { border: 0; border-radius: 22px; background: #faf6ee; padding: 18px; display: flex; flex-direction: column; min-height: 150px; }
+  .mm[data-v='c'] .mm-group:last-child { grid-column: 1 / -1; min-height: 120px; }
+  .mm[data-v='c'] .mm-group:first-child { grid-column: 1 / -1; background: var(--color-accent); color: #f5f1e8; }
+  .mm[data-v='c'] .mm-group:first-child :is(.mm-num, .mm-arrow) { color: #c9dccf; }
+  .mm[data-v='c'] .mm-group:first-child .mm-en { color: rgb(245 241 232 / 0.6); }
+  .mm[data-v='c'] .mm-main { display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding: 0; flex: 1; position: relative; }
+  .mm[data-v='c'] .mm-en { order: 1; margin-top: auto; padding-top: 28px; }
+  .mm[data-v='c'] .mm-label { order: 2; margin-top: 4px; font-size: 22px; }
+  .mm[data-v='c'] .mm-arrow { position: absolute; top: 0; right: 0; }
+  .mm[data-v='c'] .mm-subs { margin: 14px 0 0; }
+  .mm[data-v='c'] .mm-group:first-child .mm-sub { background: rgb(245 241 232 / 0.12); box-shadow: inset 0 0 0 1px rgb(245 241 232 / 0.2); }
+
+  /* 열릴 때: 판이 위에서 펼쳐지고, 항목이 차례로 떠오름 */
+  .mm:not(.hidden) { animation: mm-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .mm:not(.hidden) :is(.mm-group, .mm-foot) { animation: mm-item 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(80ms + var(--i) * 60ms); }
+  @keyframes mm-in { from { opacity: 0; clip-path: inset(0 0 100% 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+  @keyframes mm-item { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .mm:not(.hidden), .mm:not(.hidden) :is(.mm-group, .mm-foot) { animation: none; } }
 </style>
 
 <script>
@@ -182,8 +255,11 @@ const { transparent = false } = Astro.props;
     menu.classList.toggle('hidden', !menuOpen);
     toggle.setAttribute('aria-expanded', String(menuOpen));
     toggle.setAttribute('aria-label', menuOpen ? '메뉴 닫기' : '메뉴 열기');
+    document.documentElement.style.overflow = menuOpen ? 'hidden' : '';
     update();
   });
+  // 메뉴 안 링크를 누르면 닫힘 (같은 페이지 안 이동일 때도)
+  menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => { if (menuOpen) toggle.click(); }));
 
   window.addEventListener('scroll', update, { passive: true });
   update();

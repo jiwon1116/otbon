@@ -1,0 +1,54 @@
+---
+import { Image } from 'astro:assets';
+import { services, servicesIntro } from '../../../data/site';
+import { photo } from '../../../data/photos';
+
+// 메인 화면용 생산 분야 요약: PROCESS 섹션과 같은 모양(번호 + 선 → 사진 → 제목 → 설명), 6칸
+// 자세한 내용은 생산 분야 페이지(/production)
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section id="capabilities" class="scroll-mt-20 bg-paper">
+  <div class="mx-auto max-w-7xl px-4 pb-28 sm:px-6 lg:px-8 lg:pb-40">
+    <div class="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-8" data-reveal>
+      <div class="lg:col-span-7">
+        <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">{servicesIntro.eyebrow}</p>
+        <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">{servicesIntro.title}</h2>
+      </div>
+      <div class="max-w-sm lg:col-span-4 lg:col-start-9">
+        <p class="leading-relaxed text-muted">{servicesIntro.desc}</p>
+        <a href="/production" class="more-link mt-5">생산 분야 자세히 보기<span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+
+    <ol class="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 sm:mt-16 sm:gap-x-6 sm:gap-y-14 lg:mt-20 lg:grid-cols-3 lg:gap-x-8">
+      {services.map((s, i) => (
+        <li class="svc-step" data-reveal style={`--reveal-delay: ${(i % 3) * 110}ms`}>
+          <div class="flex items-center gap-4 text-sm tabular-nums">
+            <span class="font-medium text-ink">{pad(i + 1)}</span>
+            <span class="step-rule h-px flex-1" aria-hidden="true"></span>
+            <span class="hidden text-[11px] uppercase tracking-[0.2em] text-muted sm:inline">{s.en}</span>
+          </div>
+          <div class="svc-photo mt-5 sm:mt-6">
+            <Image
+              src={photo(s.photo)}
+              alt={`${s.title} 현장 사진`}
+              widths={[400, 640, 900]}
+              sizes="(min-width: 1024px) 30vw, 46vw"
+              class="h-full w-full object-cover"
+            />
+          </div>
+          <h3 class="mt-4 text-base font-semibold tracking-tight sm:mt-6 sm:text-xl">{s.title}</h3>
+          <p class="mt-2 hidden text-[15px] leading-relaxed text-muted sm:block">{s.desc}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .svc-step:hover .step-rule { background: var(--color-accent); }
+  .svc-photo { aspect-ratio: 4 / 3; overflow: hidden; border-radius: 14px; background: var(--color-soft); }
+  .svc-photo img { transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .svc-step:hover .svc-photo img { transform: scale(1.03); }
+</style>

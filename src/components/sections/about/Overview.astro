@@ -1,0 +1,164 @@
+---
+import { overview } from '../../../data/site';
+
+const last = overview.history.length - 1;
+
+// '**강조**' → 진한 글씨
+const rich = (s: string) => s.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>');
+const num = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<!--
+  회사소개 > 기업개요
+  1) 첫 화면: 제목 + 소개 문단 (마리 → 엠제이컴퍼니 → 옷본)
+  2) 이름이 바뀌어 온 과정
+  3) 생산 네트워크 · 경영이념 (왼쪽 제목, 오른쪽 설명)
+  4) 핵심 가치 3가지
+-->
+<section class="mx-auto max-w-7xl px-4 pb-20 pt-28 sm:px-6 lg:px-8 lg:pb-28">
+  <p class="text-sm text-muted" data-reveal>
+    <a href="/about" class="transition-colors hover:text-ink">회사소개</a>
+    <span class="mx-2 text-line">/</span>
+    <span class="text-ink">기업개요</span>
+  </p>
+  <div class="mt-6 grid gap-10 lg:grid-cols-12 lg:gap-12">
+    <div class="lg:col-span-5" data-reveal>
+      <p class="ov-eyebrow">{overview.eyebrow}</p>
+      <h1 class="mt-5 text-[2.1rem] font-semibold leading-[1.2] tracking-tight sm:text-5xl">
+        {overview.title.map((l) => <span class="block">{l}</span>)}
+      </h1>
+    </div>
+    <div class="ov-lead space-y-5 leading-relaxed text-muted lg:col-span-6 lg:col-start-7 lg:pt-12" data-reveal style="--reveal-delay: 120ms">
+      {overview.lead.map((p, i) => <p class:list={[i === 0 && 'ov-lead-first text-lg text-ink sm:text-xl']} set:html={rich(p)} />)}
+    </div>
+  </div>
+</section>
+
+<!-- 이름이 바뀌어 온 과정: 가는 선 위 점 세 개 (회색 → 초록), 마지막(지금 이름) 점은 심볼. 휴대폰은 세로 선 -->
+<section class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-32">
+  <div data-reveal>
+    <p class="ov-eyebrow">History</p>
+    <h2 class="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{overview.historyTitle}</h2>
+  </div>
+  <ol class="hd-line mt-14" data-history>
+    {overview.history.map((h, i) => (
+      <li class:list={['hd-item', i === last && 'is-now']} style={`--i: ${i}`}>
+        <span class="hd-dot" aria-hidden="true">
+          {i === last && <img src="/images/brand/symbol-white.svg" alt="" />}
+        </span>
+        <p class="hd-year">{h.year}</p>
+        <p class="hd-en mt-4 text-xs font-semibold tracking-[0.25em] text-muted">{h.en}</p>
+        <h3 class="mt-1 text-2xl font-semibold tracking-tight">{h.name}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-muted">{h.desc}</p>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<!-- 생산 네트워크 · 경영이념 -->
+<section class="mx-auto max-w-7xl space-y-12 px-4 pb-14 sm:space-y-16 sm:pb-24 sm:px-6 lg:space-y-24 lg:px-8 lg:pb-32">
+  {overview.sections.map((s, i) => (
+    <div class="ov-sec grid gap-6 border-t border-ink/15 pt-10 lg:grid-cols-12 lg:gap-12" data-reveal>
+      <div class="lg:col-span-5">
+        <p class="ov-eyebrow"><span>{num(i)}</span>{s.en}</p>
+        <h2 class="mt-4 text-2xl font-semibold leading-snug tracking-tight sm:text-3xl">{s.title}</h2>
+      </div>
+      <p class="ov-sec-body leading-relaxed text-muted lg:col-span-6 lg:col-start-7">{s.body}</p>
+    </div>
+  ))}
+</section>
+
+<!-- 핵심 가치 -->
+<section class="mx-auto max-w-7xl px-4 pb-28 sm:px-6 lg:px-8 lg:pb-40">
+  <ul class="ov-values grid gap-4 md:grid-cols-3">
+    {overview.values.map((v, i) => (
+      <li class="ov-value rounded-3xl bg-[#faf6ee] p-7 sm:p-8" data-reveal style={`--reveal-delay: ${i * 100}ms`}>
+        <p class="text-xs font-semibold tracking-[0.25em] text-accent">{v.en.toUpperCase()}</p>
+        <h3 class="ov-value-title mt-8 text-xl font-semibold">{v.title}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-muted">{v.desc}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style is:global>
+  .ov-eyebrow { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--color-accent); }
+  .ov-eyebrow span { letter-spacing: 0; padding-right: 12px; border-right: 1px solid currentColor; }
+
+  /* 연혁: 가는 선 위 점 세 개, 마지막 점은 심볼 */
+  .hd-line { position: relative; display: grid; gap: 40px; padding-left: 52px; }
+  .hd-line::before { content: ''; position: absolute; left: 11px; top: 6px; bottom: 6px; width: 2px; border-radius: 2px; background: linear-gradient(to bottom, rgb(40 40 40 / 0.15), var(--color-accent)); }
+  .hd-item { position: relative; }
+  .hd-dot { position: absolute; left: -52px; top: 4px; width: 24px; height: 24px; border-radius: 999px; background: var(--color-paper); box-shadow: inset 0 0 0 2px rgb(40 40 40 / 0.25); display: grid; place-items: center; }
+  .hd-item.is-now .hd-dot { width: 44px; height: 44px; left: -62px; top: -6px; background: var(--color-accent); box-shadow: 0 0 0 6px rgb(46 91 69 / 0.15); }
+  .hd-item.is-now .hd-dot img { width: 26px; height: 26px; }
+  .hd-year { font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: rgb(40 40 40 / 0.25); }
+  .hd-item.is-now .hd-year { color: var(--color-accent); }
+  @media (min-width: 768px) {
+    .hd-line { grid-template-columns: repeat(3, 1fr); gap: 32px; padding: 64px 0 0; }
+    .hd-line::before { left: 0; right: 0; top: 11px; bottom: auto; width: auto; height: 2px; background: linear-gradient(to right, rgb(40 40 40 / 0.15), var(--color-accent)); }
+    .hd-dot { left: 0; top: -64px; }
+    .hd-item.is-now .hd-dot { left: -10px; top: -74px; }
+    .hd-year { font-size: 56px; }
+  }
+
+  /* 움직임 모드: 화면에 들어오면 선이 그어지고, 선이 닿는 순서대로 점이 톡 생기며 내용이 떠오름.
+     마지막(지금 이름) 점은 이후 초록 물결이 은은하게 퍼짐 */
+  .motion .hd-line::before { transform: scaleY(0); transform-origin: top; transition: transform 1.6s cubic-bezier(0.65, 0, 0.35, 1); }
+  .motion .hd-dot { transform: scale(0); transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i) * 0.55s + 0.1s); }
+  .motion .hd-item > :not(.hd-dot) { opacity: 0; transform: translateY(18px); transition: opacity 0.8s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); transition-delay: calc(var(--i) * 0.55s + 0.25s); }
+  .motion .hd-line.is-in::before { transform: none; }
+  .motion .hd-line.is-in .hd-dot { transform: none; }
+  .motion .hd-line.is-in .hd-item > :not(.hd-dot) { opacity: 1; transform: none; }
+  .motion .hd-line.is-in .is-now .hd-dot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgb(46 91 69 / 0.35); animation: hd-pulse 2.4s ease-out 1.8s infinite; }
+  @keyframes hd-pulse { to { box-shadow: 0 0 0 18px rgb(46 91 69 / 0); } }
+  @media (min-width: 768px) {
+    .motion .hd-line::before { transform: scaleX(0); transform-origin: left; }
+  }
+
+  /* ───── 휴대폰 전용 다듬기 (PC 모양은 그대로) ───── */
+  @media (max-width: 767px) {
+    /* 소개: 첫 문장은 초록 선을 붙인 인용처럼 */
+    .ov-lead { margin-top: -8px; font-size: 15px; }
+    .ov-lead-first { padding-left: 14px; border-left: 2px solid var(--color-accent); font-size: 17px; line-height: 1.6; }
+
+    /* 연혁: 점은 작게, 내용은 베이지 카드 안에. 연도는 카드 위 작은 초록 글씨 */
+    .hd-line { gap: 14px; padding-left: 30px; }
+    .hd-line::before { left: 7px; top: 22px; bottom: 22px; }
+    .hd-dot { left: -30px; top: 22px; width: 16px; height: 16px; box-shadow: inset 0 0 0 2px rgb(40 40 40 / 0.25); }
+    .hd-item.is-now .hd-dot { width: 30px; height: 30px; left: -37px; top: 15px; box-shadow: 0 0 0 4px rgb(46 91 69 / 0.15); }
+    .hd-item.is-now .hd-dot img { width: 18px; height: 18px; }
+    .hd-item { padding: 20px 22px; border-radius: 20px; background: #faf6ee; }
+    .hd-item.is-now { background: var(--color-accent); color: #f5f1e8; }
+    .hd-item.is-now :is(.hd-en, p:last-child) { color: rgb(245 241 232 / 0.75); }
+    .hd-year { font-size: 13px; font-weight: 600; letter-spacing: 0; color: var(--color-accent); }
+    .hd-item.is-now .hd-year { color: #c9dccf; }
+    .hd-en { margin-top: 10px; }
+
+    /* 생산 네트워크 · 경영이념: 카드 없이, 위 가는 선 + 큰 초록 번호로 구분 */
+    .ov-sec { gap: 12px; padding-top: 28px; }
+    .ov-sec .ov-eyebrow { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .ov-sec .ov-eyebrow span { padding: 0; border: 0; font-size: 34px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+    .ov-sec h2 { font-size: 1.35rem; margin-top: 10px; }
+    .ov-sec-body { font-size: 15px; }
+
+    /* 핵심 가치: 카드 세 장 → 한 장 안에 세 줄 */
+    .ov-values { gap: 0; border-radius: 22px; background: #faf6ee; overflow: hidden; }
+    .ov-value { padding: 20px 22px; border-radius: 0; background: transparent; }
+    .ov-value + .ov-value { border-top: 1px solid rgb(40 40 40 / 0.08); }
+    .ov-value-title { margin-top: 8px; font-size: 1.05rem; }
+  }
+</style>
+
+<script>
+  // 연혁이 화면에 30% 정도 들어오면 한 번만 애니메이션 시작
+  const line = document.querySelector<HTMLElement>('[data-history]');
+  if (line && document.documentElement.classList.contains('motion') && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { line.classList.add('is-in'); io.disconnect(); }
+    }, { threshold: 0.3 });
+    io.observe(line);
+  } else if (line) {
+    line.classList.add('is-in');
+  }
+</script>
