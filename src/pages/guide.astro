@@ -1,0 +1,95 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CtaSection from '../components/sections/CtaSection.astro';
+import { guide as G, faqs } from '../data/site';
+
+const num = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<!--
+  거래 안내 페이지 (메뉴 '거래 안내'). 문구는 src/data/site.ts 의 guide · faqs
+  첫 화면 제목 → 거래 조건 → 자주 묻는 질문(누르면 답이 펼쳐짐) → 견적 문의
+-->
+<Layout title={G.title} description="옷본의 샘플 · 패턴비, 세금계산서, 불량 책임 등 거래 조건과 자주 묻는 질문을 안내합니다.">
+  <section class="mx-auto max-w-7xl px-4 pb-20 pt-28 sm:px-6 lg:px-8 lg:pb-28">
+    <p class="text-sm text-muted" data-reveal>
+      <a href="/" class="transition-colors hover:text-ink">홈</a>
+      <span class="mx-2 text-line">/</span>
+      <span class="text-ink">{G.title}</span>
+    </p>
+    <div class="mx-auto mt-16 max-w-3xl text-center lg:mt-20" data-reveal>
+      <p class="text-xs font-semibold uppercase tracking-[0.3em] text-accent">{G.eyebrow}</p>
+      <h1 class="mt-6 text-5xl font-bold tracking-tight sm:text-7xl">{G.title}</h1>
+      <p class="mx-auto mt-7 max-w-xl leading-relaxed text-muted sm:text-lg">{G.lead}</p>
+    </div>
+  </section>
+
+  <!-- 거래 조건: 번호 · 항목 · 설명 한 줄씩 -->
+  <section id="terms" class="scroll-mt-20">
+    <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-36">
+      <div data-reveal>
+        <p class="text-xs font-medium uppercase tracking-[0.25em] text-muted sm:text-sm">{G.termsEn}</p>
+        <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">{G.termsTitle}</h2>
+      </div>
+      <ol class="mt-12 border-t border-ink/15 sm:mt-16">
+        {G.terms.map((t, i) => (
+          <li class="sd-row" data-reveal style={`--reveal-delay: ${i * 70}ms`}>
+            <span class="sd-num">{num(i)}</span>
+            <h3 class="text-lg font-semibold sm:text-xl">{t.title}</h3>
+            <p class="text-[15px] leading-relaxed text-muted">{t.desc}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 자주 묻는 질문: 질문을 누르면 답이 펼쳐짐 -->
+  <section id="faq" class="scroll-mt-20">
+    <div class="mx-auto max-w-7xl px-4 pb-28 sm:px-6 lg:px-8 lg:pb-40">
+      <div data-reveal>
+        <p class="text-xs font-medium uppercase tracking-[0.25em] text-muted sm:text-sm">{G.faqEn}</p>
+        <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">{G.faqTitle}</h2>
+      </div>
+      <div class="mt-12 border-t border-ink/15 sm:mt-16">
+        {faqs.map((f, i) => (
+          <details class="gd-faq" data-reveal style={`--reveal-delay: ${i * 70}ms`} open={i === 0}>
+            <summary>
+              <span class="gd-q">Q</span>
+              <span class="text-lg font-semibold sm:text-xl">{f.q}</span>
+              <span class="gd-plus" aria-hidden="true"></span>
+            </summary>
+            <p class="gd-a">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaSection />
+</Layout>
+
+<style>
+  /* 거래 조건: 번호 · 항목 · 설명 한 줄씩 (휴대폰은 설명이 아래로) */
+  .sd-num { font-size: 13px; font-weight: 600; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+  .sd-row { display: grid; grid-template-columns: 3rem 1fr; gap: 8px 0; align-items: baseline; padding: 24px 0; border-bottom: 1px solid rgb(40 40 40 / 0.1); }
+  .sd-row > p { grid-column: 2; }
+  @media (min-width: 768px) {
+    .sd-row { grid-template-columns: 4rem 14rem 1fr; }
+    .sd-row > p { grid-column: auto; }
+  }
+
+  .gd-faq { border-bottom: 1px solid rgb(40 40 40 / 0.1); }
+  .gd-faq summary { display: grid; grid-template-columns: 3rem 1fr 1.25rem; align-items: center; padding: 26px 0; cursor: pointer; list-style: none; }
+  .gd-faq summary::-webkit-details-marker { display: none; }
+  .gd-faq summary:hover { color: var(--color-accent); }
+  .gd-q { font-size: 14px; font-weight: 700; color: var(--color-accent); }
+  .gd-plus { position: relative; width: 16px; height: 16px; color: var(--color-accent); }
+  .gd-plus::before, .gd-plus::after { content: ''; position: absolute; left: 0; right: 0; top: 7px; height: 2px; border-radius: 2px; background: currentColor; transition: transform 0.3s ease; }
+  .gd-plus::after { transform: rotate(90deg); }
+  .gd-faq[open] .gd-plus::after { transform: rotate(0deg); }
+  .gd-a { margin: -6px 0 0 3rem; padding-bottom: 28px; max-width: 46rem; font-size: 15px; line-height: 1.75; color: var(--color-muted); }
+  @media (min-width: 768px) {
+    .gd-faq summary { grid-template-columns: 4rem 1fr 1.25rem; }
+    .gd-a { margin-left: 4rem; }
+  }
+</style>
