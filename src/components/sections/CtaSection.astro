@@ -116,15 +116,31 @@ const items = ['아우터', '재킷', '셔츠', '팬츠', '니트', '원피스',
       <p class="wz-status" data-status role="status" aria-live="polite"></p>
     </form>
 
-    <p class="mt-4 text-center text-sm text-muted">
-      이메일 · 전화로도 상담해 드립니다 ·
-      <a href={`mailto:${site.email}`} class="text-ink underline underline-offset-4 hover:text-accent">{site.email}</a> ·
-      <a href={`tel:${site.company.phone.replaceAll('-', '')}`} class="text-ink underline underline-offset-4 hover:text-accent">{site.company.phone}</a>
-    </p>
+    <!-- 문의처: 작은 영어 이름표 + 연락처, 가운데 가는 세로선으로 나눔 -->
+    <dl class="cta-info">
+      <div><dt>EMAIL</dt><dd><a href={`mailto:${site.email}`}>{site.email}</a></dd></div>
+      <div><dt>TEL</dt><dd><a href={`tel:${site.company.phone.replaceAll('-', '')}`}>{site.company.phone}</a></dd></div>
+    </dl>
   </div>
 </section>
 
 <style>
+  /* 문의처 */
+  /* 두 칸 너비를 같게 해서 가운데 세로선이 화면 정중앙에 오게 */
+  .cta-info { display: grid; grid-template-columns: 1fr 1fr; width: fit-content; margin: 1.75rem auto 0; }
+  .cta-info > div { display: flex; align-items: baseline; gap: 0.75rem; padding: 0 1.5rem; }
+  .cta-info > div:first-child { justify-content: flex-end; }
+  .cta-info > div + div { border-left: 1px solid rgb(40 40 40 / 0.18); }
+  .cta-info dt { font-size: 10px; font-weight: 600; letter-spacing: 0.22em; color: var(--color-accent); }
+  .cta-info dd { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .cta-info a { transition: color 0.2s; }
+  .cta-info a:hover { color: var(--color-accent); }
+  @media (max-width: 480px) {
+    .cta-info > div { flex-direction: column; align-items: center; gap: 0.25rem; padding: 0 1rem; }
+    .cta-info dd { font-size: 14px; }
+  }
+
+
   /* 카드: 연한 크림색 (흰색 아님) */
   .wz-card {
     max-width: 45rem;
@@ -193,6 +209,7 @@ const items = ['아우터', '재킷', '셔츠', '팬츠', '니트', '원피스',
   .wz-status:empty { display: none; }
 
   @media (prefers-reduced-motion: reduce) { .wz-step.is-active { animation: none; } }
+
 </style>
 
 <script>

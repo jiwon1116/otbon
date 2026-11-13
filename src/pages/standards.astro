@@ -44,14 +44,23 @@ const jump = [
     </ol>
   </section>
 
-  <ProcessSteps />
-  <Standards part="quote" />
-  <Standards part="prepare" />
+  <!-- 세 챕터: 큰 화면에선 한 화면에 한 챕터씩 보이게 높이를 맞춤 -->
+  <div class="st-chapters">
+    <ProcessSteps />
+    <Standards part="quote" />
+    <Standards part="prepare" />
+  </div>
 
   <CtaSection />
 </Layout>
 
 <style>
+  /* 큰 화면: 챕터마다 최소 화면 높이(헤더 제외)만큼 차지해서 다음 챕터가 같이 보이지 않게 */
+  @media (min-width: 1024px) {
+    .st-chapters > :global(section) { display: flex; align-items: center; min-height: calc(100svh - 5rem); }
+    .st-chapters > :global(section) > :global(div) { width: 100%; padding-top: 5rem; padding-bottom: 5rem; }
+  }
+
   /* 바로가기 칸: 마우스를 올리면 초록 */
   .st-jump { display: block; height: 100%; padding: 22px 22px 24px; background: #faf6ee; transition: background-color 0.3s ease, color 0.3s ease; }
   .st-jump:hover { background: var(--color-accent); color: #f5f1e8; }

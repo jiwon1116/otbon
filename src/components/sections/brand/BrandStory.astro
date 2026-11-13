@@ -97,8 +97,8 @@ const bCurve = pts
 
         <!-- 의미 3단계: 큰 화면은 목록으로 차례로 켜지고, 작은 화면은 지금 단계만 보임 -->
         <div class="lg:order-1 lg:col-span-5">
-          <p class="ci-eyebrow"><span>02</span>Symbol</p>
-          <h2 class="mt-5 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">심볼에 담긴 의미</h2>
+          <p class="ci-eyebrow"><span>02</span>Meaning</p>
+          <h2 class="mt-5 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">로고에 담긴 의미</h2>
           <p class="mt-4 max-w-md leading-relaxed text-muted">{brandStory.lead}</p>
           <ol class="bs-steps mt-8 lg:mt-10">
             {brandStory.cards.map((c, i) => (
@@ -160,8 +160,6 @@ const bCurve = pts
   [data-phase='0'] .bs-word[data-word='0'],
   [data-phase='1'] .bs-word[data-word='1'],
   [data-phase='2'] .bs-word[data-word='2'] { opacity: 1; transform: none; }
-  /* 이니셜 단계: 단어 OTBON 은 초록빛으로 아주 연하게 */
-  .bs-word[data-word='2'] { color: rgb(46 91 69 / 0.08); }
 
 
   .bs-steps { display: grid; }
@@ -179,11 +177,14 @@ const bCurve = pts
   .motion .bs-track { height: 360vh; }
   .motion .bs-stage { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; }
   /* 큰 화면: 위쪽 헤더(80px)를 뺀 자리의 가운데에 오게 */
-  @media (min-width: 1024px) { .motion .bs-stage { padding-top: 5rem; } }
+  /* 아래쪽 큰 배경 글자 때문에 무게가 아래로 쏠려 보여서, 아래 여백을 더 줘서 내용을 위로 올림
+     위 섹션(로고 소개)과의 빈 공간도 줄이려고 위로 살짝 겹쳐 붙임 (겹치는 자리는 둘 다 빈 공간) */
+  @media (min-width: 1024px) {
+    .motion .bs-stage { padding-top: 5rem; padding-bottom: 14vh; }
+    .motion .bs { margin-top: -7rem; }
+  }
   /* 큰 모니터(가로 1536px · 세로 1000px 이상): 심볼 · 제목을 키워서 위아래가 휑하지 않게 */
   @media (min-width: 1536px) and (min-height: 1000px) {
-    /* 아래쪽 큰 배경 글자만큼 내용을 조금 위로 올려 위아래 무게를 맞춤 */
-    .motion .bs-stage { padding-bottom: 10vh; }
     .bs-art { max-width: 600px !important; }
     .bs h2 { font-size: 3rem; }
     .bs-steps { margin-top: 3rem; }

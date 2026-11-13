@@ -41,9 +41,6 @@ import { sitePhoto } from '../../../data/photos';
 
   <!-- 끌 수 있다는 표시: 마우스 화면에선 사진 위에서 커서를 따라다니는 초록 동그라미, 터치 화면에선 아래 안내 문구 -->
   <div class="drag-cursor" aria-hidden="true">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4L2 8l4 4" /></svg>
-    <span>DRAG</span>
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4l4 4-4 4" /></svg>
   </div>
   <p class="drag-hint" aria-hidden="true">← 옆으로 밀어서 둘러보세요 →</p>
 </section>
@@ -146,9 +143,9 @@ import { sitePhoto } from '../../../data/photos';
     align-items: center;
     justify-content: center;
     gap: 0.2rem;
-    width: 5rem;
-    height: 5rem;
-    margin: -2.5rem 0 0 -2.5rem;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin: -1.625rem 0 0 -1.625rem;
     border-radius: 999px;
     background: var(--color-accent);
     color: #fff;
@@ -160,8 +157,8 @@ import { sitePhoto } from '../../../data/photos';
     scale: 0.4;
     transition: opacity 0.25s ease, scale 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
-  .drag-cursor svg { width: 0.8rem; height: 0.8rem; }
-  .drag-cursor.is-on { opacity: 1; scale: 1; }
+  .drag-cursor svg { width: 0.9rem; height: 0.9rem; }
+  .drag-cursor.is-on { opacity: 0.5; scale: 1; }
   .drag-cursor.is-down { scale: 0.8; }
   @media (hover: hover) and (pointer: fine) {
     .motion .is-js ~ .drag-cursor { display: flex; }

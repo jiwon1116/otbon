@@ -23,7 +23,7 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
 
     {part === 'quote' && (
       <>
-        <ol class="mt-12 border-t border-ink/15 sm:mt-16 lg:mt-20">
+        <ol class="sd-quote mt-12 sm:mt-16 lg:mt-20">
           {S.quote.items.map((it, i) => (
             <li class="sd-row" data-reveal style={`--reveal-delay: ${i * 70}ms`}>
               <span class="sd-num">{num(i)}</span>
@@ -35,18 +35,39 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
       </>
     )}
 
+    <!-- 준비 자료: 줄을 누르면 체크되고, 그 자리에 작은 입력칸이 열림.
+         적은 내용은 아래 견적 문의 양식의 같은 칸에 바로 담기고, 체크한 게 있으면 '문의 이어서 작성' 줄이 나타남 -->
     {part === 'prepare' && (
-      <ol class="mt-12 grid gap-x-10 sm:mt-16 md:grid-cols-2 lg:mt-20">
-        {S.prepare.items.map((it, i) => (
-          <li class="sd-check" data-reveal style={`--reveal-delay: ${(i % 2) * 90}ms`}>
-            <span class="sd-dot">{i + 1}</span>
-            <div>
-              <h3 class="font-semibold sm:text-lg">{it.title}</h3>
-              <p class="mt-1.5 text-[15px] leading-relaxed text-muted">{it.desc}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
+      <div data-prep>
+        <p class="sd-hint mt-12 sm:mt-16 lg:mt-20" data-reveal>
+          <span class="sd-hint-box" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3.5 8.5l3 3 6-7" pathLength="1" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+          준비된 항목을 체크해 보세요. 견적 문의 양식에 바로 담깁니다.
+        </p>
+        <ol class="sd-prep mt-5">
+          {S.prepare.items.map((it, i) => (
+            <li class="sd-item" data-reveal style={`--reveal-delay: ${i * 80}ms; --i: ${i}`}>
+              <label class="sd-check">
+                <input type="checkbox" class="sd-box sr-only" />
+                <span class="sd-tick" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3.5 8.5l3 3 6-7" pathLength="1" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+                <span class="sd-t block font-semibold sm:text-lg">{it.title}</span>
+                <span class="sd-d block text-[15px] leading-relaxed text-muted">{it.desc}</span>
+              </label>
+              <div class="sd-more">
+                <div class="sd-more-in">
+                  {it.field === '품목'
+                    ? <div class="sd-chips" data-field={it.field}></div>
+                    : <input class="sd-input" data-field={it.field} placeholder={it.ph} aria-label={it.title} />}
+                  <span class="sd-saved" aria-hidden="true">견적 문의에 담김</span>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <a href="#contact" class="sd-go" data-go aria-live="polite">
+          <span><b data-go-n>0</b>개 항목이 견적 문의 양식에 담겼습니다</span>
+          <span class="sd-go-btn">문의 이어서 작성<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+        </a>
+      </div>
     )}
   </div>
 </section>
@@ -63,7 +84,158 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
   }
 
   /* 준비 자료 */
-  .sd-check { display: grid; grid-template-columns: 2.5rem 1fr; gap: 12px; padding: 22px 0; border-top: 1px solid rgb(40 40 40 / 0.1); }
-  .sd-dot { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; background: #faf6ee; box-shadow: inset 0 0 0 1px rgb(46 91 69 / 0.35); font-size: 13px; font-weight: 600; color: var(--color-accent); }
+  /* 체크리스트: 한 줄에 초록 체크 표시 · 이름 · 설명 (휴대폰은 설명이 아래로) */
+  .sd-prep { border-top: 1px solid rgb(40 40 40 / 0.15); }
+  .sd-prep .sd-check { display: grid; grid-template-columns: 2.75rem 1fr; gap: 6px 0; align-items: center; padding: 26px 0; border-bottom: 1px solid rgb(40 40 40 / 0.1); }
+  .sd-check { cursor: pointer; user-select: none; }
+  /* 체크 칸: 처음엔 빈 네모, 체크하면 초록으로 차고 체크 표시가 슥 그어짐 */
+  .sd-tick { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; box-shadow: inset 0 0 0 1.5px rgb(46 91 69 / 0.45); color: #f5f1e8; transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease; }
+  .sd-tick svg { width: 18px; height: 18px; }
+  .sd-tick path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) 0.05s; }
+  .sd-check:hover .sd-tick { box-shadow: inset 0 0 0 1.5px var(--color-accent); }
+  .sd-check:active .sd-tick { transform: scale(0.9); }
+  .sd-box:checked + .sd-tick { background: var(--color-accent); box-shadow: none; }
+  .sd-box:checked + .sd-tick path { stroke-dashoffset: 0; }
+  .sd-box:focus-visible + .sd-tick { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+  /* 체크한 줄은 이름이 초록으로 */
+  .sd-box:checked ~ .sd-t { color: var(--color-accent); }
+  .sd-t { transition: color 0.25s ease; }
+  .sd-prep .sd-d { grid-column: 2; }
+  @media (min-width: 768px) {
+    .sd-prep .sd-check { grid-template-columns: 3.5rem 16rem 1fr; }
+    .sd-prep .sd-d { grid-column: auto; }
+  }
+
+
+  /* 견적 기준: 크림색 카드 2 × 2 (큰 화면은 4칸). 번호 · 이름 · 설명 */
+  .sd-quote { display: grid; gap: 12px; }
+  @media (min-width: 768px) { .sd-quote { grid-template-columns: 1fr 1fr; gap: 16px; } }
+  @media (min-width: 1280px) { .sd-quote { grid-template-columns: repeat(4, 1fr); } }
+  .sd-quote .sd-row { display: flex; flex-direction: column; padding: 28px 28px 32px; border: 0; border-radius: 24px; background: #faf6ee; }
+  @media (min-width: 1024px) { .sd-quote .sd-row { padding: 32px 30px 36px; } }
+  .sd-quote h3 { margin-top: 24px; }
+  @media (min-width: 1024px) { .sd-quote h3 { margin-top: 40px; } }
+  .sd-quote p { margin-top: 10px; }
+
+  /* 체크하면 열리는 입력칸 (높이가 부드럽게 열림) */
+  .sd-prep .sd-item { border-bottom: 1px solid rgb(40 40 40 / 0.1); }
+  .sd-prep .sd-check { border-bottom: 0; }
+  .sd-more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .sd-more-in { overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-left: 2.75rem; }
+  .sd-item:has(.sd-box:checked) .sd-more { grid-template-rows: 1fr; }
+  .sd-item:has(.sd-box:checked) .sd-more-in { padding-bottom: 24px; }
+  @media (min-width: 768px) { .sd-more-in { padding-left: calc(3.5rem + 16rem); } }
+  .sd-input { width: min(100%, 22rem); padding: 11px 16px; border-radius: 12px; background: #f0e9dd; font-size: 15px; outline: none; transition: box-shadow 0.2s; }
+  .sd-input:focus { box-shadow: inset 0 0 0 1.5px var(--color-accent); }
+  .sd-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sd-chip { padding: 7px 14px; border-radius: 999px; background: #f0e9dd; font-size: 14px; transition: background-color 0.2s, color 0.2s; }
+  .sd-chip:hover { box-shadow: inset 0 0 0 1px rgb(46 91 69 / 0.4); }
+  .sd-chip[aria-pressed='true'] { background: var(--color-accent); color: #f5f1e8; }
+  /* 적으면 옆에 '견적 문의에 담김' 이 잠깐 떠오름 */
+  .sd-saved { font-size: 12px; font-weight: 600; color: var(--color-accent); opacity: 0; transform: translateY(4px); transition: opacity 0.3s, transform 0.3s; }
+  .sd-saved.is-on { opacity: 1; transform: none; }
+
+  /* 체크한 게 있으면 아래에 나타나는 '문의 이어서 작성' 줄 */
+  .sd-go { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: 28px; padding: 14px 14px 14px 26px; border-radius: 999px; background: var(--color-accent); color: #f5f1e8; font-size: 15px; opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .sd-go.is-on { opacity: 1; transform: none; pointer-events: auto; }
+  .sd-go b { font-weight: 700; }
+  .sd-go-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; background: #f5f1e8; color: var(--color-accent); font-weight: 600; font-size: 14px; }
+  .sd-go-btn svg { width: 15px; height: 15px; transition: transform 0.25s; }
+  .sd-go:hover .sd-go-btn svg { transform: translateX(3px); }
+  @media (max-width: 640px) { .sd-go { border-radius: 22px; padding: 18px 20px; } .sd-go-btn { width: 100%; justify-content: center; } }
+
+  /* ── 눌러보고 싶게 ── */
+  /* 위 안내: 작은 체크 칸이 저절로 체크됐다 풀렸다 반복 */
+  .sd-hint { display: inline-flex; align-items: center; gap: 10px; padding: 9px 16px 9px 10px; border-radius: 999px; background: #faf6ee; box-shadow: inset 0 0 0 1px rgb(46 91 69 / 0.15); font-size: 14px; color: var(--color-ink); }
+  .sd-hint-box { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; background: var(--color-accent); color: #f5f1e8; animation: sd-hint-bg 2.4s ease-in-out infinite; }
+  .sd-hint-box svg { width: 15px; height: 15px; }
+  .sd-hint-box path { stroke-dasharray: 1; animation: sd-hint-tick 2.4s ease-in-out infinite; }
+  @keyframes sd-hint-bg { 0%, 15% { background: transparent; box-shadow: inset 0 0 0 1.5px rgb(46 91 69 / 0.45); } 30%, 85% { background: var(--color-accent); box-shadow: none; } 100% { background: transparent; box-shadow: inset 0 0 0 1.5px rgb(46 91 69 / 0.45); } }
+  @keyframes sd-hint-tick { 0%, 25% { stroke-dashoffset: 1; } 45%, 85% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 1; } }
+
+  /* 아직 아무것도 체크 안 했을 때: 빈 칸 둘레로 초록 물결이 차례로 퍼짐 */
+  .sd-tick { position: relative; }
+  .sd-tick::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgb(46 91 69 / 0.35); }
+  .sd-prep:not(:has(.sd-box:checked)) .sd-tick::after { animation: sd-ping 2.8s ease-out infinite; animation-delay: calc(var(--i, 0) * 0.35s); }
+  @keyframes sd-ping { 0% { box-shadow: 0 0 0 0 rgb(46 91 69 / 0.35); } 45%, 100% { box-shadow: 0 0 0 9px rgb(46 91 69 / 0); } }
+
+  /* 마우스를 올리면: 줄이 살짝 밝아지고, 빈 칸에 체크 표시가 흐리게 미리 보임 */
+  .sd-prep .sd-item { transition: background-color 0.25s ease; }
+  @media (hover: hover) {
+    .sd-prep .sd-item:hover { background: rgb(250 246 238 / 0.8); box-shadow: -16px 0 0 rgb(250 246 238 / 0.8), 16px 0 0 rgb(250 246 238 / 0.8); }
+    .sd-check:hover .sd-box:not(:checked) + .sd-tick { color: var(--color-accent); }
+    .sd-check:hover .sd-box:not(:checked) + .sd-tick path { stroke-dashoffset: 0.55; }
+  }
+  /* 체크하는 순간 칸이 톡 튀어오름 */
+  .sd-box:checked + .sd-tick { animation: sd-pop 0.35s cubic-bezier(0.2, 0.7, 0.2, 1.4); }
+  @keyframes sd-pop { 0% { transform: scale(0.8); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sd-hint-box, .sd-hint-box path, .sd-tick::after, .sd-box:checked + .sd-tick { animation: none !important; }
+  }
 </style>
 
+<script>
+  // 준비 자료 체크 → 견적 문의 양식에 바로 담기
+  const box = document.querySelector<HTMLElement>('[data-prep]');
+  const form = document.querySelector<HTMLFormElement>('[data-wizard]');
+  if (box && form) {
+    const go = box.querySelector<HTMLElement>('[data-go]')!;
+    const goN = box.querySelector<HTMLElement>('[data-go-n]')!;
+    const formField = (name: string) => form.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${CSS.escape(name)}"]`);
+
+    // '담김' 표시를 잠깐 띄움
+    const timers = new WeakMap<Element, number>();
+    const flash = (el: Element | null) => {
+      if (!el) return;
+      el.classList.add('is-on');
+      clearTimeout(timers.get(el));
+      timers.set(el, window.setTimeout(() => el.classList.remove('is-on'), 1400));
+    };
+
+    // 품목: 양식의 품목 목록을 그대로 작은 버튼으로
+    box.querySelectorAll<HTMLElement>('.sd-chips').forEach((wrap) => {
+      const select = formField(wrap.dataset.field!) as HTMLSelectElement | null;
+      if (!select) return;
+      [...select.options].filter((o) => !o.disabled).forEach((o) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'sd-chip';
+        b.textContent = o.text;
+        b.setAttribute('aria-pressed', 'false');
+        b.addEventListener('click', () => {
+          select.value = o.value;
+          wrap.querySelectorAll('.sd-chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+          flash(wrap.parentElement!.querySelector('.sd-saved'));
+        });
+        wrap.append(b);
+      });
+    });
+
+    // 적은 글자는 양식의 같은 칸에 그대로
+    box.querySelectorAll<HTMLInputElement>('.sd-input').forEach((inp) => {
+      inp.addEventListener('input', () => {
+        const f = formField(inp.dataset.field!);
+        if (f) f.value = inp.value;
+        flash(inp.parentElement!.querySelector('.sd-saved'));
+      });
+    });
+
+    // 체크하면 입력칸에 바로 커서, 체크한 개수로 아래 줄 표시
+    const update = () => {
+      const n = box.querySelectorAll('.sd-box:checked').length;
+      goN.textContent = String(n);
+      go.classList.toggle('is-on', n > 0);
+    };
+    box.querySelectorAll<HTMLInputElement>('.sd-box').forEach((cb) => {
+      cb.addEventListener('change', () => {
+        update();
+        if (cb.checked) {
+          const inp = cb.closest('.sd-item')!.querySelector<HTMLInputElement>('.sd-input');
+          setTimeout(() => inp?.focus({ preventScroll: true }), 200);
+        }
+      });
+    });
+    update();
+  }
+</script>

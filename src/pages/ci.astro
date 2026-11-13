@@ -5,10 +5,10 @@ import BrandStory from '../components/sections/brand/BrandStory.astro';
 
 // 로고 활용 4가지: [파일, 바탕, 이름, 설명]
 const logoUses = [
-  ['/images/brand/logo.svg', 'beige', '세로형', '기본 로고'],
-  ['/images/brand/logo-horizontal.svg', 'beige', '가로형', '헤더 · 문서처럼 좁은 자리'],
-  ['/images/brand/logo-white.svg', 'ink', '반전형', '어두운 바탕 위'],
-  ['/images/brand/symbol-white.svg', 'green', '심볼', '작은 자리 · 아이콘'],
+  ['/images/brand/logo.svg', 'beige', '세로형', 'Primary Logo'],
+  ['/images/brand/logo-horizontal.svg', 'beige', '가로형', 'Horizontal Logo'],
+  ['/images/brand/logo-white.svg', 'ink', '반전형', 'Reversed Logo'],
+  ['/images/brand/symbol-white.svg', 'green', '심볼', 'Symbol Mark'],
 ];
 
 ---
@@ -18,7 +18,7 @@ const logoUses = [
   1) 첫 화면: 왼쪽 제목 · 소개 · 목차, 오른쪽 큰 로고 판 + 로고 활용 4가지 (#logo)
   3) 02 Symbol: 초록 실이 심볼을 그리며 의미 풀이 (BrandStory, 브랜드 이야기도 여기에 담음)
 -->
-<Layout title="CI" description="옷본(OTBON)의 로고와 심볼에 담긴 의미를 소개합니다.">
+<Layout title="CI" description="옷본(OTBON)의 로고에 담긴 의미를 소개합니다.">
   <section id="logo" class="mx-auto max-w-7xl px-4 pb-24 pt-28 sm:px-6 lg:flex lg:min-h-svh lg:flex-col lg:px-8 lg:pb-16 lg:pt-28">
     <p class="text-sm text-muted" data-reveal>
       <a href="/about" class="transition-colors hover:text-ink">회사소개</a>
@@ -30,11 +30,11 @@ const logoUses = [
       <div class="lg:col-span-5" data-reveal>
         <p class="ci-eyebrow">Corporate Identity</p>
         <h1 class="mt-5 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">OTBON<br />브랜드 아이덴티티</h1>
-        <p class="mt-6 max-w-md leading-relaxed text-muted">옷본의 로고와 심볼을 소개합니다. 실 한 가닥에서 시작해 세계를 잇는 의류 제작 기업의 정체성을 담았습니다.</p>
+        <p class="mt-6 max-w-md leading-relaxed text-muted">옷본의 로고를 소개합니다. 실 한 가닥에서 시작해 세계를 잇는 의류 제작 기업의 정체성을 담았습니다.</p>
         <!-- 페이지 목차 -->
         <ul class="mt-10 space-y-1 border-t border-ink/15 pt-5 text-sm">
           <li><a href="#logo" class="ci-toc"><span>01</span>로고</a></li>
-          <li><a href="#symbol" class="ci-toc"><span>02</span>심볼에 담긴 의미</a></li>
+          <li><a href="#symbol" class="ci-toc"><span>02</span>로고에 담긴 의미</a></li>
         </ul>
       </div>
       <!-- 오른쪽: 큰 로고 판 + 아래 로고 활용 4가지. 아래 칸을 누르면 큰 판이 그 로고로 바뀜
