@@ -2,7 +2,8 @@
 import { partners } from '../../../data/site';
 ---
 
-<!-- 함께한 업체: 얇은 선으로 나뉜 로고 칸이 옆으로 흐름 -->
+<!-- 함께한 업체: 얇은 선으로 나뉜 로고 칸이 스크롤에 맞춰 옆으로 흐르고, 마우스 · 손가락으로 잡고 끌어서도 넘겨 볼 수 있음
+     (마우스를 올리면 현장 사진 줄처럼 반투명 초록 동그라미가 커서를 따라다님) -->
 <section class="overflow-hidden bg-paper pt-28 lg:pt-36" data-partners>
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" data-reveal>
     <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">PARTNERS</p>
@@ -22,14 +23,73 @@ import { partners } from '../../../data/site';
       ))}
     </ul>
   </div>
+  <div class="pt-cursor" aria-hidden="true"></div>
 </section>
 
 <style>
   .partner-cell { border-left: 1px solid rgb(40 40 40 / 0.12); }
   .partner-cell:last-child { border-right: 1px solid rgb(40 40 40 / 0.12); }
+
+  /* 끌기: 세로 스크롤은 그대로, 가로로만 끌림 */
+  .motion [data-partners].is-js .drift-row { cursor: grab; touch-action: pan-y; user-select: none; }
+  .motion [data-partners].is-js .drift-row.is-dragging { cursor: grabbing; }
+  [data-partners] img { -webkit-user-drag: none; pointer-events: none; }
+
+  /* 끌기 표시 (마우스): 반투명 초록 동그라미가 커서를 따라다님. 잡으면 살짝 작아짐 */
+  .pt-cursor { position: fixed; left: 0; top: 0; z-index: 40; display: none; width: 3.25rem; height: 3.25rem; margin: -1.625rem 0 0 -1.625rem; border-radius: 999px; background: var(--color-accent); pointer-events: none; opacity: 0; scale: 0.4; transition: opacity 0.25s ease, scale 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .pt-cursor.is-on { opacity: 0.5; scale: 1; }
+  .pt-cursor.is-down { scale: 0.8; }
+  @media (hover: hover) and (pointer: fine) {
+    .motion [data-partners].is-js .pt-cursor { display: block; }
+    .motion [data-partners].is-js .drift-row { cursor: none; }
+  }
 </style>
 
 <script>
-  import { initDrift } from '../../../scripts/drift';
-  initDrift(document.querySelector<HTMLElement>('[data-partners]'));
+  import { onScrollFrame, motionOn, passProgress } from '../../../scripts/scroll';
+
+  // 스크롤에 따라 옆으로 흐르는 위치 + 끌어서 옮긴 만큼을 더함 (양 끝을 넘어가지 않게)
+  const scope = document.querySelector<HTMLElement>('[data-partners]');
+  const row = scope?.querySelector<HTMLElement>('.drift-row');
+  if (scope && row && motionOn()) {
+    scope.classList.add('is-js');
+    let dist = 0;
+    let off = 0;
+    let drag: null | { id: number; lastX: number } = null;
+
+    const render = () => {
+      const base = -dist * passProgress(scope);
+      const x = Math.min(0, Math.max(-dist, base + off));
+      off = x - base;
+      row.style.transform = `translate3d(${x}px, 0, 0)`;
+    };
+    onScrollFrame(render, () => (dist = Math.max(0, row.scrollWidth - window.innerWidth)));
+
+    const cursor = scope.querySelector<HTMLElement>('.pt-cursor')!;
+    row.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'mouse') {
+        cursor.style.translate = `${e.clientX}px ${e.clientY}px`;
+        cursor.classList.add('is-on');
+      }
+      if (!drag || drag.id !== e.pointerId) return;
+      off += e.clientX - drag.lastX;
+      drag.lastX = e.clientX;
+      render();
+    });
+    row.addEventListener('pointerleave', () => cursor.classList.remove('is-on', 'is-down'));
+    row.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      drag = { id: e.pointerId, lastX: e.clientX };
+      row.setPointerCapture(e.pointerId);
+      row.classList.add('is-dragging');
+      cursor.classList.add('is-down');
+    });
+    const end = () => {
+      drag = null;
+      row.classList.remove('is-dragging');
+      cursor.classList.remove('is-down');
+    };
+    row.addEventListener('pointerup', end);
+    row.addEventListener('pointercancel', end);
+  }
 </script>
