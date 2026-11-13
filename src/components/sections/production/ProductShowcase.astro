@@ -1,0 +1,154 @@
+---
+import { products as P } from '../../../data/site';
+
+const num = (i: number) => String(i + 1).padStart(2, '0');
+// 사진이 아직 없는 품목은 빈 칸 5개로 자리만 보여줌
+const EMPTY = 5;
+---
+
+<!--
+  생산 분야 > 제품: 품목(재킷 · 코트 · 다운 · 팬츠)마다 한 줄씩, 사진이 옆으로 쭉 이어짐.
+  문구 · 사진은 src/data/site.ts 의 products
+  - 위: 제목 · 설명, 그 아래 품목 바로가기(전체 / 재킷 / 코트 …). 내리는 동안 위에 붙어 있고 지금 보는 품목이 초록
+  - 품목 줄: 이름 · 영어 · 장수, 오른쪽 화살표로 넘기기. 사진 줄은 화면 오른쪽 끝까지 이어지고 옆으로 밀거나 끌어서 넘김
+-->
+<section id="products" class="scroll-mt-20">
+  <div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8 lg:pt-16">
+    <div class="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-8" data-reveal>
+      <div class="lg:col-span-7">
+        <p class="text-xs font-medium uppercase tracking-[0.25em] text-muted sm:text-sm">{P.en}</p>
+        <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">{P.title}</h2>
+      </div>
+      <p class="max-w-md leading-relaxed text-muted lg:col-span-5 lg:col-start-8">{P.desc}</p>
+    </div>
+  </div>
+
+  <!-- 품목 바로가기 (내리는 동안 헤더 아래에 붙어 있음) -->
+  <nav class="pd-nav" aria-label="제품 품목" data-pd-nav>
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="pd-tabs">
+        <a href="#products" class="pd-tab" data-pd-tab="all">전체</a>
+        {P.items.map((it) => <a href={`#pd-${it.en.toLowerCase()}`} class="pd-tab" data-pd-tab={it.en.toLowerCase()}>{it.name}</a>)}
+      </div>
+    </div>
+  </nav>
+
+  <div class="pb-28 lg:pb-40">
+    {P.items.map((it, i) => {
+      const id = it.en.toLowerCase();
+      const photos = it.imgs.length ? it.imgs : Array(EMPTY).fill('');
+      return (
+        <div id={`pd-${id}`} class="pd-row" data-pd-row={id}>
+          <div class="mx-auto flex max-w-7xl items-end justify-between gap-6 px-4 sm:px-6 lg:px-8" data-reveal>
+            <div class="flex items-baseline gap-4">
+              <span class="text-sm font-semibold tabular-nums text-accent">{num(i)}</span>
+              <h3 class="text-2xl font-semibold tracking-tight sm:text-3xl">{it.name}</h3>
+              <span class="text-[11px] font-medium uppercase tracking-[0.2em] text-muted">{it.en}{it.imgs.length > 0 && ` · ${it.imgs.length}`}</span>
+            </div>
+            <div class="hidden gap-2 sm:flex">
+              <button type="button" class="pd-arrow" data-dir="-1" aria-label={`${it.name} 이전 사진`}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 3L5 8l5 5" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+              <button type="button" class="pd-arrow" data-dir="1" aria-label={`${it.name} 다음 사진`}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+            </div>
+          </div>
+          <ul class="pd-track" data-pd-track>
+            {photos.map((src, k) => (
+              <li class="pd-photo" data-reveal style={`--reveal-delay: ${Math.min(k, 4) * 60}ms`}>
+                {src
+                  ? <img src={src} alt={`${it.name} 제작 사례 ${k + 1}`} loading="lazy" draggable="false" />
+                  : <span class="pd-empty" aria-hidden="true">{it.en}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    })}
+  </div>
+</section>
+
+<style>
+  /* 품목 바로가기: 헤더(휴대폰 64px · 큰 화면 80px) 바로 아래에 붙음 */
+  .pd-nav { position: sticky; top: 4rem; z-index: 20; margin-top: 3rem; padding: 12px 0; background: var(--color-paper); }
+  @media (min-width: 1024px) { .pd-nav { top: 5rem; margin-top: 3.5rem; } }
+  .pd-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .pd-tabs::-webkit-scrollbar { display: none; }
+  .pd-tab { flex: none; padding: 9px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--color-muted); background: #faf6ee; transition: background-color 0.25s, color 0.25s; }
+  .pd-tab:hover { color: var(--color-ink); }
+  .pd-tab.is-on { background: var(--color-accent); color: #f5f1e8; }
+
+  /* 품목 한 줄 */
+  .pd-row { padding-top: 56px; scroll-margin-top: 8.5rem; }
+  @media (min-width: 1024px) { .pd-row { padding-top: 80px; scroll-margin-top: 10rem; } }
+  .pd-arrow { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 999px; background: #faf6ee; color: var(--color-ink); box-shadow: inset 0 0 0 1px rgb(40 40 40 / 0.08); transition: background-color 0.25s, color 0.25s; }
+  .pd-arrow:hover { background: var(--color-accent); color: #f5f1e8; }
+  .pd-arrow svg { width: 16px; height: 16px; }
+
+  /* 사진 줄: 왼쪽은 본문 줄에 맞추고 오른쪽은 화면 끝까지. 옆으로 밀면 한 장씩 딱딱 멈춤 */
+  .pd-track {
+    --edge: max(1rem, calc((100vw - 80rem) / 2 + 2rem));
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding: 0 var(--edge) 4px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--edge);
+    scrollbar-width: none;
+    cursor: grab;
+  }
+  .pd-track::-webkit-scrollbar { display: none; }
+  .pd-track.is-drag { cursor: grabbing; scroll-snap-type: none; }
+  @media (max-width: 639px) { .pd-track { --edge: 1rem; } }
+  @media (min-width: 640px) and (max-width: 1023px) { .pd-track { --edge: 1.5rem; } }
+  @media (min-width: 1024px) { .pd-track { gap: 16px; } }
+  .pd-photo { position: relative; flex: none; width: 68%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 20px; background: #faf6ee; scroll-snap-align: start; }
+  @media (min-width: 640px) { .pd-photo { width: 40%; } }
+  @media (min-width: 1024px) { .pd-photo { width: calc((min(100vw, 80rem) - 4rem - 48px) / 4.3); } }
+  .pd-photo img { width: 100%; height: 100%; object-fit: cover; user-select: none; }
+  .pd-empty { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(1.25rem, 2.2vw, 1.75rem); font-weight: 700; letter-spacing: -0.02em; color: rgb(40 40 40 / 0.1); }
+</style>
+
+<script>
+  // 화살표: 사진 한 장만큼 넘김 / 마우스로 끌어서 넘김
+  document.querySelectorAll<HTMLElement>('.pd-row').forEach((row) => {
+    const track = row.querySelector<HTMLElement>('[data-pd-track]')!;
+    const step = () => (track.firstElementChild as HTMLElement | null)?.offsetWidth ?? 300;
+    row.querySelectorAll<HTMLButtonElement>('.pd-arrow').forEach((b) =>
+      b.addEventListener('click', () => track.scrollBy({ left: Number(b.dataset.dir) * (step() + 16), behavior: 'smooth' })),
+    );
+
+    let down: { x: number; left: number } | null = null;
+    track.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      down = { x: e.clientX, left: track.scrollLeft };
+      track.classList.add('is-drag');
+      track.setPointerCapture(e.pointerId);
+    });
+    track.addEventListener('pointermove', (e) => {
+      if (down) track.scrollLeft = down.left - (e.clientX - down.x);
+    });
+    const end = () => {
+      if (!down) return;
+      down = null;
+      // 끌기를 놓으면 가장 가까운 사진에 맞춰 멈춤
+      const left = track.scrollLeft;
+      track.classList.remove('is-drag');
+      track.scrollLeft = left;
+    };
+    track.addEventListener('pointerup', end);
+    track.addEventListener('pointercancel', end);
+  });
+
+  // 지금 화면에 있는 품목을 바로가기에서 초록으로
+  const tabs = new Map([...document.querySelectorAll<HTMLElement>('[data-pd-tab]')].map((t) => [t.dataset.pdTab!, t]));
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-pd-row]')];
+  const setOn = (key: string) => tabs.forEach((t, k) => t.classList.toggle('is-on', k === key));
+  setOn('all');
+  const pick = () => {
+    const line = window.innerHeight * 0.45;
+    let cur = 'all';
+    for (const r of rows) if (r.getBoundingClientRect().top < line) cur = r.dataset.pdRow!;
+    setOn(cur);
+  };
+  window.addEventListener('scroll', pick, { passive: true });
+  pick();
+</script>

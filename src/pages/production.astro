@@ -1,13 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ProductionGrid from '../components/sections/home/ProductionGrid.astro';
+import ProductShowcase from '../components/sections/production/ProductShowcase.astro';
 import CtaSection from '../components/sections/CtaSection.astro';
 import { servicesIntro } from '../data/site';
 ---
 
 <!--
   생산 분야 페이지 (메뉴 '생산 분야'). 문구는 src/data/site.ts 의 servicesIntro · services
-  가운데 큰 제목(제작 기준 페이지와 같은 모양) → 공정별 생산 분야 6장 → 견적 문의
+  가운데 큰 제목(제작 기준 페이지와 같은 모양) → 공정별 생산 분야 6장 → 제품 사진(products) → 견적 문의
 -->
 <Layout title="생산 분야" description={servicesIntro.desc}>
   <section class="mx-auto max-w-7xl px-4 pb-16 pt-28 sm:px-6 lg:px-8 lg:pb-20">
@@ -24,6 +25,9 @@ import { servicesIntro } from '../data/site';
   </section>
 
   <ProductionGrid hideHead />
+
+  <!-- 옷본이 만든 제품 사진 (상의 · 하의) -->
+  <ProductShowcase />
 
   <CtaSection />
 </Layout>
