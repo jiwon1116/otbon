@@ -75,9 +75,10 @@ export const servicesIntro = {
 // imgs 에 public 폴더 기준 경로를 넣으면 순서대로 보임 (예: '/images/products/jacket-1.jpg')
 // 사진이 아직 없으면 [] 로 두면 크림색 빈 칸으로 자리만 보임
 export const products = {
-  en: 'Products',
-  title: '옷본이 만든 옷',
-  desc: '원단 수배부터 패턴, 샘플, 생산, 납품까지. 옷본의 토탈 프로모션으로 완성한 제품입니다.',
+  en: 'Archive',
+  title: '제작 아카이브',
+  // 한 줄씩 끊어서 보임
+  desc: ['원단 수배부터 패턴, 샘플, 생산, 납품까지.', '옷본에서 제작한 제품입니다.'],
   items: [
     { name: '재킷', en: 'Jacket', imgs: [] as string[] },
     { name: '코트', en: 'Coat', imgs: [] as string[] },
@@ -351,7 +352,7 @@ export const overview = {
     {
       en: 'Management Philosophy',
       title: '기본에 충실한 생산, 신뢰로 이어지는 관계',
-      body: '옷본은 정직한 생산, 책임 있는 품질, 오래 가는 파트너십을 경영의 기본으로 삼습니다. 세심한 제작과 품질 관리를 바탕으로, 협력 브랜드가 믿고 맡길 수 있는 제작 파트너가 되기 위해 한 걸음씩 나아가고 있습니다.',
+      body: '옷본은 정직한 생산, 책임 있는 품질, 오래 가는 파트너십을 경영의 기본으로 삼습니다.\n세심한 제작과 품질 관리를 바탕으로, 협력 브랜드가 믿고 맡길 수 있는 제작 파트너가 되기 위해 한 걸음씩 나아가고 있습니다.',
     },
   ],
   values: [
