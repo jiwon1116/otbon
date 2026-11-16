@@ -293,15 +293,16 @@ export const brandStory = {
 // 함께한 브랜드 (메인). 적힌 순서대로 카드가 놓임 (PC 4칸씩)
 // 사진은 public/images/partners/cards/브랜드이름.jpg (900×1200)
 //   브랜드 이름을 소문자로, 띄어쓰기는 - 로 (예: '999 HUMANITY' → 999-humanity.jpg)
-export const partners: { name: string }[] = [
-  { name: 'EASTLOGUE' },
-  { name: 'WHYTE' },
-  { name: 'ROUGH SIDE' },
-  { name: 'BEHEAVYER' },
-  { name: 'moif' },
-  { name: 'SPECTATOR' },
-  { name: '999 HUMANITY' },
-  { name: 'SHIRTER' },
+// logo = 브랜드 로고 이미지 (public 기준 경로, 비우면 없음), ratio = 로고 가로 ÷ 세로
+export const partners: { name: string; logo: string; ratio?: number }[] = [
+  { name: 'EASTLOGUE', logo: '/images/partners/eastlogue.jpg', ratio: 241 / 54 },
+  { name: 'WHYTE', logo: '' },
+  { name: 'ROUGH SIDE', logo: '' },
+  { name: 'BEHEAVYER', logo: '/images/partners/beheavyer.png', ratio: 889 / 275 },
+  { name: 'moif', logo: '' },
+  { name: 'SPECTATOR', logo: '/images/partners/spectator.png', ratio: 1162 / 321 },
+  { name: '999 HUMANITY', logo: '' },
+  { name: 'SHIRTER', logo: '/images/partners/shirter.png', ratio: 878 / 104 },
 ];
 
 // 제작 과정 (메인 화면 · 제작 기준, 다섯 칸)
