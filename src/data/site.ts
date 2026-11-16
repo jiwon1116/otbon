@@ -70,7 +70,7 @@ export const about = {
 export const servicesIntro = {
   eyebrow: 'OUR CAPABILITIES',
   title: '브랜드에 필요한 생산을 한 곳에서',
-  desc: '원단 선정부터 패턴 개발, 재단, 봉제, 워싱을 거쳐 최종 납품까지. 각 분야의 전문 협력업체와 협업하여 안정적인 생산 과정을 지원합니다.',
+  desc: '원단 개발부터 패턴, 재단, 봉제, 워싱을 거쳐 최종 납품까지. 각 분야의 전문 협력업체와 협업하여 안정적인 생산 과정을 지원합니다.',
 };
 // 생산 분야 > 원단 개발 (/production, 공정 카드 아래 따로 한 칸)
 // photo = 왼쪽 큰 원단 사진 (public 기준 경로). 비우면 아래 swatches 로 스와치북 모양을 그림
@@ -87,10 +87,10 @@ export const fabricDev = {
     { label: '최소 수량', value: '컬러당 1,500m', note: '원단 개발은 컬러당 최소 1,500m부터 진행' },
   ],
   swatches: [
-    { name: 'MOLESKIN', type: 'WOVEN', color: 'Charcoal', base: '#3a3936', kind: 'woven', img: '/images/fabric/moleskin-charcoal.jpg' },
-    { name: 'KNIT', type: 'DAIMARU', color: 'Stripe', base: '#e9edf2', kind: 'knit', img: '/images/fabric/knit-stripe.jpg' },
-    { name: 'MOLESKIN', type: 'WOVEN', color: 'Olive', base: '#5d5f45', kind: 'woven', img: '' },
-    { name: 'KNIT', type: 'DAIMARU', color: 'Navy', base: '#27304a', kind: 'knit', img: '' },
+    { name: '몰스킨', type: '우븐', color: '차콜', base: '#3a3936', kind: 'woven', img: '/images/fabric/moleskin-charcoal.jpg' },
+    { name: '편직 원단', type: '다이마루', color: '스트라이프', base: '#e9edf2', kind: 'knit', img: '/images/fabric/knit-stripe.jpg' },
+    { name: '몰스킨', type: '우븐', color: '올리브', base: '#5d5f45', kind: 'woven', img: '' },
+    { name: '편직 원단', type: '다이마루', color: '네이비', base: '#27304a', kind: 'knit', img: '' },
   ] as { name: string; type: string; color: string; base: string; kind: 'woven' | 'knit'; img: string }[],
   cases: [
     { name: '몰스킨', type: '우븐', desc: '촘촘한 조직과 부드러운 기모감이 특징인 면 소재' },
