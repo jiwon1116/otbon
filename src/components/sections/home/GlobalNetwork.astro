@@ -7,7 +7,7 @@ import { geoMercator, geoPath, geoCentroid } from 'd3-geo';
 import world from 'world-atlas/countries-50m.json';
 // 첫 장면(세계 전체)용 가벼운 땅 모양
 import worldLand from 'world-atlas/land-110m.json';
-import { network } from '../../../data/site';
+import { network, branches as branchInfo } from '../../../data/site';
 // 지사가 있는 성(행정구역) 경계. Natural Earth(퍼블릭 도메인)에서 필요한 곳만 뽑아 둔 것
 import regions from '../../../data/regions.json';
 
@@ -96,6 +96,8 @@ const toTransform = (c: { cx: number; cy: number; k: number }) =>
 // 장면 순서: 세계 전체 → 한국 → 중국 → 베트남
 const camera = JSON.stringify([worldCam, ...offices.map(({ cx, cy, k }) => ({ cx, cy, k }))]);
 const intro = network.intro;
+// 나라마다 지사 소개 페이지 주소 (지도와 같은 순서). 지도를 누르면 지금 보이는 나라로 감
+const hrefs = offices.map((_, i) => (branchInfo[i] ? `/branches#${branchInfo[i].id}` : '/branches'));
 ---
 
 <!--
@@ -104,10 +106,10 @@ const intro = network.intro;
     본사에서 지사로 선이 그려짐
   - '동작 줄이기' 사용자나 JS가 꺼진 환경에선 세 나라가 모두 강조된 지도 한 장으로 보임
 -->
-<section id="network" class="net relative bg-ink text-white" data-network data-camera={camera} data-w={W} data-h={H}>
+<section id="network" class="net relative bg-ink text-white" data-network data-camera={camera} data-w={W} data-h={H} data-hrefs={JSON.stringify(hrefs)}>
   <div class="net-stage relative h-svh min-h-[560px] overflow-hidden">
     <svg
-      class="absolute inset-0 h-full w-full"
+      class="net-map absolute inset-0 h-full w-full"
       viewBox={`0 0 ${W} ${H}`}
       preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"
@@ -162,24 +164,28 @@ const intro = network.intro;
         {intro.caption.map((line) => <span class="block">{line}</span>)}
       </p>
       <h2 class="mt-6 text-6xl font-semibold tracking-tight sm:text-8xl lg:text-9xl">{intro.name}</h2>
+      <a href="/branches" class="net-more">지사 소개 보기<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" /></svg></a>
     </div>
 
-    {offices.map((o) => (
+    {offices.map((o, i) => (
       <div class="net-panel pointer-events-none absolute inset-x-0 bottom-[8%] px-4 text-center">
         <p class="text-xs font-medium tracking-[0.25em] text-white/70 sm:text-sm">{o.role}</p>
         <p class="mt-4 text-base font-normal leading-relaxed sm:text-xl">
           {o.caption.map((line) => <span class="block">{line}</span>)}
         </p>
         <h2 class="mt-6 text-6xl font-semibold tracking-tight sm:text-8xl lg:text-9xl">{o.name}</h2>
+        <a href={hrefs[i]} class="net-more">{branchInfo[i]?.name ?? o.name} 보기<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" /></svg></a>
       </div>
     ))}
 
     <!-- 움직임이 없을 때: 세 곳을 한 줄로 -->
     <ul class="net-static absolute inset-x-0 bottom-[8%] flex justify-center gap-8 px-4 text-center sm:gap-16">
-      {offices.map((o) => (
+      {offices.map((o, i) => (
         <li>
-          <p class="text-[10px] font-medium tracking-[0.2em] text-accent sm:text-xs">{o.role}</p>
-          <p class="mt-2 text-3xl font-semibold sm:text-5xl">{o.name}</p>
+          <a href={hrefs[i]} class="block transition-opacity hover:opacity-70">
+            <p class="text-[10px] font-medium tracking-[0.2em] text-accent sm:text-xs">{o.role}</p>
+            <p class="mt-2 text-3xl font-semibold sm:text-5xl">{o.name}</p>
+          </a>
         </li>
       ))}
     </ul>
@@ -248,6 +254,23 @@ const intro = network.intro;
   .motion .net-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
   .motion .net-dot { opacity: 0; transition: opacity 0.5s ease; }
   .motion .net-dot.is-shown { opacity: 1; }
+
+  /* 지사 소개로 가는 버튼 (글자 묶음은 클릭이 안 되게 두고 버튼만 눌리게) */
+  .net-more {
+    pointer-events: auto;
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 28px; padding: 11px 22px; border-radius: 999px;
+    font-size: 14px; font-weight: 600; color: #fff;
+    background: rgb(255 255 255 / 0.1); border: 1px solid rgb(255 255 255 / 0.25);
+    backdrop-filter: blur(8px); text-shadow: none;
+    transition: background-color 0.25s, border-color 0.25s;
+  }
+  .net-more:hover { background: var(--color-accent); border-color: var(--color-accent); }
+  .net-more svg { width: 14px; height: 14px; transition: transform 0.25s; }
+  .net-more:hover svg { transform: translateX(3px); }
+  /* 안 보이는 장면의 버튼은 눌리지 않게 */
+  .motion .net-panel:not(.is-on) .net-more { pointer-events: none; }
+  .motion .net-map { cursor: pointer; }
 
   @media (prefers-reduced-motion: reduce) {
     .net-pulse { animation: none; opacity: 0; }
@@ -333,6 +356,7 @@ const intro = network.intro;
         const o = clamp01(1 - Math.abs(d) * 2.5);
         panel.style.opacity = String(o);
         panel.style.transform = `translateY(${d * -40}px)`;
+        panel.classList.toggle('is-on', o > 0.5);
       });
 
       // 강조색: 지금 나라는 진하게, 지나온 나라는 옅게 (세계 장면에선 아무것도 강조 안 함)
@@ -346,6 +370,12 @@ const intro = network.intro;
         dots.forEach((dot) => dot.classList.toggle('is-shown', Number(dot.dataset.office) <= active));
       }
     };
+
+    // 지도를 누르면 지금 보이는 나라의 지사 소개로 (첫 장면이면 지사 소개 맨 위)
+    const hrefs: string[] = JSON.parse(section.dataset.hrefs!);
+    section.querySelector('.net-map')!.addEventListener('click', () => {
+      location.href = current >= 0 ? hrefs[current] : '/branches';
+    });
 
     onScrollFrame(render, measure);
   }

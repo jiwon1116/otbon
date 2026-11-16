@@ -47,6 +47,7 @@ export const nav: {
   },
   { label: '제작 기준', href: '/standards', en: 'STANDARDS' },
   { label: '생산 분야', href: '/production', en: 'CAPABILITIES' },
+  { label: '지사 소개', href: '/branches', en: 'NETWORK' },
   { label: '거래 안내', href: '/guide', en: 'TERMS & FAQ' },
 ];
 
@@ -80,7 +81,9 @@ export const products = {
   // 한 줄씩 끊어서 보임
   desc: ['원단 수배부터 패턴, 샘플, 생산, 납품까지.', '옷본에서 제작한 제품입니다.'],
   items: [
+    { name: '셔츠', en: 'Shirt', imgs: [] as string[] },
     { name: '재킷', en: 'Jacket', imgs: [] as string[] },
+    { name: '점퍼', en: 'Jumper', imgs: [] as string[] },
     { name: '코트', en: 'Coat', imgs: [] as string[] },
     { name: '다운', en: 'Down', imgs: [] as string[] },
     { name: '팬츠', en: 'Pants', imgs: [] as string[] },
@@ -89,16 +92,16 @@ export const products = {
 
 export const services = [
   {
-    title: '원단 · 부자재',
-    en: 'Fabric & Trims',
-    desc: '제품 특성과 디자인에 맞는 원단 및 부자재를 검토하고, 생산에 필요한 자재를 구성합니다.',
-    photo: 23,
-  },
-  {
     title: '패턴 개발',
     en: 'Pattern Development',
     desc: '디자인 의도를 반영해 각 부위의 형태와 치수를 설계하고, 실제 제품 제작을 위한 패턴을 완성합니다.',
     photo: 9,
+  },
+  {
+    title: '원단 · 부자재',
+    en: 'Fabric & Trims',
+    desc: '제품 특성과 디자인에 맞는 원단 및 부자재를 검토하고, 생산에 필요한 자재를 구성합니다.',
+    photo: 23,
   },
   {
     title: '재단 · 봉제',
@@ -200,6 +203,49 @@ export const network: { eyebrow: string; intro: { caption: string[]; name: strin
   ],
 };
 
+// 지사 소개 페이지 (/branches). 메인 지도에서 나라를 누르면 이 페이지의 해당 나라로 바로 이동
+// id = 주소 뒤에 붙는 이름 (/branches#china). 지도(network.offices)와 같은 순서로 적어 주세요.
+// places = 그 지사의 시설 · 협력 공장. kind = 'office'(지사 시설) | 'factory'(협력 공장)
+//   사진은 위 gallery 에서 factory 이름이 name 과 똑같은 사진을 자동으로 모아 보여줌
+//   (사진이 없으면 크림색 빈 칸). 확인이 필요한 곳은 0000 으로 비워 두었습니다.
+type Place = { name: string; kind: 'office' | 'factory'; desc: string };
+export const branchesIntro = {
+  eyebrow: 'GLOBAL NETWORK',
+  title: '지사 소개',
+  lead: '서울 본사를 중심으로 중국 단동, 베트남 박지앙 지사와 협력 공장이 함께 움직입니다.',
+};
+export const branches: { id: string; name: string; en: string; role: string; city: string; desc: string; places: Place[] }[] = [
+  {
+    id: 'korea', name: '한국 본사', en: 'Korea', role: 'HEADQUARTERS', city: '서울 성북구',
+    desc: '견적 상담부터 생산 일정, 품질, 납품까지 전 과정을 관리하는 옷본의 본사입니다.',
+    places: [
+      { name: '서울 본사', kind: 'office', desc: '견적 상담 · 생산 관리 · 납품' },
+    ],
+  },
+  {
+    id: 'china', name: '중국 단동 지사', en: 'China', role: 'BRANCH 01', city: '랴오닝성 단동',
+    desc: '패턴실과 샘플개발실을 직접 운영하며, 인근 협력 봉제 · 워싱 공장과 함께 높은 완성도의 고품질 생산을 맡습니다.',
+    places: [
+      { name: '단동 지사 기술 패턴실', kind: 'office', desc: '패턴 설계 · 그레이딩' },
+      { name: '단동 지사 샘플개발실', kind: 'office', desc: '샘플 제작 · 수정 보완' },
+      { name: '단동 지사 샘플개발실 제2현장', kind: 'office', desc: '샘플 제작' },
+      { name: '단동 지사 운영지원팀 사무실', kind: 'office', desc: '일정 · 자재 · 출고 관리' },
+      { name: '동항 빈흥영 복장공장', kind: 'factory', desc: '재단 · 봉제' },
+      { name: '동항 의성 복장공장', kind: 'factory', desc: '재단 · 봉제' },
+      { name: '월리 복장공장', kind: 'factory', desc: '재단 · 봉제' },
+      { name: '워싱공장', kind: 'factory', desc: '워싱 · 후가공' },
+    ],
+  },
+  {
+    id: 'vietnam', name: '베트남 박지앙 지사', en: 'Vietnam', role: 'BRANCH 02', city: '하노이 박지앙',
+    desc: '봉제와 대량 생산을 맡는 옷본의 베트남 지사입니다.',
+    places: [
+      { name: '박지앙 지사', kind: 'office', desc: '0000' },
+      { name: '0000 복장공장', kind: 'factory', desc: '0000' },
+    ],
+  },
+];
+
 // 브랜드 스토리 섹션 문구. icon = 카드 아이콘 종류 (thread 실뭉치 / globe 지구 / symbol 원형 심볼)
 export const brandStory = {
   label: 'BRAND STORY',
@@ -219,13 +265,16 @@ export const brandStory = {
 };
 
 // 함께한 업체. logo 에 public/ 기준 이미지 경로를 적으면 로고가 나옵니다. (예: '/images/partners/abc.png')
-export const partners = [
-  { name: '', logo: '' },
-  { name: '', logo: '' },
-  { name: '', logo: '' },
-  { name: '', logo: '' },
-  { name: '', logo: '' },
-  { name: '', logo: '' },
+// logo 가 비어 있으면 이름(name)을 글자로 보여줌
+// ratio = 로고 이미지의 가로 ÷ 세로 (로고마다 크기가 비슷해 보이게 맞추는 데 씀. 모르면 비워도 됨)
+export const partners: { name: string; logo: string; ratio?: number }[] = [
+  { name: 'SPECTATOR', logo: '/images/partners/spectator.png', ratio: 1162 / 321 },
+  { name: 'BEHEAVYER', logo: '/images/partners/beheavyer.png', ratio: 889 / 275 },
+  { name: 'SHIRTER', logo: '/images/partners/shirter.png', ratio: 878 / 104 },
+  { name: 'EASTLOGUE', logo: '/images/partners/eastlogue.jpg', ratio: 241 / 54 },
+  { name: 'WHYTE', logo: '' },
+  { name: 'moif', logo: '' },
+  { name: '999 HUMANITY', logo: '' },
 ];
 
 // 제작 과정 (메인 화면, 네 칸)
@@ -347,7 +396,7 @@ export const overview = {
     {
       en: 'Global Production',
       title: '국내와 해외를 잇는 생산 네트워크',
-      body: '서울 본사를 중심으로 중국 단동, 베트남 박지앙 지사를 운영하고 있습니다. 지사에서는 패턴실과 샘플개발실, 협력 봉제 · 워싱 공장이 함께 움직이며, 샘플 제작부터 납품까지 일정과 품질을 직접 관리합니다. 2026년 기준 협력 공장 10곳과 함께하고 있습니다.',
+      body: '서울 본사를 중심으로 중국 단동, 베트남 박지앙 지사를 운영하고 있습니다. 지사에서는 패턴실과 샘플개발실, 협력 봉제 · 워싱 공장이 함께 움직이며, 샘플 제작부터 납품까지 일정과 품질을 직접 관리합니다. 2026년 기준 협력 공장 14곳과 함께하고 있습니다.',
     },
     {
       en: 'Management Philosophy',

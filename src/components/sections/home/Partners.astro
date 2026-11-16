@@ -1,95 +1,57 @@
 ---
 import { partners } from '../../../data/site';
+
+// 로고 면적을 맞춰서 너비를 정함 (가로로 긴 로고 · 뭉툭한 로고가 비슷한 무게로 보이게)
+const logoWidth = (ratio = 4) => Math.round(Math.sqrt(5200 * ratio));
 ---
 
-<!-- 함께한 업체: 얇은 선으로 나뉜 로고 칸이 스크롤에 맞춰 옆으로 흐르고, 마우스 · 손가락으로 잡고 끌어서도 넘겨 볼 수 있음
-     (마우스를 올리면 현장 사진 줄처럼 반투명 초록 동그라미가 커서를 따라다님) -->
-<section class="overflow-hidden bg-paper pt-28 lg:pt-36" data-partners>
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" data-reveal>
-    <p class="text-xs font-medium tracking-[0.25em] text-muted sm:text-sm">PARTNERS</p>
-    <h2 class="mt-6 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">함께한 브랜드</h2>
-  </div>
+<!--
+  함께한 브랜드: 크림색 둥근 카드에 로고를 하나씩 (PC 4칸 · 휴대폰 2칸). 문구 · 로고는 src/data/site.ts 의 partners
+  - 화면에 들어오면 카드가 순서대로 아래에서 떠오름 (data-reveal)
+  - 마우스를 올리면 카드가 살짝 뜨고 로고가 진해짐
+  - 마지막 초록 칸은 견적 문의로 가는 버튼
+-->
+<section class="bg-paper py-24 lg:py-36">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center" data-reveal>
+      <p class="text-xs font-semibold uppercase tracking-[0.3em] text-accent">Partners</p>
+      <h2 class="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">함께한 브랜드</h2>
+      <p class="mt-4 text-muted">옷본과 함께 옷을 만든 브랜드입니다.</p>
+    </div>
 
-  <div class="drift-wrap mt-14 lg:mt-16">
-    <ul class="drift-row" data-drift="left">
-      {partners.map((p) => (
-        <li class="partner-cell flex aspect-[3/2] w-[56vw] shrink-0 items-center justify-center p-10 sm:w-[34vw] lg:w-[24vw] lg:max-w-[360px]">
-          {p.logo ? (
-            <img src={p.logo} alt={p.name} loading="lazy" class="max-h-14 w-auto max-w-[65%] object-contain opacity-80" />
-          ) : (
-            <span class="text-sm text-muted">{p.name || '로고 준비 중'}</span>
-          )}
+    <ul class="mt-14 grid grid-cols-2 gap-3 sm:gap-4 lg:mt-16 lg:grid-cols-4">
+      {partners.map((p, i) => (
+        <li class="pt-card" data-reveal style={`--reveal-delay: ${(i % 4) * 80}ms`}>
+          {p.logo
+            ? <img src={p.logo} alt={p.name} loading="lazy" style={`width:${logoWidth(p.ratio)}px`} />
+            : <span class="pt-word">{p.name}</span>}
         </li>
       ))}
+      <li data-reveal style={`--reveal-delay: ${(partners.length % 4) * 80}ms`}>
+        <a href="/#contact" class="pt-card pt-cta">
+          <span class="text-sm font-semibold sm:text-base">다음은 당신의 브랜드</span>
+          <span class="pt-cta-sub">제작 문의하기 <span class="pt-cta-arrow" aria-hidden="true">→</span></span>
+        </a>
+      </li>
     </ul>
   </div>
-  <div class="pt-cursor" aria-hidden="true"></div>
 </section>
 
 <style>
-  .partner-cell { border-left: 1px solid rgb(40 40 40 / 0.12); }
-  .partner-cell:last-child { border-right: 1px solid rgb(40 40 40 / 0.12); }
-
-  /* 끌기: 세로 스크롤은 그대로, 가로로만 끌림 */
-  .motion [data-partners].is-js .drift-row { cursor: grab; touch-action: pan-y; user-select: none; }
-  .motion [data-partners].is-js .drift-row.is-dragging { cursor: grabbing; }
-  [data-partners] img { -webkit-user-drag: none; pointer-events: none; }
-
-  /* 끌기 표시 (마우스): 반투명 초록 동그라미가 커서를 따라다님. 잡으면 살짝 작아짐 */
-  .pt-cursor { position: fixed; left: 0; top: 0; z-index: 40; display: none; width: 3.25rem; height: 3.25rem; margin: -1.625rem 0 0 -1.625rem; border-radius: 999px; background: var(--color-accent); pointer-events: none; opacity: 0; scale: 0.4; transition: opacity 0.25s ease, scale 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .pt-cursor.is-on { opacity: 0.5; scale: 1; }
-  .pt-cursor.is-down { scale: 0.8; }
-  @media (hover: hover) and (pointer: fine) {
-    .motion [data-partners].is-js .pt-cursor { display: block; }
-    .motion [data-partners].is-js .drift-row { cursor: none; }
+  .pt-card {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    aspect-ratio: 16 / 10; border-radius: 24px; background: #faf6ee;
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.45s;
   }
+  .pt-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px -22px rgb(40 40 40 / 0.4); }
+  /* 로고는 배경에 섞이게 (JPG 흰 바탕도 안 보이게), 평소엔 살짝 옅게 */
+  .pt-card img { max-width: 72%; height: auto; mix-blend-mode: multiply; opacity: 0.82; transition: opacity 0.3s; }
+  .pt-word { font-size: clamp(15px, 1.8vw, 20px); font-weight: 500; letter-spacing: 0.14em; opacity: 0.82; transition: opacity 0.3s; }
+  .pt-card:hover :is(img, .pt-word) { opacity: 1; }
+
+  .pt-cta { height: 100%; aspect-ratio: auto; background: var(--color-accent); color: #f5f1e8; }
+  .pt-cta:hover { background: var(--color-accent-dark); }
+  .pt-cta-sub { font-size: 12px; opacity: 0.75; }
+  .pt-cta-arrow { display: inline-block; transition: transform 0.3s; }
+  .pt-cta:hover .pt-cta-arrow { transform: translateX(3px); }
 </style>
-
-<script>
-  import { onScrollFrame, motionOn, passProgress } from '../../../scripts/scroll';
-
-  // 스크롤에 따라 옆으로 흐르는 위치 + 끌어서 옮긴 만큼을 더함 (양 끝을 넘어가지 않게)
-  const scope = document.querySelector<HTMLElement>('[data-partners]');
-  const row = scope?.querySelector<HTMLElement>('.drift-row');
-  if (scope && row && motionOn()) {
-    scope.classList.add('is-js');
-    let dist = 0;
-    let off = 0;
-    let drag: null | { id: number; lastX: number } = null;
-
-    const render = () => {
-      const base = -dist * passProgress(scope);
-      const x = Math.min(0, Math.max(-dist, base + off));
-      off = x - base;
-      row.style.transform = `translate3d(${x}px, 0, 0)`;
-    };
-    onScrollFrame(render, () => (dist = Math.max(0, row.scrollWidth - window.innerWidth)));
-
-    const cursor = scope.querySelector<HTMLElement>('.pt-cursor')!;
-    row.addEventListener('pointermove', (e) => {
-      if (e.pointerType === 'mouse') {
-        cursor.style.translate = `${e.clientX}px ${e.clientY}px`;
-        cursor.classList.add('is-on');
-      }
-      if (!drag || drag.id !== e.pointerId) return;
-      off += e.clientX - drag.lastX;
-      drag.lastX = e.clientX;
-      render();
-    });
-    row.addEventListener('pointerleave', () => cursor.classList.remove('is-on', 'is-down'));
-    row.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0) return;
-      drag = { id: e.pointerId, lastX: e.clientX };
-      row.setPointerCapture(e.pointerId);
-      row.classList.add('is-dragging');
-      cursor.classList.add('is-down');
-    });
-    const end = () => {
-      drag = null;
-      row.classList.remove('is-dragging');
-      cursor.classList.remove('is-down');
-    };
-    row.addEventListener('pointerup', end);
-    row.addEventListener('pointercancel', end);
-  }
-</script>

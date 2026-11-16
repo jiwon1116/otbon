@@ -1,0 +1,134 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import CtaSection from '../components/sections/CtaSection.astro';
+import { branches, branchesIntro as B, gallery } from '../data/site';
+import { sitePhoto } from '../data/photos';
+
+// 현장 사진(gallery)에서 이름이 같은 사진만 모음
+const allPhotos = gallery.flat();
+const photosOf = (name: string) => allPhotos.filter((p) => p.factory === name).map((p) => p.site);
+const kindLabel = { office: '지사 시설', factory: '협력 공장' } as const;
+const num = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<!--
+  지사 소개 페이지 (메뉴 '지사 소개'). 문구는 src/data/site.ts 의 branchesIntro · branches
+  가운데 큰 제목 → 나라 바로가기(내리는 동안 위에 붙음) → 나라마다 소개 + 시설 · 협력 공장 카드
+  메인 지도에서 나라를 누르면 /branches#china 처럼 그 나라로 바로 옴
+-->
+<Layout title="지사 소개" description={B.lead}>
+  <section class="mx-auto max-w-7xl px-4 pb-10 pt-28 sm:px-6 lg:px-8 lg:pb-14">
+    <p class="text-sm text-muted" data-reveal>
+      <a href="/" class="transition-colors hover:text-ink">홈</a>
+      <span class="mx-2 text-line">/</span>
+      <span class="text-ink">지사 소개</span>
+    </p>
+    <div class="mx-auto mt-16 max-w-3xl text-center lg:mt-20" data-reveal>
+      <p class="text-xs font-semibold uppercase tracking-[0.3em] text-accent">{B.eyebrow}</p>
+      <h1 class="mt-6 text-5xl font-bold tracking-tight sm:text-7xl">{B.title}</h1>
+      <p class="mx-auto mt-7 max-w-xl leading-relaxed text-muted sm:text-lg">{B.lead}</p>
+    </div>
+  </section>
+
+  <!-- 나라 바로가기 -->
+  <nav class="br-nav" aria-label="지사" data-br-nav>
+    <div class="mx-auto flex max-w-7xl justify-center px-4 sm:px-6 lg:px-8">
+      <div class="br-tabs">
+        {branches.map((b) => <a href={`#${b.id}`} class="br-tab" data-br-tab={b.id}>{b.name}</a>)}
+      </div>
+    </div>
+  </nav>
+
+  <div class="pb-28 lg:pb-40">
+    {branches.map((b, i) => {
+      const offices = b.places.filter((p) => p.kind === 'office').length;
+      const factories = b.places.length - offices;
+      return (
+        <section id={b.id} class="br-sec" data-br-sec={b.id}>
+          <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8">
+            <!-- 왼쪽: 나라 소개 (큰 화면에선 내리는 동안 붙어 있음) -->
+            <div class="lg:col-span-4">
+              <div class="lg:sticky lg:top-40" data-reveal>
+                <p class="text-xs font-semibold tracking-[0.25em] text-accent">{num(i)} · {b.role}</p>
+                <h2 class="mt-5 text-5xl font-semibold tracking-tight sm:text-6xl">{b.en}</h2>
+                <p class="mt-4 text-xl font-semibold">{b.name}</p>
+                <p class="mt-1 text-sm text-muted">{b.city}</p>
+                <p class="mt-6 max-w-sm leading-relaxed text-muted">{b.desc}</p>
+                <dl class="mt-8 flex gap-8 border-t border-line pt-6">
+                  <div><dt class="text-xs text-muted">지사 시설</dt><dd class="mt-1 text-2xl font-semibold tabular-nums">{offices}</dd></div>
+                  {factories > 0 && <div><dt class="text-xs text-muted">협력 공장</dt><dd class="mt-1 text-2xl font-semibold tabular-nums">{factories}</dd></div>}
+                </dl>
+              </div>
+            </div>
+
+            <!-- 오른쪽: 시설 · 협력 공장 카드 -->
+            <ul class="grid gap-4 sm:grid-cols-2 lg:col-span-8 lg:gap-5">
+              {b.places.map((p, k) => {
+                const photos = photosOf(p.name);
+                return (
+                  <li class="br-card" data-reveal style={`--reveal-delay: ${(k % 2) * 80}ms`}>
+                    <div class="br-photo">
+                      {photos.length
+                        ? <Image src={sitePhoto(photos[0])} alt={`${p.name} 현장`} widths={[480, 720, 960]} sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw" class="h-full w-full object-cover" />
+                        : <span class="br-empty" aria-hidden="true">{b.en}</span>}
+                      {photos.length > 1 && <span class="br-count">사진 {photos.length}</span>}
+                    </div>
+                    <div class="flex items-start justify-between gap-4 p-5 sm:p-6">
+                      <div>
+                        <p class="font-semibold leading-snug">{p.name}</p>
+                        <p class="mt-1 text-sm text-muted">{p.desc}</p>
+                      </div>
+                      <span class:list={['br-kind', p.kind === 'factory' && 'is-factory']}>{kindLabel[p.kind]}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      );
+    })}
+  </div>
+
+  <CtaSection />
+</Layout>
+
+<style>
+  /* 나라 바로가기: 헤더(휴대폰 64px · 큰 화면 80px) 바로 아래에 붙음 */
+  .br-nav { position: sticky; top: 4rem; z-index: 20; padding: 12px 0; background: var(--color-paper); }
+  @media (min-width: 1024px) { .br-nav { top: 5rem; } }
+  .br-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding: 4px; border-radius: 999px; background: #faf6ee; }
+  .br-tabs::-webkit-scrollbar { display: none; }
+  .br-tab { flex: none; padding: 9px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--color-muted); transition: background-color 0.25s, color 0.25s; }
+  .br-tab:hover { color: var(--color-ink); }
+  .br-tab.is-on { background: var(--color-accent); color: #f5f1e8; }
+
+  .br-sec { padding-top: 72px; scroll-margin-top: 8.5rem; }
+  .br-sec + .br-sec { margin-top: 72px; border-top: 1px solid var(--color-line); }
+  @media (min-width: 1024px) { .br-sec { padding-top: 104px; scroll-margin-top: 9rem; } .br-sec + .br-sec { margin-top: 104px; } }
+
+  .br-card { overflow: hidden; border-radius: 24px; background: #faf6ee; }
+  .br-photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--color-soft); }
+  .br-photo :global(img) { transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .br-card:hover .br-photo :global(img) { transform: scale(1.04); }
+  .br-empty { display: grid; height: 100%; place-items: center; font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgb(110 104 94 / 0.5); }
+  .br-count { position: absolute; right: 12px; bottom: 12px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #f5f1e8; background: rgb(40 40 40 / 0.6); backdrop-filter: blur(6px); }
+  .br-kind { flex: none; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; color: var(--color-accent); background: rgb(46 91 69 / 0.1); }
+  .br-kind.is-factory { color: var(--color-muted); background: var(--color-soft); }
+</style>
+
+<script>
+  // 지금 보고 있는 나라 탭을 초록으로
+  const tabs = [...document.querySelectorAll<HTMLAnchorElement>('[data-br-tab]')];
+  const secs = [...document.querySelectorAll<HTMLElement>('[data-br-sec]')];
+  const update = () => {
+    const line = window.innerHeight * 0.4;
+    let on = secs[0]?.dataset.brSec;
+    for (const s of secs) if (s.getBoundingClientRect().top <= line) on = s.dataset.brSec;
+    tabs.forEach((t) => t.classList.toggle('is-on', t.dataset.brTab === on));
+  };
+  addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', update);
+  update();
+</script>
