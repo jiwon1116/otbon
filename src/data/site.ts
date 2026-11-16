@@ -110,7 +110,7 @@ export const products = {
     { name: '셔츠', en: 'Shirt', imgs: [] as string[] },
     { name: '재킷', en: 'Jacket', imgs: [] as string[] },
     { name: '점퍼', en: 'Jumper', imgs: [] as string[] },
-    { name: '코트', en: 'Coat', imgs: [] as string[] },
+    { name: '코트', en: 'Coat', imgs: ['/images/products/coat-1.jpg', '/images/products/coat-2.jpg'] },
     { name: '다운', en: 'Down', imgs: [] as string[] },
     { name: '팬츠', en: 'Pants', imgs: [] as string[] },
   ],
