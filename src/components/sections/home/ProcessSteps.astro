@@ -8,7 +8,7 @@ const { more } = Astro.props as { more?: { href: string; label: string } };
 ---
 
 <!--
-  제작 과정: 위에 제목과 설명, 아래 4단계를 네 칸으로 (태블릿 2칸)
+  제작 과정: 위에 제목과 설명, 아래 5단계를 다섯 칸으로 (태블릿 2칸)
   - 휴대폰: 번호 + 제목 줄만 보이는 접는 목록. 줄을 누르면 사진과 설명이 펼쳐짐 (처음엔 01만 열림)
   - 칸마다: 번호 + 얇은 선 → 사진 → 제목 → 설명
   - 화면에 들어오면 칸이 차례로 살짝 떠오름. 마우스를 올리면 선이 초록으로, 사진이 아주 살짝 커짐
@@ -26,7 +26,7 @@ const { more } = Astro.props as { more?: { href: string; label: string } };
       </div>
     </div>
 
-    <ol class="mt-12 grid gap-x-6 gap-y-8 sm:mt-16 sm:gap-y-14 sm:grid-cols-2 lg:mt-20 lg:grid-cols-4 lg:gap-x-8">
+    <ol class="mt-12 grid gap-x-6 gap-y-8 sm:mt-16 sm:gap-y-14 sm:grid-cols-2 lg:mt-20 lg:grid-cols-5 lg:gap-x-6">
       {process.map((p, i) => (
         <li class:list={["step", i === 0 && "is-on"]} data-step-item data-reveal style={`--reveal-delay: ${i * 110}ms`}>
           <div class="step-head flex items-center gap-4 text-sm tabular-nums">
@@ -39,7 +39,7 @@ const { more } = Astro.props as { more?: { href: string; label: string } };
               src={photo(p.photo)}
               alt={`${p.title} 과정 현장 사진`}
               widths={[400, 640, 900]}
-              sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 92vw"
+              sizes="(min-width: 1024px) 18vw, (min-width: 640px) 45vw, 92vw"
               class="h-full w-full object-cover"
             />
           </div>

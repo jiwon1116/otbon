@@ -27,11 +27,11 @@ const list = await Promise.all(
 
 <!--
   지사 소개 페이지 (메뉴 '지사 소개'). 문구는 src/data/site.ts 의 branchesIntro · branches, 사진은 gallery
-  가운데 큰 제목 → 나라 바로가기(내리는 동안 위에 붙음) → 나라마다: 소개 + 현장 사진 모음
+  가운데 큰 제목 → 나라 탭(내리는 동안 위에 붙음) → 고른 나라 하나만: 소개 + 현장 사진 모음 (나라끼리 이어서 스크롤하지 않음)
   - 사진 모음: 첫 사진은 크게, 나머지는 격자. 위의 시설 이름을 누르면 그 시설 사진만 보임
   - 사진을 누르면 화면 가득 크게 보기 (← → 키로 넘기기, Esc 로 닫기)
   - 사진이 없는 나라는 시설 목록 카드만
-  메인 지도에서 나라를 누르면 /branches#china 처럼 들어와서 그 나라 칸으로 바로 옴
+  메인 지도에서 나라를 누르면 /branches#china 처럼 들어와서 그 나라 탭이 열린 채로 시작
 -->
 <Layout title="지사 소개" description={B.lead}>
   <section class="mx-auto max-w-7xl px-4 pb-10 pt-28 sm:px-6 lg:px-8 lg:pb-12">
@@ -51,14 +51,14 @@ const list = await Promise.all(
   <nav class="br-nav" aria-label="지사" data-br-nav>
     <div class="mx-auto flex max-w-7xl justify-center px-4 sm:px-6 lg:px-8">
       <div class="br-tabs">
-        {list.map((b) => <a href={`#${b.id}`} class="br-tab" data-br-tab={b.id}>{b.name}</a>)}
+        {list.map((b) => <a href={`#${b.id}`} class="br-tab" role="tab" data-br-tab={b.id}>{b.name}</a>)}
       </div>
     </div>
   </nav>
 
   <div class="pb-28 lg:pb-40">
     {list.map((b, i) => (
-      <section id={b.id} class="br-sec" data-br-sec={b.id}>
+      <section id={`panel-${b.id}`} class="br-sec" role="tabpanel" data-br-sec={b.id}>
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <!-- 나라 소개: 왼쪽 큰 이름, 오른쪽 설명 · 숫자 -->
           <div class="br-head" data-reveal>
@@ -152,9 +152,12 @@ const list = await Promise.all(
   .br-tab:hover { color: var(--color-ink); }
   .br-tab.is-on { background: var(--color-accent); color: #f5f1e8; }
 
-  .br-sec { padding-top: 80px; scroll-margin-top: 8.5rem; }
-  .br-sec + .br-sec { margin-top: 80px; border-top: 1px solid var(--color-line); }
-  @media (min-width: 1024px) { .br-sec { padding-top: 112px; scroll-margin-top: 9rem; } .br-sec + .br-sec { margin-top: 112px; } }
+  /* 나라는 한 번에 하나만 (탭으로 바꿈). JS 가 꺼져 있으면 셋 다 이어서 보임 */
+  .br-sec { padding-top: 64px; }
+  .br-sec[hidden] { display: none; }
+  .br-sec.is-enter { animation: br-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  @keyframes br-in { from { opacity: 0; transform: translateY(16px); } }
+  @media (min-width: 1024px) { .br-sec { padding-top: 88px; } }
 
   /* 나라 소개 */
   .br-head { display: grid; gap: 28px; }
@@ -228,18 +231,35 @@ const list = await Promise.all(
 </style>
 
 <script>
-  // 지금 보고 있는 나라 탭을 초록으로
+  // 나라 탭: 고른 나라 하나만 보이게. 주소 뒤 #china 처럼 나라가 있으면 그 나라로 시작 (메인 지도에서 누르고 들어온 경우)
   const tabs = [...document.querySelectorAll<HTMLAnchorElement>('[data-br-tab]')];
   const secs = [...document.querySelectorAll<HTMLElement>('[data-br-sec]')];
-  const update = () => {
-    const line = window.innerHeight * 0.4;
-    let on = secs[0]?.dataset.brSec;
-    for (const s of secs) if (s.getBoundingClientRect().top <= line) on = s.dataset.brSec;
-    tabs.forEach((t) => t.classList.toggle('is-on', t.dataset.brTab === on));
+  const nav = document.querySelector<HTMLElement>('[data-br-nav]')!;
+  const showBranch = (id: string, scroll: boolean) => {
+    if (!secs.some((s) => s.dataset.brSec === id)) id = secs[0].dataset.brSec!;
+    secs.forEach((s) => {
+      const on = s.dataset.brSec === id;
+      s.hidden = !on;
+      s.classList.toggle('is-enter', on && scroll);
+    });
+    tabs.forEach((t) => {
+      t.classList.toggle('is-on', t.dataset.brTab === id);
+      t.setAttribute('aria-selected', String(t.dataset.brTab === id));
+    });
+    // 탭이 화면 위로 지나가 있으면 탭 바로 아래부터 보이게
+    if (scroll && nav.getBoundingClientRect().top < 0) {
+      const head = document.getElementById('site-header')?.offsetHeight ?? 64;
+      window.scrollTo({ top: nav.offsetTop - head, behavior: 'smooth' });
+    }
   };
-  addEventListener('scroll', update, { passive: true });
-  addEventListener('resize', update);
-  update();
+  tabs.forEach((t) =>
+    t.addEventListener('click', (e) => {
+      e.preventDefault();
+      history.replaceState(null, '', `#${t.dataset.brTab}`);
+      showBranch(t.dataset.brTab!, true);
+    }),
+  );
+  showBranch(location.hash.slice(1), false);
 
   // 사진 모음: 시설별 골라 보기 + 더 보기. 보이는 사진 중 첫 장을 크게
   const FIRST = 9;

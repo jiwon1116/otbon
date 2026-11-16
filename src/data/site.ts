@@ -277,10 +277,10 @@ export const partners: { name: string; logo: string; ratio?: number }[] = [
   { name: '999 HUMANITY', logo: '' },
 ];
 
-// 제작 과정 (메인 화면, 네 칸)
+// 제작 과정 (메인 화면 · 제작 기준, 다섯 칸)
 // photo = src/assets/factory/factory-번호.jpg
 export const processIntro = {
-  title: '하나의 샘플을 완성하는 체계적인 네 단계',
+  title: '하나의 샘플을 완성하는 체계적인 다섯 단계',
   desc: '각 단계의 진행 사항을 면밀하게 확인하며 샘플 한 벌부터 완제품까지 완성도 높은 결과를 만들어갑니다.',
 };
 export const process = [
@@ -300,13 +300,20 @@ export const process = [
   },
   {
     step: '03',
+    en: 'Cutting',
+    title: '재단',
+    photo: 17,
+    desc: '원단의 결 방향을 맞춰 재단합니다. 원단의 수축률과 특성을 미리 확인해, 샘플이 설계한 핏 그대로 나올 수 있도록 준비합니다.',
+  },
+  {
+    step: '04',
     en: 'Sample Making',
     title: '샘플 제작',
     photo: 38,
     desc: '개발된 패턴을 바탕으로 샘플을 제작합니다. 봉제 완성도와 마감 상태 등을 세밀하게 확인하고, 수정 및 보완 사항을 반영하여 최종 샘플을 완성합니다.',
   },
   {
-    step: '04',
+    step: '05',
     en: 'Quality Control',
     title: '품질 검수',
     photo: 14,
