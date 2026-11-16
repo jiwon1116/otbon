@@ -1,57 +1,49 @@
 ---
+import PartnersStack from './PartnersStack';
 import { partners } from '../../../data/site';
 
-// 로고 면적을 맞춰서 너비를 정함 (가로로 긴 로고 · 뭉툭한 로고가 비슷한 무게로 보이게)
-const logoWidth = (ratio = 4) => Math.round(Math.sqrt(5200 * ratio));
+// 사진: public/images/partners/cards/브랜드이름.jpg (900×1200)
+//   브랜드 이름을 소문자로, 띄어쓰기는 - 로 (예: '999 HUMANITY' → 999-humanity.jpg)
+const items = partners.map((p, i) => ({
+  image: `/images/partners/cards/${p.name.toLowerCase().replace(/\s+/g, '-')}.jpg`,
+  name: p.name,
+  num: String(i + 1).padStart(2, '0'),
+}));
 ---
 
 <!--
-  함께한 브랜드: 크림색 둥근 카드에 로고를 하나씩 (PC 4칸 · 휴대폰 2칸). 문구 · 로고는 src/data/site.ts 의 partners
-  - 화면에 들어오면 카드가 순서대로 아래에서 떠오름 (data-reveal)
-  - 마우스를 올리면 카드가 살짝 뜨고 로고가 진해짐
-  - 마지막 초록 칸은 견적 문의로 가는 버튼
+  함께한 브랜드: 겹쳐 쌓인 사진 카드 (componentry 의 layered-stack, React · gsap)
+  - 메인 지도처럼 이 섹션을 지나가는 동안 화면이 고정됨 (data-pin)
+  - 처음엔 브랜드 사진 카드가 가운데 삐뚤빼뚤 쌓여 있다가, 스크롤하면 차례로 격자 자리로 펼쳐짐
+  - 제목과 카드 7장이 한 화면에 다 들어오게 카드 크기를 화면 높이에 맞춤
+  - 카드 아래 크림색 띠에 브랜드 이름 · 번호
+  브랜드 목록은 src/data/site.ts 의 partners, 사진은 public/images/partners/cards/
 -->
-<section class="bg-paper py-24 lg:py-36">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="text-center" data-reveal>
+<section class="pt-pin bg-paper" data-pin>
+  <div class="pt-stage">
+    <div class="px-4 text-center sm:px-6 lg:px-8" data-reveal>
       <p class="text-xs font-semibold uppercase tracking-[0.3em] text-accent">Partners</p>
-      <h2 class="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">함께한 브랜드</h2>
-      <p class="mt-4 text-muted">옷본과 함께 옷을 만든 브랜드입니다.</p>
+      <h2 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">함께한 브랜드</h2>
     </div>
-
-    <ul class="mt-14 grid grid-cols-2 gap-3 sm:gap-4 lg:mt-16 lg:grid-cols-4">
-      {partners.map((p, i) => (
-        <li class="pt-card" data-reveal style={`--reveal-delay: ${(i % 4) * 80}ms`}>
-          {p.logo
-            ? <img src={p.logo} alt={p.name} loading="lazy" style={`width:${logoWidth(p.ratio)}px`} />
-            : <span class="pt-word">{p.name}</span>}
-        </li>
-      ))}
-      <li data-reveal style={`--reveal-delay: ${(partners.length % 4) * 80}ms`}>
-        <a href="/#contact" class="pt-card pt-cta">
-          <span class="text-sm font-semibold sm:text-base">다음은 당신의 브랜드</span>
-          <span class="pt-cta-sub">제작 문의하기 <span class="pt-cta-arrow" aria-hidden="true">→</span></span>
-        </a>
-      </li>
-    </ul>
+    <div class="pt-cards-wrap px-4 sm:px-6 lg:px-8">
+      <PartnersStack client:load items={items} />
+    </div>
   </div>
 </section>
 
-<style>
-  .pt-card {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-    aspect-ratio: 16 / 10; border-radius: 24px; background: #faf6ee;
-    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.45s;
-  }
-  .pt-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px -22px rgb(40 40 40 / 0.4); }
-  /* 로고는 배경에 섞이게 (JPG 흰 바탕도 안 보이게), 평소엔 살짝 옅게 */
-  .pt-card img { max-width: 72%; height: auto; mix-blend-mode: multiply; opacity: 0.82; transition: opacity 0.3s; }
-  .pt-word { font-size: clamp(15px, 1.8vw, 20px); font-weight: 500; letter-spacing: 0.14em; opacity: 0.82; transition: opacity 0.3s; }
-  .pt-card:hover :is(img, .pt-word) { opacity: 1; }
+<style is:global>
+  /* 지도처럼: 긴 섹션 안에서 화면(높이 100%)이 고정되고, 스크롤하는 동안 카드가 펼쳐짐 */
+  .pt-pin { height: 240svh; margin-top: 96px; margin-bottom: 120px; } /* 아래 여백: 견적 문의와 간격 */
+  @media (min-width: 1024px) { .pt-pin { margin-top: 144px; margin-bottom: 200px; } }
+  .pt-stage { position: sticky; top: 0; height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: 28px; padding-top: 72px; padding-bottom: 24px; }
+  @media (min-width: 1024px) { .pt-stage { padding-top: 88px; gap: 36px; } }
 
-  .pt-cta { height: 100%; aspect-ratio: auto; background: var(--color-accent); color: #f5f1e8; }
-  .pt-cta:hover { background: var(--color-accent-dark); }
-  .pt-cta-sub { font-size: 12px; opacity: 0.75; }
-  .pt-cta-arrow { display: inline-block; transition: transform 0.3s; }
-  .pt-cta:hover .pt-cta-arrow { transform: translateX(3px); }
+  /* 카드 크기: 두 줄(PC 4칸) · 세 줄(휴대폰 3칸)이 남은 화면 높이에 딱 들어가게
+     --avail = 화면 높이 - 위 메뉴 · 제목 · 여백, --cap = 카드 아래 이름 띠 + 테두리 높이 */
+  .pt-grid-cards { --cols: 4; --rows: 2; --gap: 16px; --cap: 46px; --avail: calc(100svh - 300px);
+    --w: min(calc((100vw - 64px - (var(--cols) - 1) * var(--gap)) / var(--cols)), calc(((var(--avail) - (var(--rows) - 1) * var(--gap)) / var(--rows) - var(--cap)) * 0.75), 230px);
+    display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap);
+    max-width: calc(var(--cols) * var(--w) + (var(--cols) - 1) * var(--gap)); } /* 남는 칸은 마지막 줄 가운데로 */
+  @media (max-width: 639px) { .pt-grid-cards { --cols: 3; --rows: 3; --gap: 8px; --cap: 30px; --avail: calc(100svh - 230px); } }
+  .pt-grid-cards > figure { width: var(--w); }
 </style>

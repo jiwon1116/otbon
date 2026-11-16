@@ -9,12 +9,21 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@astrojs/react": "^7.1.9",
     "@astrojs/sitemap": "^3.7.4",
     "@tailwindcss/vite": "^4.3.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "astro": "^7.4.5",
-    "tailwindcss": "^4.3.4"
+    "framer-motion": "^14.14.0",
+    "gsap": "^3.15.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^4.3.4",
+    "three": "^0.187.0"
   },
   "devDependencies": {
+    "@types/three": "^0.187.0",
     "d3-geo": "^3.1.1",
     "topojson-client": "^3.1.0",
     "topojson-simplify": "^3.0.3",

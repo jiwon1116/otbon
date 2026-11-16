@@ -1,24 +1,40 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import CtaSection from '../components/sections/CtaSection.astro';
 import { branches, branchesIntro as B, gallery } from '../data/site';
 import { sitePhoto } from '../data/photos';
 
-// 현장 사진(gallery)에서 이름이 같은 사진만 모음
+// 나라마다 현장 사진 모음: gallery 에서 그 나라 시설 이름과 같은 사진을 시설 순서대로
 const allPhotos = gallery.flat();
-const photosOf = (name: string) => allPhotos.filter((p) => p.factory === name).map((p) => p.site);
-const kindLabel = { office: '지사 시설', factory: '협력 공장' } as const;
-const num = (i: number) => String(i + 1).padStart(2, '0');
+
+// 처음에 보이는 사진 수 (큰 사진 1 + 작은 사진 8 = 세 줄). 나머지는 '더 보기'
+const FIRST = 9;
+
+const list = await Promise.all(
+  branches.map(async (b) => {
+    const photos = b.places.flatMap((p) =>
+      allPhotos.filter((g) => g.factory === p.name).map((g) => ({ site: g.site, name: p.name, kind: p.kind })),
+    );
+    // 크게 볼 때 쓰는 큰 사진 주소
+    const full = await Promise.all(photos.map((ph) => getImage({ src: sitePhoto(ph.site), width: 1600, format: 'webp' })));
+    const offices = b.places.filter((p) => p.kind === 'office').length;
+    const withPhotos = b.places.map((p) => ({ ...p, count: photos.filter((ph) => ph.name === p.name).length })).filter((p) => p.count > 0);
+    return { ...b, photos: photos.map((ph, k) => ({ ...ph, full: full[k].src })), offices, factories: b.places.length - offices, withPhotos };
+  }),
+);
 ---
 
 <!--
-  지사 소개 페이지 (메뉴 '지사 소개'). 문구는 src/data/site.ts 의 branchesIntro · branches
-  가운데 큰 제목 → 나라 바로가기(내리는 동안 위에 붙음) → 나라마다 소개 + 시설 · 협력 공장 카드
-  메인 지도에서 나라를 누르면 /branches#china 처럼 그 나라로 바로 옴
+  지사 소개 페이지 (메뉴 '지사 소개'). 문구는 src/data/site.ts 의 branchesIntro · branches, 사진은 gallery
+  가운데 큰 제목 → 나라 바로가기(내리는 동안 위에 붙음) → 나라마다: 소개 + 현장 사진 모음
+  - 사진 모음: 첫 사진은 크게, 나머지는 격자. 위의 시설 이름을 누르면 그 시설 사진만 보임
+  - 사진을 누르면 화면 가득 크게 보기 (← → 키로 넘기기, Esc 로 닫기)
+  - 사진이 없는 나라는 시설 목록 카드만
+  메인 지도에서 나라를 누르면 /branches#china 처럼 들어와서 그 나라 칸으로 바로 옴
 -->
 <Layout title="지사 소개" description={B.lead}>
-  <section class="mx-auto max-w-7xl px-4 pb-10 pt-28 sm:px-6 lg:px-8 lg:pb-14">
+  <section class="mx-auto max-w-7xl px-4 pb-10 pt-28 sm:px-6 lg:px-8 lg:pb-12">
     <p class="text-sm text-muted" data-reveal>
       <a href="/" class="transition-colors hover:text-ink">홈</a>
       <span class="mx-2 text-line">/</span>
@@ -35,60 +51,92 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
   <nav class="br-nav" aria-label="지사" data-br-nav>
     <div class="mx-auto flex max-w-7xl justify-center px-4 sm:px-6 lg:px-8">
       <div class="br-tabs">
-        {branches.map((b) => <a href={`#${b.id}`} class="br-tab" data-br-tab={b.id}>{b.name}</a>)}
+        {list.map((b) => <a href={`#${b.id}`} class="br-tab" data-br-tab={b.id}>{b.name}</a>)}
       </div>
     </div>
   </nav>
 
   <div class="pb-28 lg:pb-40">
-    {branches.map((b, i) => {
-      const offices = b.places.filter((p) => p.kind === 'office').length;
-      const factories = b.places.length - offices;
-      return (
-        <section id={b.id} class="br-sec" data-br-sec={b.id}>
-          <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8">
-            <!-- 왼쪽: 나라 소개 (큰 화면에선 내리는 동안 붙어 있음) -->
-            <div class="lg:col-span-4">
-              <div class="lg:sticky lg:top-40" data-reveal>
-                <p class="text-xs font-semibold tracking-[0.25em] text-accent">{num(i)} · {b.role}</p>
-                <h2 class="mt-5 text-5xl font-semibold tracking-tight sm:text-6xl">{b.en}</h2>
-                <p class="mt-4 text-xl font-semibold">{b.name}</p>
-                <p class="mt-1 text-sm text-muted">{b.city}</p>
-                <p class="mt-6 max-w-sm leading-relaxed text-muted">{b.desc}</p>
-                <dl class="mt-8 flex gap-8 border-t border-line pt-6">
-                  <div><dt class="text-xs text-muted">지사 시설</dt><dd class="mt-1 text-2xl font-semibold tabular-nums">{offices}</dd></div>
-                  {factories > 0 && <div><dt class="text-xs text-muted">협력 공장</dt><dd class="mt-1 text-2xl font-semibold tabular-nums">{factories}</dd></div>}
-                </dl>
-              </div>
+    {list.map((b, i) => (
+      <section id={b.id} class="br-sec" data-br-sec={b.id}>
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <!-- 나라 소개: 왼쪽 큰 이름, 오른쪽 설명 · 숫자 -->
+          <div class="br-head" data-reveal>
+            <div>
+              <p class="text-xs font-semibold tracking-[0.25em] text-accent">{b.role}</p>
+              <h2 class="br-en">{b.en}</h2>
+              <p class="mt-3 text-lg font-semibold">{b.name}<span class="ml-3 text-sm font-medium text-muted">{b.city}</span></p>
             </div>
-
-            <!-- 오른쪽: 시설 · 협력 공장 카드 -->
-            <ul class="grid gap-4 sm:grid-cols-2 lg:col-span-8 lg:gap-5">
-              {b.places.map((p, k) => {
-                const photos = photosOf(p.name);
-                return (
-                  <li class="br-card" data-reveal style={`--reveal-delay: ${(k % 2) * 80}ms`}>
-                    <div class="br-photo">
-                      {photos.length
-                        ? <Image src={sitePhoto(photos[0])} alt={`${p.name} 현장`} widths={[480, 720, 960]} sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw" class="h-full w-full object-cover" />
-                        : <span class="br-empty" aria-hidden="true">{b.en}</span>}
-                      {photos.length > 1 && <span class="br-count">사진 {photos.length}</span>}
-                    </div>
-                    <div class="flex items-start justify-between gap-4 p-5 sm:p-6">
-                      <div>
-                        <p class="font-semibold leading-snug">{p.name}</p>
-                        <p class="mt-1 text-sm text-muted">{p.desc}</p>
-                      </div>
-                      <span class:list={['br-kind', p.kind === 'factory' && 'is-factory']}>{kindLabel[p.kind]}</span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+            <div class="br-aside">
+              <p class="leading-relaxed text-muted">{b.desc}</p>
+              <dl class="br-stats">
+                <div><dt>지사 시설</dt><dd>{b.offices}</dd></div>
+                {b.factories > 0 && <div><dt>협력 공장</dt><dd>{b.factories}</dd></div>}
+                {b.photos.length > 0 && <div><dt>현장 사진</dt><dd>{b.photos.length}</dd></div>}
+              </dl>
+            </div>
           </div>
-        </section>
-      );
-    })}
+
+          {b.photos.length > 0 ? (
+            <div class="br-album" data-album>
+              <!-- 시설별로 골라 보기 -->
+              <div class="br-chips" role="group" aria-label={`${b.name} 시설별 사진`}>
+                <button type="button" class="br-chip is-on" data-filter="">전체<span>{b.photos.length}</span></button>
+                {b.withPhotos.map((p) => (
+                  <button type="button" class="br-chip" data-filter={p.name}>{p.name.replace(/^단동 지사 /, '')}<span>{p.count}</span></button>
+                ))}
+              </div>
+
+              <ul class="br-grid" data-grid>
+                {b.photos.map((ph, k) => (
+                  <li class="br-item" data-name={ph.name} data-reveal style={`--reveal-delay: ${(k % 4) * 60}ms`}>
+                    <button type="button" class="br-shot" data-full={ph.full} data-caption={ph.name} aria-label={`${ph.name} 사진 크게 보기`}>
+                      <Image src={sitePhoto(ph.site)} alt={`${ph.name} 현장`} widths={[400, 640, 960]} sizes="(min-width: 1024px) 25vw, 50vw" class="h-full w-full object-cover" />
+                      <span class="br-cap"><span class:list={['br-kind', ph.kind === 'factory' && 'is-factory']}>{ph.kind === 'office' ? '지사' : '협력'}</span>{ph.name}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              {b.photos.length > FIRST && (
+                <div class="mt-8 text-center">
+                  <button type="button" class="br-more" data-more>사진 더 보기 <span data-more-count></span></button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div class="br-noimg" data-reveal>
+              <ul class="grid gap-3 sm:grid-cols-2">
+                {b.places.map((p) => (
+                  <li class="br-place">
+                    <span class:list={['br-kind', p.kind === 'factory' && 'is-factory']}>{p.kind === 'office' ? '지사' : '협력'}</span>
+                    <div><p class="font-semibold">{p.name}</p><p class="mt-0.5 text-sm text-muted">{p.desc}</p></div>
+                  </li>
+                ))}
+              </ul>
+              <p class="mt-5 text-sm text-muted">현장 사진은 준비 중입니다.</p>
+            </div>
+          )}
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <!-- 크게 보기 -->
+  <div class="br-lb" data-lb hidden>
+    <button type="button" class="br-lb-close" data-lb-close aria-label="닫기">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13" stroke-linecap="round" /></svg>
+    </button>
+    <button type="button" class="br-lb-nav is-prev" data-lb-prev aria-label="이전 사진">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3L5 8l5 5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    </button>
+    <figure class="br-lb-fig">
+      <img data-lb-img alt="" />
+      <figcaption><span data-lb-cap></span><span class="br-lb-count" data-lb-count></span></figcaption>
+    </figure>
+    <button type="button" class="br-lb-nav is-next" data-lb-next aria-label="다음 사진">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    </button>
   </div>
 
   <CtaSection />
@@ -96,7 +144,7 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
 
 <style>
   /* 나라 바로가기: 헤더(휴대폰 64px · 큰 화면 80px) 바로 아래에 붙음 */
-  .br-nav { position: sticky; top: 4rem; z-index: 20; padding: 12px 0; background: var(--color-paper); }
+  .br-nav { position: sticky; top: 4rem; z-index: 20; margin-top: 24px; padding: 12px 0; background: var(--color-paper); }
   @media (min-width: 1024px) { .br-nav { top: 5rem; } }
   .br-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding: 4px; border-radius: 999px; background: #faf6ee; }
   .br-tabs::-webkit-scrollbar { display: none; }
@@ -104,18 +152,79 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
   .br-tab:hover { color: var(--color-ink); }
   .br-tab.is-on { background: var(--color-accent); color: #f5f1e8; }
 
-  .br-sec { padding-top: 72px; scroll-margin-top: 8.5rem; }
-  .br-sec + .br-sec { margin-top: 72px; border-top: 1px solid var(--color-line); }
-  @media (min-width: 1024px) { .br-sec { padding-top: 104px; scroll-margin-top: 9rem; } .br-sec + .br-sec { margin-top: 104px; } }
+  .br-sec { padding-top: 80px; scroll-margin-top: 8.5rem; }
+  .br-sec + .br-sec { margin-top: 80px; border-top: 1px solid var(--color-line); }
+  @media (min-width: 1024px) { .br-sec { padding-top: 112px; scroll-margin-top: 9rem; } .br-sec + .br-sec { margin-top: 112px; } }
 
-  .br-card { overflow: hidden; border-radius: 24px; background: #faf6ee; }
-  .br-photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--color-soft); }
-  .br-photo :global(img) { transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .br-card:hover .br-photo :global(img) { transform: scale(1.04); }
-  .br-empty { display: grid; height: 100%; place-items: center; font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgb(110 104 94 / 0.5); }
-  .br-count { position: absolute; right: 12px; bottom: 12px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #f5f1e8; background: rgb(40 40 40 / 0.6); backdrop-filter: blur(6px); }
-  .br-kind { flex: none; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; color: var(--color-accent); background: rgb(46 91 69 / 0.1); }
-  .br-kind.is-factory { color: var(--color-muted); background: var(--color-soft); }
+  /* 나라 소개 */
+  .br-head { display: grid; gap: 28px; }
+  @media (min-width: 1024px) { .br-head { grid-template-columns: 7fr 5fr; align-items: end; gap: 48px; } }
+  .br-en { margin-top: 14px; font-size: clamp(56px, 9vw, 120px); font-weight: 600; line-height: 0.92; letter-spacing: -0.045em; }
+  .br-stats { display: flex; gap: 32px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-line); }
+  .br-stats dt { font-size: 12px; color: var(--color-muted); }
+  .br-stats dd { margin-top: 2px; font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* 시설별 골라 보기 */
+  .br-album { margin-top: 48px; }
+  @media (min-width: 1024px) { .br-album { margin-top: 64px; } }
+  .br-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 16px; }
+  .br-chips::-webkit-scrollbar { display: none; }
+  .br-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--color-muted); background: #faf6ee; transition: background-color 0.25s, color 0.25s; }
+  .br-chip span { font-size: 11px; font-weight: 600; opacity: 0.6; font-variant-numeric: tabular-nums; }
+  .br-chip:hover { color: var(--color-ink); }
+  .br-chip.is-on { color: #f5f1e8; background: var(--color-ink); }
+
+  /* 사진 격자: 첫 사진은 2×2 로 크게 */
+  .br-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  @media (min-width: 640px) { .br-grid { gap: 12px; } }
+  @media (min-width: 1024px) { .br-grid { grid-template-columns: repeat(4, 1fr); } }
+  .br-item { aspect-ratio: 1 / 1; }
+  .br-item.is-feature { grid-column: span 2; grid-row: span 2; }
+  .br-item[hidden] { display: none; }
+  .br-shot { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; border-radius: 20px; background: var(--color-soft); cursor: zoom-in; }
+  @media (max-width: 639px) { .br-shot { border-radius: 14px; } }
+  .br-shot :global(img) { transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .br-shot:hover :global(img) { transform: scale(1.05); }
+  .br-shot::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 55%, rgb(30 30 30 / 0.55)); opacity: 0; transition: opacity 0.4s; }
+  .br-shot:hover::after { opacity: 1; }
+  .br-cap { position: absolute; left: 14px; right: 14px; bottom: 12px; z-index: 1; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #f5f1e8; text-align: left;
+    opacity: 0; transform: translateY(8px); transition: opacity 0.35s, transform 0.35s; }
+  .br-shot:hover .br-cap { opacity: 1; transform: none; }
+  .br-item.is-feature .br-cap { font-size: 15px; left: 20px; bottom: 18px; }
+  @media (hover: none) { .br-item.is-feature .br-cap { opacity: 1; transform: none; } .br-item.is-feature .br-shot::after { opacity: 1; } }
+  .br-kind { flex: none; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; color: var(--color-accent); background: rgb(250 246 238 / 0.92); }
+  .br-kind.is-factory { color: var(--color-muted); }
+
+  .br-more { display: inline-flex; gap: 6px; padding: 12px 26px; border-radius: 999px; font-size: 14px; font-weight: 600; background: #faf6ee; transition: background-color 0.25s, color 0.25s; }
+  .br-more:hover { background: var(--color-ink); color: #f5f1e8; }
+  .br-more span { opacity: 0.6; }
+
+  /* 사진 없는 나라 */
+  .br-noimg { margin-top: 48px; }
+  .br-place { display: flex; align-items: flex-start; gap: 12px; padding: 20px 22px; border-radius: 20px; background: #faf6ee; }
+  .br-place .br-kind { margin-top: 2px; background: rgb(46 91 69 / 0.1); }
+  .br-place .br-kind.is-factory { background: var(--color-soft); }
+
+  /* 크게 보기 */
+  .br-lb { position: fixed; inset: 0; z-index: 60; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 24px; background: rgb(24 24 24 / 0.94); backdrop-filter: blur(6px); animation: br-fade 0.3s ease; }
+  .br-lb[hidden] { display: none; }
+  @keyframes br-fade { from { opacity: 0; } }
+  .br-lb-fig { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; height: 100%; justify-content: center; }
+  .br-lb-fig img { max-width: 100%; max-height: calc(100svh - 120px); border-radius: 16px; object-fit: contain; animation: br-pop 0.35s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  @keyframes br-pop { from { opacity: 0; transform: scale(0.97); } }
+  .br-lb-fig figcaption { display: flex; gap: 14px; font-size: 14px; font-weight: 600; color: #f5f1e8; }
+  .br-lb-count { color: rgb(245 241 232 / 0.5); font-variant-numeric: tabular-nums; }
+  .br-lb-nav, .br-lb-close { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #f5f1e8; background: rgb(245 241 232 / 0.1); transition: background-color 0.25s; }
+  .br-lb-nav:hover, .br-lb-close:hover { background: rgb(245 241 232 / 0.22); }
+  .br-lb-nav svg, .br-lb-close svg { width: 18px; height: 18px; }
+  .br-lb-close { position: absolute; right: 20px; top: 20px; }
+  @media (max-width: 639px) {
+    .br-lb { grid-template-columns: 1fr; padding: 16px; }
+    .br-lb-nav { position: absolute; bottom: 20px; }
+    .br-lb-nav.is-prev { left: calc(50% - 60px); }
+    .br-lb-nav.is-next { right: calc(50% - 60px); }
+    .br-lb-fig img { max-height: calc(100svh - 200px); }
+  }
 </style>
 
 <script>
@@ -131,4 +240,78 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
   addEventListener('scroll', update, { passive: true });
   addEventListener('resize', update);
   update();
+
+  // 사진 모음: 시설별 골라 보기 + 더 보기. 보이는 사진 중 첫 장을 크게
+  const FIRST = 9;
+  document.querySelectorAll<HTMLElement>('[data-album]').forEach((album) => {
+    const items = [...album.querySelectorAll<HTMLElement>('.br-item')];
+    const chips = [...album.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const more = album.querySelector<HTMLButtonElement>('[data-more]');
+    const moreCount = album.querySelector<HTMLElement>('[data-more-count]');
+    let filter = '';
+    let open = false;
+    const render = () => {
+      const match = items.filter((it) => !filter || it.dataset.name === filter);
+      items.forEach((it) => {
+        const k = match.indexOf(it);
+        it.hidden = k < 0 || (!open && k >= FIRST);
+        it.classList.toggle('is-feature', k === 0 && match.length >= 5);
+        it.classList.add('is-visible'); // 걸러 낸 뒤 나타나는 사진도 바로 보이게
+      });
+      const rest = match.length - FIRST;
+      if (more) {
+        more.parentElement!.hidden = open || rest <= 0;
+        moreCount!.textContent = `+${rest}`;
+      }
+    };
+    chips.forEach((c) =>
+      c.addEventListener('click', () => {
+        filter = c.dataset.filter!;
+        chips.forEach((x) => x.classList.toggle('is-on', x === c));
+        render();
+      }),
+    );
+    more?.addEventListener('click', () => { open = true; render(); });
+    render();
+  });
+
+  // 크게 보기: 같은 나라에서 지금 보이는 사진끼리 넘김
+  const lb = document.querySelector<HTMLElement>('[data-lb]')!;
+  const img = lb.querySelector<HTMLImageElement>('[data-lb-img]')!;
+  const cap = lb.querySelector<HTMLElement>('[data-lb-cap]')!;
+  const count = lb.querySelector<HTMLElement>('[data-lb-count]')!;
+  let shots: HTMLButtonElement[] = [];
+  let at = 0;
+  let last: HTMLElement | null = null;
+  const show = (k: number) => {
+    at = (k + shots.length) % shots.length;
+    const s = shots[at];
+    img.src = s.dataset.full!;
+    img.alt = `${s.dataset.caption} 현장`;
+    img.style.animation = 'none'; img.offsetWidth; img.style.animation = '';
+    cap.textContent = s.dataset.caption!;
+    count.textContent = `${at + 1} / ${shots.length}`;
+  };
+  const close = () => { lb.hidden = true; document.documentElement.style.overflow = ''; last?.focus(); };
+  document.querySelectorAll<HTMLButtonElement>('.br-shot').forEach((b) =>
+    b.addEventListener('click', () => {
+      const album = b.closest('[data-album]')!;
+      shots = [...album.querySelectorAll<HTMLButtonElement>('.br-item:not([hidden]) .br-shot')];
+      last = b;
+      lb.hidden = false;
+      document.documentElement.style.overflow = 'hidden';
+      show(shots.indexOf(b));
+      lb.querySelector<HTMLElement>('[data-lb-close]')!.focus();
+    }),
+  );
+  lb.querySelector('[data-lb-prev]')!.addEventListener('click', () => show(at - 1));
+  lb.querySelector('[data-lb-next]')!.addEventListener('click', () => show(at + 1));
+  lb.querySelector('[data-lb-close]')!.addEventListener('click', close);
+  lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
+  addEventListener('keydown', (e) => {
+    if (lb.hidden) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') show(at - 1);
+    if (e.key === 'ArrowRight') show(at + 1);
+  });
 </script>
