@@ -72,6 +72,32 @@ export const servicesIntro = {
   title: '브랜드에 필요한 생산을 한 곳에서',
   desc: '원단 선정부터 패턴 개발, 재단, 봉제, 워싱을 거쳐 최종 납품까지. 각 분야의 전문 협력업체와 협업하여 안정적인 생산 과정을 지원합니다.',
 };
+// 생산 분야 > 원단 개발 (/production, 공정 카드 아래 따로 한 칸)
+// photo = 왼쪽 큰 원단 사진 (public 기준 경로). 비우면 아래 swatches 로 스와치북 모양을 그림
+// swatches = 스와치북 조각 (위에서부터 겹침). kind: woven(우븐 결) | knit(니트 골), base = 원단 색
+//   img 에 public 기준 사진 경로를 넣으면 그 조각은 실제 원단 사진으로 보임
+// specs = 조건 (제목 · 큰 글씨), cases = 개발 사례 목록 (이름 · 설명 · 종류)
+export const fabricDev = {
+  photo: '',
+  en: 'Fabric Development',
+  title: '원단 개발',
+  desc: '제품의 특성과 용도에 적합한 원단을 개발합니다. 소재의 구성부터 조직, 두께, 촉감, 컬러까지 세부 사양을 검토하고 요구하는 기준에 맞춰 원단을 구현합니다.',
+  specs: [
+    { label: '개발 범위', value: '다이마루 ~ 우븐', note: '니트(다이마루)부터 우븐까지 개발 가능' },
+    { label: '최소 수량', value: '컬러당 1,500m', note: '원단 개발은 컬러당 최소 1,500m부터 진행' },
+  ],
+  swatches: [
+    { name: 'MOLESKIN', type: 'WOVEN', color: 'Charcoal', base: '#3a3936', kind: 'woven', img: '/images/fabric/moleskin-charcoal.jpg' },
+    { name: 'KNIT', type: 'DAIMARU', color: 'Stripe', base: '#e9edf2', kind: 'knit', img: '/images/fabric/knit-stripe.jpg' },
+    { name: 'MOLESKIN', type: 'WOVEN', color: 'Olive', base: '#5d5f45', kind: 'woven', img: '' },
+    { name: 'KNIT', type: 'DAIMARU', color: 'Navy', base: '#27304a', kind: 'knit', img: '' },
+  ] as { name: string; type: string; color: string; base: string; kind: 'woven' | 'knit'; img: string }[],
+  cases: [
+    { name: '몰스킨', type: '우븐', desc: '촘촘한 조직과 부드러운 기모감이 특징인 면 소재' },
+    { name: '편직 원단', type: '다이마루', desc: '브랜드 요청 사양에 따라 별도로 개발한 편직 원단' },
+  ],
+};
+
 // 생산 분야 > 제품 사진 (/production). 품목마다 한 줄씩, 사진이 옆으로 이어짐
 // imgs 에 public 폴더 기준 경로를 넣으면 순서대로 보임 (예: '/images/products/jacket-1.jpg')
 // 사진이 아직 없으면 [] 로 두면 크림색 빈 칸으로 자리만 보임
@@ -197,7 +223,7 @@ export const network: { eyebrow: string; intro: { caption: string[]; name: strin
     },
     {
       code: 704, name: 'Vietnam', role: 'BRANCH 02', zoom: 7, region: 'VN-54', // 베트남 전체 말고 박지앙성만
-      caption: ['봉제와 대량 생산을 맡는', '옷본의 베트남 하노이 박지앙 지사 입니다.'],
+      caption: ['균일한 품질로 대량 생산을 맡는', '옷본의 베트남 하노이 박지앙 지사 입니다.'],
       cities: [{ name: '박지앙', sub: '하노이', pin: [106.2, 21.27], side: 'left' }],
     },
   ],
@@ -238,7 +264,7 @@ export const branches: { id: string; name: string; en: string; role: string; cit
   },
   {
     id: 'vietnam', name: '베트남 박지앙 지사', en: 'Vietnam', role: 'BRANCH 02', city: '하노이 박지앙',
-    desc: '봉제와 대량 생산을 맡는 옷본의 베트남 지사입니다.',
+    desc: '균일한 품질로 대량 생산을 맡는 옷본의 베트남 지사입니다.',
     places: [
       { name: '박지앙 지사', kind: 'office', desc: '0000' },
       { name: '0000 복장공장', kind: 'factory', desc: '0000' },
@@ -264,17 +290,18 @@ export const brandStory = {
   ] as { icon: 'thread' | 'globe' | 'symbol'; title: string; desc: string }[],
 };
 
-// 함께한 업체. logo 에 public/ 기준 이미지 경로를 적으면 로고가 나옵니다. (예: '/images/partners/abc.png')
-// logo 가 비어 있으면 이름(name)을 글자로 보여줌
-// ratio = 로고 이미지의 가로 ÷ 세로 (로고마다 크기가 비슷해 보이게 맞추는 데 씀. 모르면 비워도 됨)
-export const partners: { name: string; logo: string; ratio?: number }[] = [
-  { name: 'SPECTATOR', logo: '/images/partners/spectator.png', ratio: 1162 / 321 },
-  { name: 'BEHEAVYER', logo: '/images/partners/beheavyer.png', ratio: 889 / 275 },
-  { name: 'SHIRTER', logo: '/images/partners/shirter.png', ratio: 878 / 104 },
-  { name: 'EASTLOGUE', logo: '/images/partners/eastlogue.jpg', ratio: 241 / 54 },
-  { name: 'WHYTE', logo: '' },
-  { name: 'moif', logo: '' },
-  { name: '999 HUMANITY', logo: '' },
+// 함께한 브랜드 (메인). 적힌 순서대로 카드가 놓임 (PC 4칸씩)
+// 사진은 public/images/partners/cards/브랜드이름.jpg (900×1200)
+//   브랜드 이름을 소문자로, 띄어쓰기는 - 로 (예: '999 HUMANITY' → 999-humanity.jpg)
+export const partners: { name: string }[] = [
+  { name: 'EASTLOGUE' },
+  { name: 'WHYTE' },
+  { name: 'ROUGH SIDE' },
+  { name: 'BEHEAVYER' },
+  { name: 'moif' },
+  { name: 'SPECTATOR' },
+  { name: '999 HUMANITY' },
+  { name: 'SHIRTER' },
 ];
 
 // 제작 과정 (메인 화면 · 제작 기준, 다섯 칸)

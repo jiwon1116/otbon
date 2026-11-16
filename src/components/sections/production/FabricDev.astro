@@ -1,0 +1,122 @@
+---
+import { fabricDev as F } from '../../../data/site';
+
+// 사진이 있는 원단만 (사진 없는 조각은 보여주지 않음)
+const shots = F.swatches.filter((w) => w.img);
+---
+
+<!--
+  생산 분야 > 원단 개발
+  - 왼쪽: 원단 사진이 칸을 꽉 채움. 여러 장이면 4초마다 천천히 겹쳐 바뀌고, 사진은 아주 느리게 살짝 확대됨
+      · 왼쪽 아래 반투명 라벨(번호 · 이름 · 종류), 오른쪽 아래 얇은 진행 막대
+  - 오른쪽: 제목 · 설명 · 조건(개발 범위 · 최소 수량) · 개발 사례 목록 (지금 보이는 조각의 종류에 맞는 사례 줄이 진해짐)
+  문구 · 사진은 src/data/site.ts 의 fabricDev
+-->
+<section id="fabric" class="scroll-mt-20 bg-paper" data-fabric>
+  <div class="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-32">
+    <div class="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+      <div class="fd-photo" data-reveal>
+        {F.photo ? <img src={F.photo} alt="옷본이 개발한 원단" loading="lazy" /> : (
+          <div class="fx" data-fx>
+            {shots.map((w, i) => (
+              <figure class:list={['fx-shot', i === 0 && 'is-on']} data-fx-shot data-kind={w.kind}>
+                <img src={w.img} alt={`${w.name} ${w.color} 원단`} loading="lazy" />
+              </figure>
+            ))}
+            {shots.map((w, i) => (
+              <p class:list={['fx-label', i === 0 && 'is-on']} data-fx-label>
+                <span class="fx-no">No.{String(i + 1).padStart(2, '0')}</span>
+                <span class="fx-name">{w.name}</span>
+                <span class="fx-meta">{w.type} · {w.color}</span>
+              </p>
+            ))}
+            {shots.length > 1 && (
+              <div class="fx-bars" aria-hidden="true">{shots.map(() => <span><i></i></span>)}</div>
+            )}
+          </div>
+        )}
+      </div>
+      <div data-reveal style="--reveal-delay: 100ms">
+        <p class="text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm">{F.en}</p>
+        <h2 class="mt-5 text-3xl font-semibold tracking-tight sm:text-5xl">{F.title}</h2>
+        <p class="mt-5 leading-relaxed text-muted">{F.desc}</p>
+        <dl class="mt-8 grid grid-cols-2 gap-6 border-t border-line pt-6">
+          {F.specs.map((s) => (
+            <div><dt class="text-xs text-muted">{s.label}</dt><dd class="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">{s.value}</dd></div>
+          ))}
+        </dl>
+        <p class="mt-10 text-xs font-semibold tracking-[0.2em] text-muted">개발 사례</p>
+        <ul class="mt-3 border-t border-line">
+          {F.cases.map((c) => (
+            <li class="fd-case flex items-center justify-between gap-4 border-b border-line py-4" data-case={c.type === '우븐' ? 'woven' : 'knit'}>
+              <div>
+                <p class="font-semibold">{c.name}</p>
+                <p class="mt-0.5 text-sm text-muted">{c.desc}</p>
+              </div>
+              <span class="fd-tag">{c.type}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .fd-photo { display: grid; place-items: center; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 28px; background: var(--color-soft); color: rgb(110 104 94 / 0.6); font-size: 13px; }
+  @media (max-width: 1023px) { .fd-photo { aspect-ratio: 4 / 3.6; } }
+  .fd-photo > img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ---- 원단 사진 (여러 장이면 천천히 겹쳐 바뀜) ---- */
+  .fx { position: absolute; inset: 0; }
+  .fd-photo { position: relative; }
+  .fx-shot { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity 1.4s ease; }
+  .fx-shot.is-on { opacity: 1; }
+  .fx-shot img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.02); }
+  .fx-shot.is-on img { animation: fx-zoom 6s linear both; }
+  @keyframes fx-zoom { from { transform: scale(1.02); } to { transform: scale(1.1); } }
+  .fx-label { position: absolute; left: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 12px 16px; border-radius: 14px;
+    background: rgb(250 246 238 / 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    opacity: 0; transform: translateY(8px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fx-label.is-on { opacity: 1; transform: none; transition-delay: 0.5s; }
+  .fx-no { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; color: var(--color-accent); }
+  .fx-name { font-size: 14px; font-weight: 700; letter-spacing: 0.14em; color: var(--color-ink); }
+  .fx-meta { font-size: 10px; font-weight: 600; letter-spacing: 0.16em; color: var(--color-muted); }
+  .fx-bars { position: absolute; right: 22px; bottom: 30px; display: flex; gap: 6px; }
+  .fx-bars span { width: 28px; height: 2px; border-radius: 2px; background: rgb(250 246 238 / 0.45); overflow: hidden; }
+  .fx-bars i { display: block; height: 100%; background: #faf6ee; transform-origin: 0 50%; transform: scaleX(0); }
+  .fx-bars span.is-on i { animation: fx-bar 4s linear both; }
+  @keyframes fx-bar { to { transform: scaleX(1); } }
+  @media (prefers-reduced-motion: reduce) { .fx-shot.is-on img, .fx-bars span.is-on i { animation: none; } .fx-shot { transition: none; } }
+
+  /* 사례 목록: 지금 보이는 조각 종류가 아닌 줄은 옅게 */
+  .fd-case { transition: opacity 0.5s; }
+  [data-fabric].is-live .fd-case:not(.is-on) { opacity: 0.4; }
+  .fd-tag { flex: none; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; color: var(--color-accent); background: rgb(46 91 69 / 0.1); }
+</style>
+
+<script>
+  // 원단 사진: 4초마다 다음 사진으로 천천히 겹쳐 바뀜 (화면에 보일 때만). 지금 원단 종류에 맞는 사례 줄을 진하게
+  const root = document.querySelector<HTMLElement>('[data-fabric]');
+  const fx = root?.querySelector<HTMLElement>('[data-fx]');
+  if (root && fx) {
+    const shots = [...fx.querySelectorAll<HTMLElement>('[data-fx-shot]')];
+    const labels = [...fx.querySelectorAll<HTMLElement>('[data-fx-label]')];
+    const bars = [...fx.querySelectorAll<HTMLElement>('.fx-bars span')];
+    const cases = [...root.querySelectorAll<HTMLElement>('[data-case]')];
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let at = 0;
+    const show = (k: number) => {
+      at = (k + shots.length) % shots.length;
+      shots.forEach((s, i) => s.classList.toggle('is-on', i === at));
+      labels.forEach((l, i) => l.classList.toggle('is-on', i === at));
+      bars.forEach((b, i) => { b.classList.remove('is-on'); if (i === at) { void b.offsetWidth; b.classList.add('is-on'); } });
+      root.classList.add('is-live');
+      cases.forEach((c) => c.classList.toggle('is-on', c.dataset.case === shots[at].dataset.kind));
+    };
+    show(0);
+    let visible = false;
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.3 }).observe(fx);
+    if (shots.length > 1 && !reduce) setInterval(() => { if (visible && !document.hidden) show(at + 1); }, 4000);
+  }
+</script>
