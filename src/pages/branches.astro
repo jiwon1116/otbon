@@ -1,12 +1,11 @@
 ---
 import { Image, getImage } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
-import CtaSection from '../components/sections/CtaSection.astro';
-import { branches, branchesIntro as B, gallery } from '../data/site';
+import { branches, branchesIntro as B, gallery, branchPhotoSkip } from '../data/site';
 import { sitePhoto } from '../data/photos';
 
-// 나라마다 현장 사진 모음: gallery 에서 그 나라 시설 이름과 같은 사진을 시설 순서대로
-const allPhotos = gallery.flat();
+// 나라마다 현장 사진 모음: gallery 에서 그 나라 시설 이름과 같은 사진을 시설 순서대로 (겹치는 사진 branchPhotoSkip 은 뺌)
+const allPhotos = gallery.flat().filter((g) => !branchPhotoSkip.includes(g.site));
 
 // 처음에 보이는 사진 수 (큰 사진 1 + 작은 사진 8 = 세 줄). 나머지는 '더 보기'
 const FIRST = 9;
@@ -18,9 +17,7 @@ const list = await Promise.all(
     );
     // 크게 볼 때 쓰는 큰 사진 주소
     const full = await Promise.all(photos.map((ph) => getImage({ src: sitePhoto(ph.site), width: 1600, format: 'webp' })));
-    const offices = b.places.filter((p) => p.kind === 'office').length;
-    const withPhotos = b.places.map((p) => ({ ...p, count: photos.filter((ph) => ph.name === p.name).length })).filter((p) => p.count > 0);
-    return { ...b, photos: photos.map((ph, k) => ({ ...ph, full: full[k].src })), offices, factories: b.places.length - offices, withPhotos };
+    return { ...b, photos: photos.map((ph, k) => ({ ...ph, full: full[k].src })) };
   }),
 );
 ---
@@ -69,24 +66,11 @@ const list = await Promise.all(
             </div>
             <div class="br-aside">
               <p class="leading-relaxed text-muted">{b.desc}</p>
-              <dl class="br-stats">
-                <div><dt>지사 시설</dt><dd>{b.offices}</dd></div>
-                {b.factories > 0 && <div><dt>협력 공장</dt><dd>{b.factories}</dd></div>}
-                {b.photos.length > 0 && <div><dt>현장 사진</dt><dd>{b.photos.length}</dd></div>}
-              </dl>
             </div>
           </div>
 
           {b.photos.length > 0 ? (
             <div class="br-album" data-album>
-              <!-- 시설별로 골라 보기 -->
-              <div class="br-chips" role="group" aria-label={`${b.name} 시설별 사진`}>
-                <button type="button" class="br-chip is-on" data-filter="">전체<span>{b.photos.length}</span></button>
-                {b.withPhotos.map((p) => (
-                  <button type="button" class="br-chip" data-filter={p.name}>{p.name.replace(/^단동 지사 /, '')}<span>{p.count}</span></button>
-                ))}
-              </div>
-
               <ul class="br-grid" data-grid>
                 {b.photos.map((ph, k) => (
                   <li class="br-item" data-name={ph.name} data-reveal style={`--reveal-delay: ${(k % 4) * 60}ms`}>
@@ -138,8 +122,6 @@ const list = await Promise.all(
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" /></svg>
     </button>
   </div>
-
-  <CtaSection />
 </Layout>
 
 <style>
@@ -163,19 +145,10 @@ const list = await Promise.all(
   .br-head { display: grid; gap: 28px; }
   @media (min-width: 1024px) { .br-head { grid-template-columns: 7fr 5fr; align-items: end; gap: 48px; } }
   .br-en { margin-top: 14px; font-size: clamp(56px, 9vw, 120px); font-weight: 600; line-height: 0.92; letter-spacing: -0.045em; }
-  .br-stats { display: flex; gap: 32px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-line); }
-  .br-stats dt { font-size: 12px; color: var(--color-muted); }
-  .br-stats dd { margin-top: 2px; font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
-  /* 시설별 골라 보기 */
+  /* 사진 모음 */
   .br-album { margin-top: 48px; }
   @media (min-width: 1024px) { .br-album { margin-top: 64px; } }
-  .br-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 16px; }
-  .br-chips::-webkit-scrollbar { display: none; }
-  .br-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--color-muted); background: #faf6ee; transition: background-color 0.25s, color 0.25s; }
-  .br-chip span { font-size: 11px; font-weight: 600; opacity: 0.6; font-variant-numeric: tabular-nums; }
-  .br-chip:hover { color: var(--color-ink); }
-  .br-chip.is-on { color: #f5f1e8; background: var(--color-ink); }
 
   /* 사진 격자: 첫 사진은 2×2 로 크게 */
   .br-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -261,36 +234,25 @@ const list = await Promise.all(
   );
   showBranch(location.hash.slice(1), false);
 
-  // 사진 모음: 시설별 골라 보기 + 더 보기. 보이는 사진 중 첫 장을 크게
+  // 사진 모음: 처음엔 9장만, '더 보기'로 나머지. 첫 장은 크게
   const FIRST = 9;
   document.querySelectorAll<HTMLElement>('[data-album]').forEach((album) => {
     const items = [...album.querySelectorAll<HTMLElement>('.br-item')];
-    const chips = [...album.querySelectorAll<HTMLButtonElement>('[data-filter]')];
     const more = album.querySelector<HTMLButtonElement>('[data-more]');
     const moreCount = album.querySelector<HTMLElement>('[data-more-count]');
-    let filter = '';
     let open = false;
     const render = () => {
-      const match = items.filter((it) => !filter || it.dataset.name === filter);
-      items.forEach((it) => {
-        const k = match.indexOf(it);
-        it.hidden = k < 0 || (!open && k >= FIRST);
-        it.classList.toggle('is-feature', k === 0 && match.length >= 5);
-        it.classList.add('is-visible'); // 걸러 낸 뒤 나타나는 사진도 바로 보이게
+      items.forEach((it, k) => {
+        it.hidden = !open && k >= FIRST;
+        it.classList.toggle('is-feature', k === 0 && items.length >= 5);
+        if (open) it.classList.add('is-visible'); // 더 보기로 나타난 사진도 바로 보이게
       });
-      const rest = match.length - FIRST;
+      const rest = items.length - FIRST;
       if (more) {
         more.parentElement!.hidden = open || rest <= 0;
         moreCount!.textContent = `+${rest}`;
       }
     };
-    chips.forEach((c) =>
-      c.addEventListener('click', () => {
-        filter = c.dataset.filter!;
-        chips.forEach((x) => x.classList.toggle('is-on', x === c));
-        render();
-      }),
-    );
     more?.addEventListener('click', () => { open = true; render(); });
     render();
   });

@@ -235,6 +235,9 @@ export const network: { eyebrow: string; intro: { caption: string[]; name: strin
 //   사진은 위 gallery 에서 factory 이름이 name 과 똑같은 사진을 자동으로 모아 보여줌
 //   (사진이 없으면 크림색 빈 칸). 확인이 필요한 곳은 0000 으로 비워 두었습니다.
 type Place = { name: string; kind: 'office' | 'factory'; desc: string };
+// 지사 소개에서 빼는 현장 사진 번호 (src/assets/sites/site-번호.jpg). 비슷한 장면이 겹치는 사진
+// 메인 화면 제작 현장 사진 줄에는 그대로 나옴
+export const branchPhotoSkip = [10, 14, 18, 20, 22, 32];
 export const branchesIntro = {
   eyebrow: 'GLOBAL NETWORK',
   title: '지사 소개',
@@ -330,14 +333,14 @@ export const process = [
     step: '03',
     en: 'Cutting',
     title: '재단',
-    photo: 17,
-    desc: '원단의 결 방향을 맞춰 재단합니다. 원단의 수축률과 특성을 미리 확인해, 샘플이 설계한 핏 그대로 나올 수 있도록 준비합니다.',
+    photo: 38,
+    desc: '원단의 특성과 결 방향을 고려해 재단을 진행합니다. 수축률과 원단 상태를 사전에 확인하여 패턴의 형태와 치수가 정확하게 구현되도록 합니다.',
   },
   {
     step: '04',
     en: 'Sample Making',
     title: '샘플 제작',
-    photo: 38,
+    photo: 17,
     desc: '개발된 패턴을 바탕으로 샘플을 제작합니다. 봉제 완성도와 마감 상태 등을 세밀하게 확인하고, 수정 및 보완 사항을 반영하여 최종 샘플을 완성합니다.',
   },
   {
