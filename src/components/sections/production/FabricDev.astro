@@ -12,7 +12,7 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
   생산 분야 > 원단 개발 (제작 아카이브와 같은 모양: 각진 사진 · 얇은 선 · 글자 위주)
   - 왼쪽: 작은 영문 → 큰 제목 → 설명 → 조건 표(개발 범위 | 최소 수량) → 개발 사례 목록
       · 지금 보이는 원단과 같은 종류의 사례 줄만 진하고 나머지는 옅게
-  - 오른쪽(휴대폰은 위): 원단 사진. 여러 장이면 4초마다 천천히 겹쳐 바뀌고 아주 느리게 살짝 확대됨
+  - 오른쪽(휴대폰은 위): 원단 사진. 사진 · ← → · 사례 줄을 누르면 천천히 겹쳐 바뀌고 아주 느리게 살짝 확대됨
       · 사진 아래 캡션(번호 · 이름 · 색)과 지금 몇 번째인지, 그 아래 얇은 진행선
   문구 · 사진은 src/data/site.ts 의 fabricDev
 -->
@@ -20,7 +20,7 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
   <div class="mx-auto max-w-7xl px-4 pt-28 pb-24 sm:px-6 lg:px-8 lg:pt-48 lg:pb-32">
     <div class="fd-grid">
       <div class="fd-photo-col" data-reveal>
-        <div class="fd-photo">
+        <div class="fd-photo" data-fx-photo>
           {F.photo ? <img src={F.photo} alt="옷본이 개발한 원단" loading="lazy" /> : shots.map((w, i) => (
             <img class:list={['fd-shot', i === 0 && 'is-on']} src={w.img} alt={`${w.name} ${w.color} 원단`} loading="lazy" data-fx-shot data-kind={w.kind} />
           ))}
@@ -33,7 +33,11 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
                   <p class:list={['fd-cap-name', i === 0 && 'is-on']} data-fx-label><b>{pad(i + 1)}</b>{w.name} · {w.color}</p>
                 ))}
               </div>
-              <p class="fd-cap-count" aria-hidden="true"><span data-fx-now>01</span> / {pad(shots.length)}</p>
+              <div class="fd-cap-count">
+                {shots.length > 1 && <button type="button" class="fd-arrow" data-fx-prev aria-label="이전 원단">←</button>}
+                <p aria-hidden="true"><span data-fx-now>01</span> / {pad(shots.length)}</p>
+                {shots.length > 1 && <button type="button" class="fd-arrow" data-fx-next aria-label="다음 원단">→</button>}
+              </div>
             </div>
             <div class="fd-bar" aria-hidden="true"><i data-fx-bar style={`transform: scaleX(${1 / shots.length})`}></i></div>
           </>
@@ -94,8 +98,15 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
   .fd-cap-name { position: absolute; left: 0; top: 0; opacity: 0; transform: translateY(6px); transition: opacity 0.5s ease, transform 0.5s ease; white-space: nowrap; }
   .fd-cap-name.is-on { opacity: 1; transform: none; transition-delay: 0.3s; }
   .fd-cap-name b { margin-right: 8px; color: var(--color-ink); }
-  .fd-cap-count { font-variant-numeric: tabular-nums; }
+  .fd-cap-count { display: flex; align-items: baseline; gap: 14px; font-variant-numeric: tabular-nums; }
   .fd-cap-count span { color: var(--color-ink); }
+  .fd-arrow { font-size: 14px; line-height: 1; color: var(--color-ink); padding: 4px 2px; cursor: pointer; transition: color 0.2s, transform 0.2s; }
+  .fd-arrow:hover { color: var(--color-accent); }
+  [data-fx-prev]:hover { transform: translateX(-2px); }
+  [data-fx-next]:hover { transform: translateX(2px); }
+  .fd-photo.is-click { cursor: pointer; }
+  .fd-case.is-click { cursor: pointer; }
+  .fd-case.is-click:hover .fd-case-name { color: var(--color-accent); }
   .fd-bar { margin-top: 12px; height: 1px; background: var(--color-line); }
   .fd-bar i { display: block; height: 100%; background: var(--color-ink); transform-origin: 0 50%; transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
   @media (prefers-reduced-motion: reduce) { .fd-shot.is-on { animation: none; } .fd-shot { transition: none; } }
@@ -124,7 +135,7 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
 </style>
 
 <script>
-  // 원단 사진: 4초마다 다음 사진으로 천천히 겹쳐 바뀜 (화면에 보일 때만). 캡션 · 번호 · 진행선 · 사례 줄이 같이 바뀜
+  // 원단 사진: 누르면 다음 사진으로 천천히 겹쳐 바뀜. 캡션 · 번호 · 진행선 · 사례 줄이 같이 바뀜
   const root = document.querySelector<HTMLElement>('[data-fabric]');
   const shots = [...(root?.querySelectorAll<HTMLElement>('[data-fx-shot]') ?? [])];
   if (root && shots.length) {
@@ -132,7 +143,6 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
     const now = root.querySelector<HTMLElement>('[data-fx-now]');
     const bar = root.querySelector<HTMLElement>('[data-fx-bar]');
     const cases = [...root.querySelectorAll<HTMLElement>('[data-case]')];
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let at = 0;
     const show = (k: number) => {
       at = (k + shots.length) % shots.length;
@@ -144,8 +154,19 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
       cases.forEach((c) => c.classList.toggle('is-on', c.dataset.case === shots[at].dataset.kind));
     };
     show(0);
-    let visible = false;
-    new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.3 }).observe(shots[0].parentElement!);
-    if (shots.length > 1 && !reduce) setInterval(() => { if (visible && !document.hidden) show(at + 1); }, 4000);
+    // 자동으로 넘어가지 않고, 누를 때만 바뀜: 사진 누르기 · ← → 버튼 · 개발 사례 줄 누르기(같은 종류 사진으로)
+    if (shots.length > 1) {
+      const photo = root.querySelector<HTMLElement>('[data-fx-photo]');
+      photo?.classList.add('is-click');
+      photo?.addEventListener('click', () => show(at + 1));
+      root.querySelector('[data-fx-prev]')?.addEventListener('click', () => show(at - 1));
+      root.querySelector('[data-fx-next]')?.addEventListener('click', () => show(at + 1));
+      cases.forEach((c) => {
+        const k = shots.findIndex((s) => s.dataset.kind === c.dataset.case);
+        if (k < 0) return;
+        c.classList.add('is-click');
+        c.addEventListener('click', () => show(k));
+      });
+    }
   }
 </script>
