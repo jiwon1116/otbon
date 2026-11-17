@@ -101,18 +101,20 @@ export const fabricDev = {
 // 생산 분야 > 제품 사진 (/production). 품목마다 한 줄씩, 사진이 옆으로 이어짐
 // imgs 에 public 폴더 기준 경로를 넣으면 순서대로 보임 (예: '/images/products/jacket-1.jpg')
 // 사진이 아직 없으면 [] 로 두면 크림색 빈 칸으로 자리만 보임
+// 뒷면 사진이 있으면 { src: 앞면, back: 뒷면 } 으로 넣기 → 마우스를 올리면 뒷면이 보임
+export type ProductImg = string | { src: string; back?: string };
 export const products = {
   en: 'Archive',
   title: '제작 아카이브',
   // 한 줄씩 끊어서 보임
-  desc: ['원단 수배부터 패턴, 샘플, 생산, 납품까지.', '옷본에서 제작한 제품입니다.'],
+  desc: ['다양한 브랜드와 함께 만들어 온', 'OTBON의 의류 제작 결과물을 담았습니다.'],
   items: [
-    { name: '셔츠', en: 'Shirt', imgs: [] as string[] },
-    { name: '재킷', en: 'Jacket', imgs: [] as string[] },
-    { name: '점퍼', en: 'Jumper', imgs: [] as string[] },
-    { name: '코트', en: 'Coat', imgs: ['/images/products/coat-1.jpg', '/images/products/coat-2.jpg'] },
-    { name: '다운', en: 'Down', imgs: [] as string[] },
-    { name: '팬츠', en: 'Pants', imgs: [] as string[] },
+    { name: '셔츠', en: 'Shirt', imgs: ['/images/products/shirt-1.jpg', '/images/products/shirt-2.jpg', '/images/products/shirt-3.jpg'] },
+    { name: '재킷', en: 'Jacket', imgs: ['/images/products/jacket-2.jpg', '/images/products/jacket-3.jpg', '/images/products/jacket-4.jpg', { src: '/images/products/jacket-5.jpg', back: '/images/products/jacket-5-front.jpg' }, { src: '/images/products/jacket-6.jpg', back: '/images/products/jacket-6-back.jpg' }, '/images/products/jacket-1.jpg'] as ProductImg[] },
+    { name: '점퍼', en: 'Jumper', imgs: ['/images/products/jumper-1.jpg', '/images/products/jumper-5.jpg', '/images/products/jumper-6.jpg', '/images/products/jumper-2.jpg', '/images/products/jumper-3.jpg', '/images/products/jumper-4.jpg'] },
+    { name: '코트', en: 'Coat', imgs: ['/images/products/coat-2.jpg', '/images/products/coat-1.jpg', '/images/products/coat-3.jpg'] },
+    { name: '다운', en: 'Down', imgs: ['/images/products/down-1.jpg', '/images/products/down-4.jpg', '/images/products/down-5.jpg', '/images/products/down-2.jpg', '/images/products/down-3.jpg'] },
+    { name: '팬츠', en: 'Pants', imgs: ['/images/products/pants-1.jpg', '/images/products/pants-2.jpg', '/images/products/pants-3.jpg', '/images/products/pants-4.jpg', '/images/products/pants-5.jpg'] },
   ],
 };
 

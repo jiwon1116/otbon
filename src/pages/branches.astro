@@ -170,6 +170,8 @@ const list = await Promise.all(
   @media (hover: none) { .br-item.is-feature .br-cap { opacity: 1; transform: none; } .br-item.is-feature .br-shot::after { opacity: 1; } }
   .br-kind { flex: none; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; color: var(--color-accent); background: rgb(250 246 238 / 0.92); }
   .br-kind.is-factory { color: var(--color-muted); }
+  /* 사진 위 표시: 지사는 초록 바탕 · 흰 글씨 (협력은 크림 바탕 그대로) */
+  .br-cap .br-kind:not(.is-factory) { color: #faf6ee; background: var(--color-accent); }
 
   .br-more { display: inline-flex; gap: 6px; padding: 12px 26px; border-radius: 999px; font-size: 14px; font-weight: 600; background: #faf6ee; transition: background-color 0.25s, color 0.25s; }
   .br-more:hover { background: var(--color-ink); color: #f5f1e8; }

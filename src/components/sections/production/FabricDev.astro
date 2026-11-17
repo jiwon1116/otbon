@@ -3,59 +3,67 @@ import { fabricDev as F } from '../../../data/site';
 
 // 사진이 있는 원단만 (사진 없는 조각은 보여주지 않음)
 const shots = F.swatches.filter((w) => w.img);
+const pad = (n: number) => String(n).padStart(2, '0');
+// 종류 영문 표기 (사례 목록 오른쪽 작은 글자)
+const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
 ---
 
 <!--
-  생산 분야 > 원단 개발
-  - 왼쪽: 원단 사진이 칸을 꽉 채움. 여러 장이면 4초마다 천천히 겹쳐 바뀌고, 사진은 아주 느리게 살짝 확대됨
-      · 왼쪽 아래 반투명 라벨(번호 · 이름 · 종류), 오른쪽 아래 얇은 진행 막대
-  - 오른쪽: 제목 · 설명 · 조건(개발 범위 · 최소 수량) · 개발 사례 목록 (지금 보이는 조각의 종류에 맞는 사례 줄이 진해짐)
+  생산 분야 > 원단 개발 (제작 아카이브와 같은 모양: 각진 사진 · 얇은 선 · 글자 위주)
+  - 왼쪽: 작은 영문 → 큰 제목 → 설명 → 조건 표(개발 범위 | 최소 수량) → 개발 사례 목록
+      · 지금 보이는 원단과 같은 종류의 사례 줄만 진하고 나머지는 옅게
+  - 오른쪽(휴대폰은 위): 원단 사진. 여러 장이면 4초마다 천천히 겹쳐 바뀌고 아주 느리게 살짝 확대됨
+      · 사진 아래 캡션(번호 · 이름 · 색)과 지금 몇 번째인지, 그 아래 얇은 진행선
   문구 · 사진은 src/data/site.ts 의 fabricDev
 -->
 <section id="fabric" class="scroll-mt-20 bg-paper" data-fabric>
-  <div class="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-32">
-    <div class="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
-      <div class="fd-photo" data-reveal>
-        {F.photo ? <img src={F.photo} alt="옷본이 개발한 원단" loading="lazy" /> : (
-          <div class="fx" data-fx>
-            {shots.map((w, i) => (
-              <figure class:list={['fx-shot', i === 0 && 'is-on']} data-fx-shot data-kind={w.kind}>
-                <img src={w.img} alt={`${w.name} ${w.color} 원단`} loading="lazy" />
-              </figure>
-            ))}
-            {shots.map((w, i) => (
-              <p class:list={['fx-label', i === 0 && 'is-on']} data-fx-label>
-                <span class="fx-no">No.{String(i + 1).padStart(2, '0')}</span>
-                <span class="fx-name">{w.name}</span>
-                <span class="fx-meta">{w.type} · {w.color}</span>
-              </p>
-            ))}
-            {shots.length > 1 && (
-              <div class="fx-bars" aria-hidden="true">{shots.map(() => <span><i></i></span>)}</div>
-            )}
-          </div>
+  <div class="mx-auto max-w-7xl px-4 pt-28 pb-24 sm:px-6 lg:px-8 lg:pt-48 lg:pb-32">
+    <div class="fd-grid">
+      <div class="fd-photo-col" data-reveal>
+        <div class="fd-photo">
+          {F.photo ? <img src={F.photo} alt="옷본이 개발한 원단" loading="lazy" /> : shots.map((w, i) => (
+            <img class:list={['fd-shot', i === 0 && 'is-on']} src={w.img} alt={`${w.name} ${w.color} 원단`} loading="lazy" data-fx-shot data-kind={w.kind} />
+          ))}
+        </div>
+        {!F.photo && shots.length > 0 && (
+          <>
+            <div class="fd-cap">
+              <div class="fd-cap-names">
+                {shots.map((w, i) => (
+                  <p class:list={['fd-cap-name', i === 0 && 'is-on']} data-fx-label><b>{pad(i + 1)}</b>{w.name} · {w.color}</p>
+                ))}
+              </div>
+              <p class="fd-cap-count" aria-hidden="true"><span data-fx-now>01</span> / {pad(shots.length)}</p>
+            </div>
+            <div class="fd-bar" aria-hidden="true"><i data-fx-bar style={`transform: scaleX(${1 / shots.length})`}></i></div>
+          </>
         )}
       </div>
+
       <div data-reveal style="--reveal-delay: 100ms">
-        <p class="text-xs font-medium uppercase tracking-[0.25em] text-accent sm:text-sm">{F.en}</p>
-        <h2 class="mt-5 text-3xl font-semibold tracking-tight sm:text-5xl">{F.title}</h2>
-        <p class="mt-5 leading-relaxed text-muted">{F.desc}</p>
-        <dl class="mt-8 grid grid-cols-2 gap-6 border-t border-line pt-6">
+        <p class="fd-eyebrow">{F.en.toUpperCase()}</p>
+        <h2 class="fd-title">{F.title}</h2>
+        <p class="fd-desc">{F.desc}</p>
+        <dl class="fd-specs">
           {F.specs.map((s) => (
-            <div><dt class="text-xs text-muted">{s.label}</dt><dd class="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">{s.value}</dd></div>
+            <div><dt>{s.label}</dt><dd>{s.value}</dd></div>
           ))}
         </dl>
-        <p class="mt-10 text-xs font-semibold tracking-[0.2em] text-muted">개발 사례</p>
-        <ul class="mt-3 border-t border-line">
-          {F.cases.map((c) => (
-            <li class="fd-case flex items-center justify-between gap-4 border-b border-line py-4" data-case={c.type === '우븐' ? 'woven' : 'knit'}>
-              <div>
-                <p class="font-semibold">{c.name}</p>
-                <p class="mt-0.5 text-sm text-muted">{c.desc}</p>
-              </div>
-              <span class="fd-tag">{c.type}</span>
-            </li>
-          ))}
+        <p class="fd-cases-h">개발 사례</p>
+        <ul>
+          {F.cases.map((c, i) => {
+            const kind = c.type === '우븐' ? 'woven' : 'knit';
+            return (
+              <li class="fd-case" data-case={kind}>
+                <span class="fd-case-no">{pad(i + 1)}</span>
+                <div>
+                  <p class="fd-case-name">{c.name}</p>
+                  <p class="fd-case-desc">{c.desc}</p>
+                </div>
+                <span class="fd-case-kind">{kindEn(kind)}</span>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>
@@ -63,46 +71,66 @@ const shots = F.swatches.filter((w) => w.img);
 </section>
 
 <style>
-  .fd-photo { display: grid; place-items: center; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 28px; background: var(--color-soft); color: rgb(110 104 94 / 0.6); font-size: 13px; }
-  @media (max-width: 1023px) { .fd-photo { aspect-ratio: 4 / 3.6; } }
-  .fd-photo > img { width: 100%; height: 100%; object-fit: cover; }
+  /* 왼쪽 글(5) · 오른쪽 사진(6). 휴대폰 · 태블릿은 사진이 위 */
+  .fd-grid { display: grid; gap: 40px; }
+  .fd-photo-col { order: -1; }
+  @media (min-width: 1024px) {
+    .fd-grid { grid-template-columns: 5fr 6fr; gap: 72px; align-items: center; }
+    /* 사진 + 캡션이 한 화면에 들어오게 (헤더 · 캡션 자리 빼고) */
+    .fd-photo-col { order: 2; width: 100%; max-width: min(460px, calc((100svh - 300px) * 0.8)); justify-self: end; }
+  }
 
-  /* ---- 원단 사진 (여러 장이면 천천히 겹쳐 바뀜) ---- */
-  .fx { position: absolute; inset: 0; }
-  .fd-photo { position: relative; }
-  .fx-shot { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity 1.4s ease; }
-  .fx-shot.is-on { opacity: 1; }
-  .fx-shot img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.02); }
-  .fx-shot.is-on img { animation: fx-zoom 6s linear both; }
-  @keyframes fx-zoom { from { transform: scale(1.02); } to { transform: scale(1.1); } }
-  .fx-label { position: absolute; left: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 12px 16px; border-radius: 14px;
-    background: rgb(250 246 238 / 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    opacity: 0; transform: translateY(8px); transition: opacity 0.6s ease, transform 0.6s ease; }
-  .fx-label.is-on { opacity: 1; transform: none; transition-delay: 0.5s; }
-  .fx-no { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; color: var(--color-accent); }
-  .fx-name { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; color: var(--color-ink); }
-  .fx-meta { font-size: 11px; font-weight: 600; color: var(--color-muted); }
-  .fx-bars { position: absolute; right: 22px; bottom: 30px; display: flex; gap: 6px; }
-  .fx-bars span { width: 28px; height: 2px; border-radius: 2px; background: rgb(250 246 238 / 0.45); overflow: hidden; }
-  .fx-bars i { display: block; height: 100%; background: #faf6ee; transform-origin: 0 50%; transform: scaleX(0); }
-  .fx-bars span.is-on i { animation: fx-bar 4s linear both; }
-  @keyframes fx-bar { to { transform: scaleX(1); } }
-  @media (prefers-reduced-motion: reduce) { .fx-shot.is-on img, .fx-bars span.is-on i { animation: none; } .fx-shot { transition: none; } }
+  /* ---- 원단 사진: 각진 칸, 여러 장이면 천천히 겹쳐 바뀜 ---- */
+  .fd-photo { position: relative; aspect-ratio: 4 / 3.6; overflow: hidden; background: #faf6ee; }
+  @media (min-width: 1024px) { .fd-photo { aspect-ratio: 4 / 5; } }
+  .fd-photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .fd-shot { opacity: 0; transform: scale(1.02); transition: opacity 1.4s ease; }
+  .fd-shot.is-on { opacity: 1; animation: fd-zoom 6s linear both; }
+  @keyframes fd-zoom { from { transform: scale(1.02); } to { transform: scale(1.1); } }
 
-  /* 사례 목록: 지금 보이는 조각 종류가 아닌 줄은 옅게 */
-  .fd-case { transition: opacity 0.5s; }
-  [data-fabric].is-live .fd-case:not(.is-on) { opacity: 0.4; }
-  .fd-tag { flex: none; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; color: var(--color-accent); background: rgb(46 91 69 / 0.1); }
+  /* 사진 아래 캡션 · 진행선 */
+  .fd-cap { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-top: 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; color: var(--color-muted); }
+  .fd-cap-names { position: relative; flex: 1; min-height: 1.4em; }
+  .fd-cap-name { position: absolute; left: 0; top: 0; opacity: 0; transform: translateY(6px); transition: opacity 0.5s ease, transform 0.5s ease; white-space: nowrap; }
+  .fd-cap-name.is-on { opacity: 1; transform: none; transition-delay: 0.3s; }
+  .fd-cap-name b { margin-right: 8px; color: var(--color-ink); }
+  .fd-cap-count { font-variant-numeric: tabular-nums; }
+  .fd-cap-count span { color: var(--color-ink); }
+  .fd-bar { margin-top: 12px; height: 1px; background: var(--color-line); }
+  .fd-bar i { display: block; height: 100%; background: var(--color-ink); transform-origin: 0 50%; transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+  @media (prefers-reduced-motion: reduce) { .fd-shot.is-on { animation: none; } .fd-shot { transition: none; } }
+
+  /* ---- 글: 제작 아카이브와 같은 제목 크기 ---- */
+  .fd-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.28em; color: var(--color-accent); }
+  .fd-title { margin-top: 18px; font-size: clamp(2.5rem, 5vw, 3.75rem); font-weight: 600; letter-spacing: -0.045em; line-height: 1.05; }
+  .fd-desc { margin-top: 20px; font-size: 15px; line-height: 1.75; color: var(--color-muted); }
+  @media (min-width: 640px) { .fd-desc { font-size: 16px; } }
+
+  /* 조건 표: 위 진한 선, 가운데 세로선 */
+  .fd-specs { display: grid; grid-template-columns: 1fr 1fr; margin-top: 40px; border-top: 1px solid var(--color-ink); }
+  .fd-specs > div { padding: 18px 0; border-bottom: 1px solid var(--color-line); }
+  .fd-specs > div + div { padding-left: 24px; border-left: 1px solid var(--color-line); }
+  .fd-specs dt { font-size: 12px; font-weight: 600; color: var(--color-muted); }
+  .fd-specs dd { margin-top: 6px; font-size: clamp(1.125rem, 1.8vw, 1.375rem); font-weight: 600; letter-spacing: -0.03em; }
+
+  /* 개발 사례: 번호 · 이름/설명 · 종류, 선으로 나눔. 지금 사진과 다른 종류는 옅게 */
+  .fd-cases-h { margin-top: 36px; margin-bottom: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.2em; color: var(--color-muted); }
+  .fd-case { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--color-line); transition: opacity 0.5s; }
+  [data-fabric].is-live .fd-case:not(.is-on) { opacity: 0.35; }
+  .fd-case-no { font-size: 12px; font-weight: 600; color: var(--color-muted); font-variant-numeric: tabular-nums; }
+  .fd-case-name { font-size: 16px; font-weight: 600; }
+  .fd-case-desc { margin-top: 3px; font-size: 13px; color: var(--color-muted); }
+  .fd-case-kind { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; color: var(--color-muted); }
 </style>
 
 <script>
-  // 원단 사진: 4초마다 다음 사진으로 천천히 겹쳐 바뀜 (화면에 보일 때만). 지금 원단 종류에 맞는 사례 줄을 진하게
+  // 원단 사진: 4초마다 다음 사진으로 천천히 겹쳐 바뀜 (화면에 보일 때만). 캡션 · 번호 · 진행선 · 사례 줄이 같이 바뀜
   const root = document.querySelector<HTMLElement>('[data-fabric]');
-  const fx = root?.querySelector<HTMLElement>('[data-fx]');
-  if (root && fx) {
-    const shots = [...fx.querySelectorAll<HTMLElement>('[data-fx-shot]')];
-    const labels = [...fx.querySelectorAll<HTMLElement>('[data-fx-label]')];
-    const bars = [...fx.querySelectorAll<HTMLElement>('.fx-bars span')];
+  const shots = [...(root?.querySelectorAll<HTMLElement>('[data-fx-shot]') ?? [])];
+  if (root && shots.length) {
+    const labels = [...root.querySelectorAll<HTMLElement>('[data-fx-label]')];
+    const now = root.querySelector<HTMLElement>('[data-fx-now]');
+    const bar = root.querySelector<HTMLElement>('[data-fx-bar]');
     const cases = [...root.querySelectorAll<HTMLElement>('[data-case]')];
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let at = 0;
@@ -110,13 +138,14 @@ const shots = F.swatches.filter((w) => w.img);
       at = (k + shots.length) % shots.length;
       shots.forEach((s, i) => s.classList.toggle('is-on', i === at));
       labels.forEach((l, i) => l.classList.toggle('is-on', i === at));
-      bars.forEach((b, i) => { b.classList.remove('is-on'); if (i === at) { void b.offsetWidth; b.classList.add('is-on'); } });
+      if (now) now.textContent = String(at + 1).padStart(2, '0');
+      if (bar) bar.style.transform = `scaleX(${(at + 1) / shots.length})`;
       root.classList.add('is-live');
       cases.forEach((c) => c.classList.toggle('is-on', c.dataset.case === shots[at].dataset.kind));
     };
     show(0);
     let visible = false;
-    new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.3 }).observe(fx);
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.3 }).observe(shots[0].parentElement!);
     if (shots.length > 1 && !reduce) setInterval(() => { if (visible && !document.hidden) show(at + 1); }, 4000);
   }
 </script>
