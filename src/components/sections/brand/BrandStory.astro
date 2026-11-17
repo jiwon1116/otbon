@@ -132,13 +132,15 @@ const bCurve = pts
   .bs-stripe.from-right { transform-origin: right center; }
 
   /* 배경 글자: 화면 아래쪽에 걸친 아주 큰 단어. 움직임 모드에서만 보임 */
+  /* 배경 글자 크기: 화면 폭과 높이 중 작은 쪽에 맞춤 (윈도우처럼 세로가 짧은 화면에서 글자가 너무 커져 목록과 겹치지 않게) */
+  .bs { --bw: clamp(5rem, min(21vw, 30svh), 22rem); }
   .bs-words { display: none; }
   .motion .bs-words {
     display: block;
     position: absolute;
     inset: auto 0 -0.12em;
     height: 1em;
-    font-size: clamp(6rem, 21vw, 22rem);
+    font-size: var(--bw);
     font-weight: 800;
     line-height: 1;
     letter-spacing: -0.05em;
@@ -179,9 +181,24 @@ const bCurve = pts
   /* 큰 화면: 위쪽 헤더(80px)를 뺀 자리의 가운데에 오게 */
   /* 아래쪽 큰 배경 글자 때문에 무게가 아래로 쏠려 보여서, 아래 여백을 더 줘서 내용을 위로 올림
      위 섹션(로고 소개)과의 빈 공간도 줄이려고 위로 살짝 겹쳐 붙임 (겹치는 자리는 둘 다 빈 공간) */
+  /* 아래 여백 = 배경 글자가 화면에 보이는 높이(글자 크기의 약 0.72배) + 조금 → 목록이 항상 글자 위에서 끝남 */
   @media (min-width: 1024px) {
-    .motion .bs-stage { padding-top: 5rem; padding-bottom: 14vh; }
+    .motion .bs-stage { padding-top: 5rem; padding-bottom: calc(var(--bw) * 0.72 + 20px); }
     .motion .bs { margin-top: -7rem; }
+  }
+  /* 세로가 짧은 화면(윈도우 노트북 등): 배경 글자를 더 작게, 목록 간격도 촘촘하게 */
+  @media (min-width: 1024px) and (max-height: 820px) {
+    .bs { --bw: clamp(5rem, min(21vw, 22svh), 22rem); }
+    .bs h2 { font-size: 1.875rem; }
+    .bs h2 + p { margin-top: 0.75rem; }
+    .bs-steps { margin-top: 1.25rem !important; }
+    .bs-step { padding: 12px 0; }
+    .bs-step p { font-size: 0.875rem; line-height: 1.6; }
+  }
+  /* 아주 짧은 화면: 배경 글자는 꾸밈이라 빼고 내용을 우선 */
+  @media (min-width: 1024px) and (max-height: 660px) {
+    .motion .bs-words { display: none; }
+    .motion .bs-stage { padding-bottom: 1.5rem; }
   }
   /* 큰 모니터(가로 1536px · 세로 1000px 이상): 심볼 · 제목을 키워서 위아래가 휑하지 않게 */
   @media (min-width: 1536px) and (min-height: 1000px) {
