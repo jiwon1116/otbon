@@ -22,7 +22,7 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
       <div class="fd-photo-col" data-reveal>
         <div class="fd-photo" data-fx-photo>
           {F.photo ? <img src={F.photo} alt="옷본이 개발한 원단" loading="lazy" /> : shots.map((w, i) => (
-            <img class:list={['fd-shot', i === 0 && 'is-on']} src={w.img} alt={`${w.name} ${w.color} 원단`} loading="lazy" data-fx-shot data-kind={w.kind} />
+            <img class:list={['fd-shot', i === 0 && 'is-on']} src={w.img} alt={w.color ? `${w.name} ${w.color} 원단` : w.name} loading="lazy" data-fx-shot data-kind={w.kind} />
           ))}
         </div>
         {!F.photo && shots.length > 0 && (
@@ -30,7 +30,7 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
             <div class="fd-cap">
               <div class="fd-cap-names">
                 {shots.map((w, i) => (
-                  <p class:list={['fd-cap-name', i === 0 && 'is-on']} data-fx-label><b>{pad(i + 1)}</b>{w.name} · {w.color}</p>
+                  <p class:list={['fd-cap-name', i === 0 && 'is-on']} data-fx-label><b>{pad(i + 1)}</b>{w.name}{w.color && ` · ${w.color}`}</p>
                 ))}
               </div>
               <div class="fd-cap-count">

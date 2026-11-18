@@ -88,7 +88,7 @@ export const fabricDev = {
   ],
   swatches: [
     { name: '몰스킨', type: '우븐', color: '차콜', base: '#3a3936', kind: 'woven', img: '/images/fabric/moleskin-charcoal.jpg' },
-    { name: '편직 원단', type: '다이마루', color: '스트라이프', base: '#e9edf2', kind: 'knit', img: '/images/fabric/knit-stripe.jpg' },
+    { name: '편직 원단', type: '다이마루', color: '', base: '#e9edf2', kind: 'knit', img: '/images/fabric/knit-stripe.jpg' },
     { name: '몰스킨', type: '우븐', color: '올리브', base: '#5d5f45', kind: 'woven', img: '' },
     { name: '편직 원단', type: '다이마루', color: '네이비', base: '#27304a', kind: 'knit', img: '' },
   ] as { name: string; type: string; color: string; base: string; kind: 'woven' | 'knit'; img: string }[],
