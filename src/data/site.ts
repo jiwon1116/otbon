@@ -225,7 +225,7 @@ export const network: { eyebrow: string; intro: { caption: string[]; name: strin
     },
     {
       code: 704, name: 'Vietnam', role: 'BRANCH 02', zoom: 7, region: 'VN-54', // 베트남 전체 말고 박지앙성만
-      caption: ['완성도 높은 의류 제작과 안정적인 대량 생산을 담당하는', '옷본의 베트남 지사입니다.'],
+      caption: ['균일한 품질과 안정적인 대량 생산을 담당하는', '옷본의 베트남 지사입니다.'],
       cities: [{ name: '박지앙', sub: '하노이', pin: [106.2, 21.27], side: 'left' }],
     },
   ],
@@ -269,7 +269,7 @@ export const branches: { id: string; name: string; en: string; role: string; cit
   },
   {
     id: 'vietnam', name: '베트남 박지앙 지사', en: 'Vietnam', role: 'BRANCH 02', city: '하노이 박지앙',
-    desc: '완성도 높은 의류 제작과 안정적인 대량 생산을 담당하는 옷본의 베트남 지사입니다.',
+    desc: '균일한 품질과 안정적인 대량 생산을 담당하는 옷본의 베트남 지사입니다.',
     places: [
       { name: '박지앙 지사', kind: 'office', desc: '0000' },
       { name: '0000 복장공장', kind: 'factory', desc: '0000' },

@@ -10,7 +10,7 @@ const { hideHead = false } = Astro.props as { hideHead?: boolean };
 <!--
   생산 분야: 제목 + 번호 카드 6장 (큰 화면 3칸 × 2줄, 태블릿 2칸, 휴대폰 1칸)
   - 사진은 빼고 글 중심으로. 카드마다 굵은 초록 번호 · 제목 · 영어 이름 · 설명
-  - 마우스를 올리면 카드가 살짝 떠오름
+  - 마우스를 올려도 움직임 없음
 -->
 <section id="production" class="scroll-mt-20 bg-paper">
   <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8 lg:pb-32">
@@ -36,7 +36,7 @@ const { hideHead = false } = Astro.props as { hideHead?: boolean };
 </section>
 
 <style>
-  /* 카드: 바탕보다 밝은 따뜻한 흰색 + 얇은 테두리, 마우스를 올리면 살짝 떠오름 */
+  /* 카드: 바탕보다 밝은 따뜻한 흰색 + 얇은 테두리 (마우스를 올려도 효과 없음) */
   .cap-card {
     height: 100%;
     padding: 1.25rem 1.4rem;
@@ -44,14 +44,8 @@ const { hideHead = false } = Astro.props as { hideHead?: boolean };
     border-radius: 16px;
     background: #fdfbf7;
     box-shadow: 0 1px 2px rgb(40 40 40 / 0.04);
-    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.4s ease;
   }
   @media (min-width: 1024px) { .cap-card { padding: 1.5rem 1.75rem; } }
-  .cap-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px -16px rgb(40 40 40 / 0.18); }
 
 
-  @media (prefers-reduced-motion: reduce) {
-    .cap-card { transition: none; }
-    .cap-card:hover { transform: none; }
-  }
 </style>
