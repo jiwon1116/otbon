@@ -3,8 +3,15 @@ import { fabricDev as F } from '../../../data/site';
 
 // 사진이 있는 원단만 (사진 없는 조각은 보여주지 않음)
 const shots = F.swatches.filter((w) => w.img);
+// 이름이 같은 원단은 한 장으로 묶음 (같은 원단의 다른 컬러는 사진 아래 색 점으로 바꿔 봄)
+const groups: { name: string; items: typeof shots }[] = [];
+for (const w of shots) {
+  const g = groups.find((x) => x.name === w.name);
+  if (g) g.items.push(w);
+  else groups.push({ name: w.name, items: [w] });
+}
 const pad = (n: number) => String(n).padStart(2, '0');
-// 종류 영문 표기 (사례 목록 오른쪽 작은 글자)
+// 사진 ↔ 사례 줄은 원단 이름으로 연결. 종류 영문 표기 (사례 목록 오른쪽 작은 글자)
 const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
 ---
 
@@ -21,25 +28,36 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
     <div class="fd-grid">
       <div class="fd-photo-col" data-reveal>
         <div class="fd-photo" data-fx-photo>
-          {F.photo ? <img src={F.photo} alt="옷본이 개발한 원단" loading="lazy" /> : shots.map((w, i) => (
-            <img class:list={['fd-shot', i === 0 && 'is-on']} src={w.img} alt={w.color ? `${w.name} ${w.color} 원단` : w.name} loading="lazy" data-fx-shot data-kind={w.kind} />
-          ))}
+          {F.photo ? <img src={F.photo} alt="옷본이 개발한 원단" loading="lazy" /> : groups.flatMap((g, gi) => g.items.map((w, ci) => (
+            <img class:list={['fd-shot', gi === 0 && ci === 0 && 'is-on', w.still && 'is-still']} src={w.img} alt={w.color ? `${w.name} ${w.color} 원단` : w.name} loading="lazy" data-fx-shot data-g={gi} data-c={ci} />
+          )))}
         </div>
-        {!F.photo && shots.length > 0 && (
+        {!F.photo && groups.length > 0 && (
           <>
             <div class="fd-cap">
               <div class="fd-cap-names">
-                {shots.map((w, i) => (
-                  <p class:list={['fd-cap-name', i === 0 && 'is-on']} data-fx-label><b>{pad(i + 1)}</b>{w.name}{w.color && ` · ${w.color}`}</p>
+                {groups.map((g, gi) => (
+                  <p class:list={['fd-cap-name', gi === 0 && 'is-on']} data-fx-label data-kind={g.name}><b>{pad(gi + 1)}</b>{g.name}{g.items[0].color && <span data-fx-color> · {g.items[0].color}</span>}</p>
                 ))}
               </div>
               <div class="fd-cap-count">
-                {shots.length > 1 && <button type="button" class="fd-arrow" data-fx-prev aria-label="이전 원단">←</button>}
-                <p aria-hidden="true"><span data-fx-now>01</span> / {pad(shots.length)}</p>
-                {shots.length > 1 && <button type="button" class="fd-arrow" data-fx-next aria-label="다음 원단">→</button>}
+                {groups.length > 1 && <button type="button" class="fd-arrow" data-fx-prev aria-label="이전 원단">←</button>}
+                <p aria-hidden="true"><span data-fx-now>01</span> / {pad(groups.length)}</p>
+                {groups.length > 1 && <button type="button" class="fd-arrow" data-fx-next aria-label="다음 원단">→</button>}
               </div>
             </div>
-            <div class="fd-bar" aria-hidden="true"><i data-fx-bar style={`transform: scaleX(${1 / shots.length})`}></i></div>
+            {groups.some((g) => g.items.length > 1) && (
+              <div class="fd-dots">
+                {groups.map((g, gi) => g.items.length > 1 && (
+                  <div class:list={['fd-dot-row', gi === 0 && 'is-on']} data-fx-dots={gi}>
+                    {g.items.map((w, ci) => (
+                      <button type="button" class:list={['fd-dot', ci === 0 && 'is-on']} style={`--dot: ${w.base}`} data-fx-dot={ci} data-color={w.color} aria-label={`${w.color} 컬러 보기`} aria-pressed={ci === 0 ? 'true' : 'false'}></button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div class="fd-bar" aria-hidden="true"><i data-fx-bar style={`transform: scaleX(${1 / groups.length})`}></i></div>
           </>
         )}
       </div>
@@ -58,7 +76,7 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
           {F.cases.map((c, i) => {
             const kind = c.type === '우븐' ? 'woven' : 'knit';
             return (
-              <li class="fd-case" data-case={kind}>
+              <li class="fd-case" data-case={c.name}>
                 <span class="fd-case-no">{pad(i + 1)}</span>
                 <div>
                   <p class="fd-case-name">{c.name}</p>
@@ -91,6 +109,8 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
   .fd-shot { opacity: 0; transform: scale(1.02); transition: opacity 1.4s ease; }
   .fd-shot.is-on { opacity: 1; animation: fd-zoom 6s linear both; }
   @keyframes fd-zoom { from { transform: scale(1.02); } to { transform: scale(1.1); } }
+  /* 잔무늬 원단은 확대하지 않음 (무늬가 일렁여 눈이 아픔) */
+  .fd-shot.is-still, .fd-shot.is-still.is-on { transform: none; animation: none; }
 
   /* 사진 아래 캡션 · 진행선 */
   .fd-cap { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-top: 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; color: var(--color-muted); }
@@ -107,6 +127,13 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
   .fd-photo.is-click { cursor: pointer; }
   .fd-case.is-click { cursor: pointer; }
   .fd-case.is-click:hover .fd-case-name { color: var(--color-accent); }
+  /* 같은 원단의 컬러 점: 지금 원단에 컬러가 여러 개일 때만 보임. 자리는 늘 잡아 둬서 들썩이지 않음 */
+  .fd-dots { position: relative; height: 22px; margin-top: 10px; }
+  .fd-dot-row { position: absolute; left: 0; top: 0; display: flex; gap: 10px; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s; }
+  .fd-dot-row.is-on { opacity: 1; visibility: visible; transition-delay: 0.3s; }
+  .fd-dot { width: 14px; height: 14px; margin: 4px; border-radius: 50%; background: var(--dot); cursor: pointer; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08); transition: box-shadow 0.25s, transform 0.25s; }
+  .fd-dot:hover { transform: scale(1.12); }
+  .fd-dot.is-on { box-shadow: 0 0 0 2px var(--color-paper, #f5efe4), 0 0 0 3px var(--color-ink); }
   .fd-bar { margin-top: 12px; height: 1px; background: var(--color-line); }
   .fd-bar i { display: block; height: 100%; background: var(--color-ink); transform-origin: 0 50%; transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
   @media (prefers-reduced-motion: reduce) { .fd-shot.is-on { animation: none; } .fd-shot { transition: none; } }
@@ -139,33 +166,53 @@ const kindEn = (kind: string) => (kind === 'woven' ? 'WOVEN' : 'DAIMARU');
   const root = document.querySelector<HTMLElement>('[data-fabric]');
   const shots = [...(root?.querySelectorAll<HTMLElement>('[data-fx-shot]') ?? [])];
   if (root && shots.length) {
+    // 이름이 같은 원단은 한 묶음(g). 묶음 안의 컬러(c)는 색 점으로 바꿈
     const labels = [...root.querySelectorAll<HTMLElement>('[data-fx-label]')];
+    const dotRows = [...root.querySelectorAll<HTMLElement>('[data-fx-dots]')];
     const now = root.querySelector<HTMLElement>('[data-fx-now]');
     const bar = root.querySelector<HTMLElement>('[data-fx-bar]');
     const cases = [...root.querySelectorAll<HTMLElement>('[data-case]')];
-    let at = 0;
-    const show = (k: number) => {
-      at = (k + shots.length) % shots.length;
-      shots.forEach((s, i) => s.classList.toggle('is-on', i === at));
-      labels.forEach((l, i) => l.classList.toggle('is-on', i === at));
-      if (now) now.textContent = String(at + 1).padStart(2, '0');
-      if (bar) bar.style.transform = `scaleX(${(at + 1) / shots.length})`;
+    const total = labels.length;
+    let g = 0;
+    let c = 0;
+    const show = (k: number, color = 0) => {
+      g = (k + total) % total;
+      c = color;
+      shots.forEach((s) => s.classList.toggle('is-on', s.dataset.g === String(g) && s.dataset.c === String(c)));
+      labels.forEach((l, i) => l.classList.toggle('is-on', i === g));
+      dotRows.forEach((row) => {
+        const on = row.dataset.fxDots === String(g);
+        row.classList.toggle('is-on', on);
+        row.querySelectorAll<HTMLElement>('[data-fx-dot]').forEach((d) => {
+          const sel = on && d.dataset.fxDot === String(c);
+          d.classList.toggle('is-on', d.dataset.fxDot === String(on ? c : 0));
+          d.setAttribute('aria-pressed', sel ? 'true' : 'false');
+          // 캡션의 색 이름도 같이 바뀜
+          if (sel) { const span = labels[g].querySelector('[data-fx-color]'); if (span) span.textContent = ` · ${d.dataset.color}`; }
+        });
+      });
+      if (now) now.textContent = String(g + 1).padStart(2, '0');
+      if (bar) bar.style.transform = `scaleX(${(g + 1) / total})`;
       root.classList.add('is-live');
-      cases.forEach((c) => c.classList.toggle('is-on', c.dataset.case === shots[at].dataset.kind));
+      cases.forEach((el) => el.classList.toggle('is-on', el.dataset.case === labels[g].dataset.kind));
     };
     show(0);
-    // 자동으로 넘어가지 않고, 누를 때만 바뀜: 사진 누르기 · ← → 버튼 · 개발 사례 줄 누르기(같은 종류 사진으로)
-    if (shots.length > 1) {
+    // 색 점: 같은 원단 안에서 컬러만 바꿈
+    dotRows.forEach((row) => row.querySelectorAll<HTMLElement>('[data-fx-dot]').forEach((d) => {
+      d.addEventListener('click', () => show(Number(row.dataset.fxDots), Number(d.dataset.fxDot)));
+    }));
+    // 자동으로 넘어가지 않고, 누를 때만 바뀜: 사진 누르기 · ← → 버튼 · 개발 사례 줄 누르기(같은 원단으로)
+    if (total > 1) {
       const photo = root.querySelector<HTMLElement>('[data-fx-photo]');
       photo?.classList.add('is-click');
-      photo?.addEventListener('click', () => show(at + 1));
-      root.querySelector('[data-fx-prev]')?.addEventListener('click', () => show(at - 1));
-      root.querySelector('[data-fx-next]')?.addEventListener('click', () => show(at + 1));
-      cases.forEach((c) => {
-        const k = shots.findIndex((s) => s.dataset.kind === c.dataset.case);
+      photo?.addEventListener('click', () => show(g + 1));
+      root.querySelector('[data-fx-prev]')?.addEventListener('click', () => show(g - 1));
+      root.querySelector('[data-fx-next]')?.addEventListener('click', () => show(g + 1));
+      cases.forEach((el) => {
+        const k = labels.findIndex((l) => l.dataset.kind === el.dataset.case);
         if (k < 0) return;
-        c.classList.add('is-click');
-        c.addEventListener('click', () => show(k));
+        el.classList.add('is-click');
+        el.addEventListener('click', () => show(k));
       });
     }
   }

@@ -16,7 +16,8 @@ const EMPTY = 5;
   - 품목 구역: 바로가기 아래에 화면이 멈추고, 아래로 스크롤하는 만큼 사진 줄이 옆으로 부드럽게 흘러감
       · 오른쪽 위 지금 번호 / 전체 장수, 아래 얇은 진행선. 사진 안쪽도 살짝 반대로 움직여 깊이감
       · 움직임 줄이기 설정이면 멈추지 않고 손으로 옆으로 밀어서 봄
-  - 뒷면 사진이 있는 칸은 마우스를 올리면(휴대폰은 누르면) 뒷면
+  - 뒷면 사진이 있는 칸은 마우스를 올리면 뒷면
+  - 사진을 누르면 크게 보기 창(맨 아래 dialog). 창 안에서 한 번 더 누르면 2배 확대, ← → 로 같은 품목 넘기기, 뒷면 있으면 뒷면 보기 버튼
 -->
 <section id="products" class="scroll-mt-20">
   <div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8 lg:pt-16" data-reveal>
@@ -57,7 +58,7 @@ const EMPTY = 5;
             </div>
             <ul class="pd-track" data-pd-track>
               {photos.map(({ src, back }, k) => (
-                <li class:list={['pd-item', back && 'has-back']}>
+                <li class:list={['pd-item', back && 'has-back', src && 'is-zoomable']} data-pd-item={src ? '' : undefined} data-src={src || undefined} data-back={back || undefined} data-name={it.name} data-k={k}>
                   <div class="pd-photo">
                     <div class="pd-in" data-pd-in>
                       {src
@@ -76,9 +77,62 @@ const EMPTY = 5;
       );
     })}
   </div>
+
+  <!-- 크게 보기: 사진을 누르면 열림. 사진을 한 번 더 누르면 누른 곳이 확대(마우스를 움직이면 따라 이동), ← → 로 같은 품목 다음 사진 -->
+  <dialog class="lb" aria-label="제품 사진 크게 보기" data-lb>
+    <div class="lb-top">
+      <p class="lb-title"><span data-lb-name></span> <b data-lb-now>01</b> / <span data-lb-total>01</span></p>
+      <div class="lb-tools">
+        <button type="button" class="lb-side" data-lb-side hidden>뒷면 보기</button>
+        <button type="button" class="lb-x" data-lb-close aria-label="닫기">✕</button>
+      </div>
+    </div>
+    <div class="lb-stage" data-lb-stage>
+      <img class="lb-img" alt="" data-lb-img draggable="false" />
+    </div>
+    <button type="button" class="lb-arrow lb-prev" data-lb-prev aria-label="이전 사진">←</button>
+    <button type="button" class="lb-arrow lb-next" data-lb-next aria-label="다음 사진">→</button>
+    <p class="lb-hint" data-lb-hint>사진을 누르면 확대해서 구석구석 볼 수 있어요</p>  </dialog>
 </section>
 
 <style>
+  /* ---- 크게 보기 ---- */
+  .pd-item.is-zoomable .pd-photo { cursor: zoom-in; }
+  .lb { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgb(245 241 232 / 0.97); color: var(--color-ink); overflow: hidden; }
+  .lb::backdrop { background: transparent; }
+  .lb[open] { animation: lb-in 0.3s ease both; }
+  @keyframes lb-in { from { opacity: 0; } to { opacity: 1; } }
+  .lb-top { position: absolute; left: 0; right: 0; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 20px; }
+  @media (min-width: 1024px) { .lb-top { padding: 24px 40px; } }
+  .lb-title { font-size: 12px; font-weight: 600; letter-spacing: 0.16em; color: var(--color-muted); font-variant-numeric: tabular-nums; }
+  .lb-title [data-lb-name] { margin-right: 10px; color: var(--color-ink); letter-spacing: 0.02em; font-size: 14px; }
+  .lb-title b { color: var(--color-ink); }
+  .lb-tools { display: flex; align-items: center; gap: 8px; }
+  .lb-side { padding: 8px 14px; font-size: 13px; font-weight: 600; border: 1px solid var(--color-line); border-radius: 999px; background: #faf6ee; transition: border-color 0.2s; }
+  .lb-side:hover { border-color: var(--color-ink); }
+  .lb-x { width: 40px; height: 40px; font-size: 18px; line-height: 1; border-radius: 999px; transition: background 0.2s; }
+  .lb-x:hover { background: var(--color-soft); }
+  /* 사진 무대는 화면 전체 → 확대하면 화면 끝까지 넓게 보임. 손동작(끌기 · 두 손가락 확대)은 스크립트가 직접 처리 */
+  .lb-stage { position: absolute; inset: 0; overflow: hidden; cursor: zoom-in; touch-action: none; }
+  /* 확대 전: 위 · 아래 글자 자리를 뺀 칸 안에 사진 전체가 비율대로(contain) 들어옴 */
+  .lb-img { position: absolute; left: 16px; top: 72px; width: calc(100% - 32px); height: calc(100% - 128px); max-width: none; object-fit: contain; user-select: none; -webkit-user-drag: none; transform-origin: 50% 50%; will-change: transform; transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+  @media (min-width: 1024px) { .lb-img { left: 120px; top: 88px; width: calc(100% - 240px); height: calc(100% - 152px); } }
+  /* 확대 중: 손바닥(잡기) 커서, 누르고 있는 동안은 쥔 손 */
+  .lb.is-zoom .lb-stage { cursor: grab; }
+  .lb.is-zoom.is-drag .lb-stage { cursor: grabbing; }
+  /* 끄는 중 · 두 손가락 확대 중엔 바로 따라옴 */
+  .lb.is-drag .lb-img { transition: none; }
+  .lb-top { pointer-events: none; }
+  .lb-top > * { pointer-events: auto; }
+  .lb-arrow { position: absolute; top: 50%; z-index: 2; width: 48px; height: 48px; margin-top: -24px; font-size: 18px; border-radius: 999px; transition: background 0.2s, opacity 0.2s; }
+  .lb-arrow:hover { background: var(--color-soft); }
+  .lb-prev { left: 8px; }
+  .lb-next { right: 8px; }
+  @media (min-width: 1024px) { .lb-prev { left: 40px; } .lb-next { right: 40px; } }
+  .lb.is-zoom .lb-arrow, .lb.is-single .lb-arrow { opacity: 0; pointer-events: none; }
+  .lb-hint { position: absolute; left: 0; right: 0; bottom: 20px; text-align: center; font-size: 12px; color: var(--color-muted); transition: opacity 0.3s; }
+  .lb.is-zoom .lb-hint { opacity: 0; }
+
   /* 헤더(휴대폰 64px · 큰 화면 80px) + 바로가기 줄(52px) 아래에서 품목 화면이 멈춤 */
   #products { --nav-h: 52px; --pin-top: calc(4rem + var(--nav-h)); }
   @media (min-width: 1024px) { #products { --pin-top: calc(5rem + var(--nav-h)); } }
@@ -308,11 +362,151 @@ const EMPTY = 5;
     });
   }
 
-  // 뒷면 사진: 마우스가 없는 화면(휴대폰 · 태블릿)은 눌러서 앞 ↔ 뒤 바꾸기
-  if (!matchMedia('(hover: hover)').matches) {
-    document.querySelectorAll<HTMLElement>('.pd-item.has-back').forEach((p) =>
-      p.addEventListener('click', () => p.classList.toggle('is-back')),
-    );
+  // ---- 크게 보기: 사진을 누르면 열림 (뒷면이 있으면 창 안에서 '뒷면 보기'로 바꿈) ----
+  const lb = document.querySelector<HTMLDialogElement>('[data-lb]');
+  if (lb) {
+    const img = lb.querySelector<HTMLImageElement>('[data-lb-img]')!;
+    const stage = lb.querySelector<HTMLElement>('[data-lb-stage]')!;
+    const nameEl = lb.querySelector<HTMLElement>('[data-lb-name]')!;
+    const nowEl = lb.querySelector<HTMLElement>('[data-lb-now]')!;
+    const totalEl = lb.querySelector<HTMLElement>('[data-lb-total]')!;
+    const sideBtn = lb.querySelector<HTMLButtonElement>('[data-lb-side]')!;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    let list: HTMLElement[] = [];
+    let at = 0;
+    let backSide = false;
+
+    // ---- 확대 상태: 배율(s) · 이동(tx, ty). 사진 칸 가운데를 기준으로 translate → scale ----
+    const ZOOM = 2; // 누르면 이 배율로
+    const MAX = 3; // 두 손가락 · 휠로 최대
+    let s = 1, tx = 0, ty = 0;
+    const apply = () => {
+      img.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) scale(${s.toFixed(3)})`;
+      lb.classList.toggle('is-zoom', s > 1.01);
+    };
+    // 사진 칸 · 실제 사진이 그려진 크기 · 화면 가운데와의 차이
+    const geo = () => {
+      const W = stage.clientWidth, H = stage.clientHeight;
+      const bw = img.offsetWidth, bh = img.offsetHeight;
+      const r = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 0.8;
+      const cw = Math.min(bw, bh * r), ch = cw / r;
+      const bx = img.offsetLeft + bw / 2, by = img.offsetTop + bh / 2;
+      return { W, H, cw, ch, bx, by, dx: bx - W / 2, dy: by - H / 2 };
+    };
+    // 사진이 화면보다 크면 가장자리가 화면 안으로 들어오지 않게, 작으면 가운데로
+    const clamp = () => {
+      if (s <= 1.001) { s = 1; tx = 0; ty = 0; return; }
+      const g = geo();
+      const hx = (g.cw * s - g.W) / 2, hy = (g.ch * s - g.H) / 2;
+      tx = hx > 0 ? Math.min(hx - g.dx, Math.max(-hx - g.dx, tx)) : -g.dx;
+      ty = hy > 0 ? Math.min(hy - g.dy, Math.max(-hy - g.dy, ty)) : -g.dy;
+    };
+    // 화면의 (qx, qy) 지점이 그대로 손가락/마우스 밑에 남도록 배율을 바꿈
+    const zoomAt = (qx: number, qy: number, ns: number) => {
+      const g = geo();
+      const px = (qx - g.bx - tx) / s, py = (qy - g.by - ty) / s;
+      s = Math.min(MAX, Math.max(1, ns));
+      tx = qx - g.bx - s * px;
+      ty = qy - g.by - s * py;
+      clamp();
+      apply();
+    };
+    const unzoom = () => { s = 1; tx = 0; ty = 0; lb.classList.remove('is-drag'); apply(); };
+    const render = () => {
+      const it = list[at];
+      const back = it.dataset.back;
+      if (!back) backSide = false;
+      img.src = backSide && back ? back : it.dataset.src!;
+      img.alt = `${it.dataset.name} 제작 사례 ${at + 1}${backSide ? ' 뒷면' : ''}`;
+      nameEl.textContent = it.dataset.name!;
+      nowEl.textContent = pad(at + 1);
+      totalEl.textContent = pad(list.length);
+      sideBtn.hidden = !back;
+      sideBtn.textContent = backSide ? '앞면 보기' : '뒷면 보기';
+      lb.classList.toggle('is-single', list.length < 2);
+      unzoom();
+    };
+    const go = (d: number) => { at = (at + d + list.length) % list.length; backSide = false; render(); };
+
+    document.querySelectorAll<HTMLElement>('[data-pd-item]').forEach((item) => {
+      item.querySelector('.pd-photo')?.addEventListener('click', () => {
+        list = [...item.parentElement!.querySelectorAll<HTMLElement>('[data-pd-item]')];
+        at = list.indexOf(item);
+        backSide = false;
+        render();
+        lb.showModal();
+        document.documentElement.style.overflow = 'hidden';
+      });
+    });
+
+    // ---- 손동작 ----
+    // 누르기: 확대 전이면 누른 곳을 확대, 확대 중이면 원래대로. 사진 바깥 빈 곳을 누르면 닫힘
+    // PC: 확대 중 마우스로 잡아 끌어서 이동(손바닥 커서), 휠로 더 크게/작게
+    // 휴대폰: 확대 중 한 손가락으로 끌어서 이동, 두 손가락으로 벌리고 오므려 확대/축소
+    const pts = new Map<number, { x: number; y: number }>();
+    let moved = false;
+    let pinch: { d: number; s: number } | null = null;
+    let downAt = { x: 0, y: 0 };
+    const mid = () => { const [a, b] = [...pts.values()]; return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, d: Math.hypot(a.x - b.x, a.y - b.y) }; };
+
+    stage.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      stage.setPointerCapture(e.pointerId);
+      if (s > 1.01 || e.pointerType !== 'mouse') lb.classList.add('is-drag'); // 끄는 동안은 바로 따라오게
+      if (pts.size === 1) { moved = false; downAt = { x: e.clientX, y: e.clientY }; }
+      if (pts.size === 2) { pinch = { d: mid().d, s }; moved = true; }
+    });
+    stage.addEventListener('pointermove', (e) => {
+      const prev = pts.get(e.pointerId);
+      if (!prev) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 8) moved = true;
+      if (pts.size === 2 && pinch) {
+        const m = mid();
+        zoomAt(m.x, m.y, pinch.s * (m.d / pinch.d));
+      } else if (pts.size === 1 && s > 1.01) {
+        tx += e.clientX - prev.x;
+        ty += e.clientY - prev.y;
+        clamp();
+        apply();
+      }
+    });
+    const lift = (e: PointerEvent) => {
+      pts.delete(e.pointerId);
+      if (pts.size < 2) pinch = null;
+      if (pts.size === 0) lb.classList.remove('is-drag');
+    };
+    stage.addEventListener('pointerup', lift);
+    stage.addEventListener('pointercancel', lift);
+
+    stage.addEventListener('click', (e) => {
+      if (moved) { moved = false; return; } // 끌기 · 두 손가락 확대 직후 손을 뗀 건 누르기로 치지 않음
+      if (s > 1.01) { unzoom(); return; }
+      const g = geo();
+      const ex = e.clientX - (g.bx - g.cw / 2), ey = e.clientY - (g.by - g.ch / 2);
+      if (ex < 0 || ey < 0 || ex > g.cw || ey > g.ch) { lb.close(); return; }
+      zoomAt(e.clientX, e.clientY, ZOOM);
+    });
+    stage.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const ns = Math.min(MAX, Math.max(1, s * Math.exp(-e.deltaY * 0.0025)));
+      if (ns <= 1.01) { unzoom(); return; }
+      zoomAt(e.clientX, e.clientY, ns); // 마우스가 있는 곳을 중심으로
+    }, { passive: false });
+    window.addEventListener('resize', () => { if (lb.open) { clamp(); apply(); } });
+    // Esc: 확대 중이면 먼저 원래대로, 한 번 더 누르면 닫힘
+    lb.addEventListener('cancel', (e) => { if (s > 1.01) { e.preventDefault(); unzoom(); } });
+
+    sideBtn.addEventListener('click', () => { backSide = !backSide; render(); });
+    lb.querySelector('[data-lb-prev]')!.addEventListener('click', () => go(-1));
+    lb.querySelector('[data-lb-next]')!.addEventListener('click', () => go(1));
+    lb.querySelector('[data-lb-close]')!.addEventListener('click', () => lb.close());
+    lb.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') go(-1);
+      if (e.key === 'ArrowRight') go(1);
+    });
+    lb.addEventListener('close', () => { unzoom(); document.documentElement.style.overflow = ''; });
   }
 
   // 지금 화면에 있는 품목을 바로가기에서 초록으로

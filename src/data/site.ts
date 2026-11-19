@@ -76,6 +76,7 @@ export const servicesIntro = {
 // photo = 왼쪽 큰 원단 사진 (public 기준 경로). 비우면 아래 swatches 로 스와치북 모양을 그림
 // swatches = 스와치북 조각 (위에서부터 겹침). kind: woven(우븐 결) | knit(니트 골), base = 원단 색
 //   img 에 public 기준 사진 경로를 넣으면 그 조각은 실제 원단 사진으로 보임
+//   still: true 면 그 사진은 확대 움직임 없이 그대로 (잔무늬 체크는 확대하면 눈이 아픔)
 // specs = 조건 (제목 · 큰 글씨), cases = 개발 사례 목록 (이름 · 설명 · 종류)
 export const fabricDev = {
   photo: '',
@@ -88,13 +89,17 @@ export const fabricDev = {
   ],
   swatches: [
     { name: '몰스킨', type: '우븐', color: '차콜', base: '#3a3936', kind: 'woven', img: '/images/fabric/moleskin-charcoal.jpg' },
-    { name: '편직 원단', type: '다이마루', color: '', base: '#e9edf2', kind: 'knit', img: '/images/fabric/knit-stripe.jpg' },
+    { name: '편직 원단', type: '우븐', color: '', base: '#e9edf2', kind: 'woven', img: '/images/fabric/knit-stripe.jpg' },
+    { name: '체크 원단', type: '우븐', color: '레드', base: '#b3263a', kind: 'woven', img: '/images/fabric/check-red.jpg', still: true },
+    { name: '체크 원단', type: '우븐', color: '블루', base: '#1f4e85', kind: 'woven', img: '/images/fabric/check-blue.jpg', still: true },
+    { name: '체크 원단', type: '우븐', color: '오렌지', base: '#e2a35c', kind: 'woven', img: '/images/fabric/check-orange.jpg', still: true },
     { name: '몰스킨', type: '우븐', color: '올리브', base: '#5d5f45', kind: 'woven', img: '' },
-    { name: '편직 원단', type: '다이마루', color: '네이비', base: '#27304a', kind: 'knit', img: '' },
-  ] as { name: string; type: string; color: string; base: string; kind: 'woven' | 'knit'; img: string }[],
+    { name: '편직 원단', type: '우븐', color: '네이비', base: '#27304a', kind: 'woven', img: '' },
+  ] as { name: string; type: string; color: string; base: string; kind: 'woven' | 'knit'; img: string; still?: boolean }[],
   cases: [
     { name: '몰스킨', type: '우븐', desc: '촘촘한 조직과 부드러운 기모감이 특징인 면 소재' },
-    { name: '편직 원단', type: '다이마루', desc: '브랜드 요청 사양에 따라 별도로 개발한 편직 원단' },
+    { name: '편직 원단', type: '우븐', desc: '브랜드 요청 사양에 따라 별도로 개발한 편직 원단' },
+    { name: '체크 원단', type: '우븐', desc: '컬러별로 만나볼 수 있는 체크 원단' },
   ],
 };
 
@@ -526,7 +531,7 @@ export const standards = {
   quote: {
     en: 'Quotation',
     title: '견적이 정해지는 기준',
-    desc: '정해진 단가표 대신 아래 네 가지 항목으로 견적을 산출합니다. 같은 품목이라도 사양에 따라 단가가 상이할 수 있습니다.',
+    desc: '정해진 단가표 대신 아래 네 가지 항목으로 견적을 산출합니다.\n같은 품목이라도 원단과 사양에 따라 단가가 상이할 수 있습니다.',
     items: [
       { title: '수량', desc: '스타일별 수량과 색상 · 사이즈 구성. 총수량이 같더라도 옵션 구성에 따라 생산 단가가 달라질 수 있습니다.' },
       { title: '원단 · 부자재', desc: '원부자재는 옷본 수배 또는 고객사 사급 중 지정 가능하며, 동일 사양 기준 단가 경쟁력을 갖춘 소싱처가 있을 경우 별도로 제안해 드립니다.' },
