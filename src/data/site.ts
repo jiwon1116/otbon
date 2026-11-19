@@ -88,18 +88,19 @@ export const fabricDev = {
     { label: '최소 수량', value: '컬러당 1,500m', note: '원단 개발은 컬러당 최소 1,500m부터 진행' },
   ],
   swatches: [
-    { name: '몰스킨', type: '우븐', color: '차콜', base: '#3a3936', kind: 'woven', img: '/images/fabric/moleskin-charcoal.jpg' },
+    // 밝은 컬러 → 어두운 컬러 순 (원단끼리도, 같은 원단의 컬러끼리도)
     { name: '편직 원단', type: '우븐', color: '', base: '#e9edf2', kind: 'woven', img: '/images/fabric/knit-stripe.jpg' },
+    { name: '체크 원단', type: '우븐', color: '오렌지', base: '#e2a35c', kind: 'woven', img: '/images/fabric/check-orange.jpg', still: true },
     { name: '체크 원단', type: '우븐', color: '레드', base: '#b3263a', kind: 'woven', img: '/images/fabric/check-red.jpg', still: true },
     { name: '체크 원단', type: '우븐', color: '블루', base: '#1f4e85', kind: 'woven', img: '/images/fabric/check-blue.jpg', still: true },
-    { name: '체크 원단', type: '우븐', color: '오렌지', base: '#e2a35c', kind: 'woven', img: '/images/fabric/check-orange.jpg', still: true },
+    { name: '몰스킨', type: '우븐', color: '차콜', base: '#3a3936', kind: 'woven', img: '/images/fabric/moleskin-charcoal.jpg' },
     { name: '몰스킨', type: '우븐', color: '올리브', base: '#5d5f45', kind: 'woven', img: '' },
     { name: '편직 원단', type: '우븐', color: '네이비', base: '#27304a', kind: 'woven', img: '' },
   ] as { name: string; type: string; color: string; base: string; kind: 'woven' | 'knit'; img: string; still?: boolean }[],
   cases: [
-    { name: '몰스킨', type: '우븐', desc: '촘촘한 조직과 부드러운 기모감이 특징인 면 소재' },
     { name: '편직 원단', type: '우븐', desc: '브랜드 요청 사양에 따라 별도로 개발한 편직 원단' },
     { name: '체크 원단', type: '우븐', desc: '컬러별로 만나볼 수 있는 체크 원단' },
+    { name: '몰스킨', type: '우븐', desc: '촘촘한 조직과 부드러운 기모감이 특징인 면 소재' },
   ],
 };
 
@@ -114,12 +115,13 @@ export const products = {
   // 한 줄씩 끊어서 보임
   desc: ['다양한 브랜드와 함께 만들어 온', 'OTBON의 의류 제작 결과물을 담았습니다.'],
   items: [
-    { name: '셔츠', en: 'Shirt', imgs: ['/images/products/shirt-1.jpg', '/images/products/shirt-2.jpg', '/images/products/shirt-3.jpg'] },
-    { name: '재킷', en: 'Jacket', imgs: ['/images/products/jacket-2.jpg', '/images/products/jacket-3.jpg', '/images/products/jacket-4.jpg', { src: '/images/products/jacket-5.jpg', back: '/images/products/jacket-5-front.jpg' }, { src: '/images/products/jacket-6.jpg', back: '/images/products/jacket-6-back.jpg' }, '/images/products/jacket-1.jpg'] as ProductImg[] },
-    { name: '점퍼', en: 'Jumper', imgs: ['/images/products/jumper-1.jpg', '/images/products/jumper-5.jpg', '/images/products/jumper-6.jpg', '/images/products/jumper-2.jpg', '/images/products/jumper-3.jpg', '/images/products/jumper-4.jpg'] },
-    { name: '코트', en: 'Coat', imgs: ['/images/products/coat-2.jpg', '/images/products/coat-1.jpg', '/images/products/coat-3.jpg'] },
-    { name: '다운', en: 'Down', imgs: ['/images/products/down-1.jpg', '/images/products/down-4.jpg', '/images/products/down-5.jpg', '/images/products/down-2.jpg', '/images/products/down-3.jpg'] },
-    { name: '팬츠', en: 'Pants', imgs: ['/images/products/pants-1.jpg', '/images/products/pants-2.jpg', '/images/products/pants-3.jpg', '/images/products/pants-4.jpg', '/images/products/pants-5.jpg'] },
+    // 품목마다 사진은 밝은 옷 → 어두운 옷 순
+    { name: '셔츠', en: 'Shirt', imgs: ['/images/products/shirt-3.jpg', '/images/products/shirt-2.jpg', '/images/products/shirt-1.jpg'] },
+    { name: '재킷', en: 'Jacket', imgs: ['/images/products/jacket-1.jpg', '/images/products/jacket-3.jpg', '/images/products/jacket-2.jpg', '/images/products/jacket-4.jpg', { src: '/images/products/jacket-5.jpg', back: '/images/products/jacket-5-front.jpg' }, { src: '/images/products/jacket-6.jpg', back: '/images/products/jacket-6-back.jpg' }] as ProductImg[] },
+    { name: '점퍼', en: 'Jumper', imgs: ['/images/products/jumper-2.jpg', '/images/products/jumper-3.jpg', '/images/products/jumper-6.jpg', '/images/products/jumper-5.jpg', '/images/products/jumper-1.jpg', '/images/products/jumper-4.jpg'] },
+    { name: '다운', en: 'Down', imgs: ['/images/products/down-1.jpg', '/images/products/down-5.jpg', '/images/products/down-4.jpg', '/images/products/down-3.jpg', '/images/products/down-2.jpg'] },
+    { name: '코트', en: 'Coat', imgs: ['/images/products/coat-3.jpg', '/images/products/coat-2.jpg', '/images/products/coat-1.jpg'] },
+    { name: '팬츠', en: 'Pants', imgs: ['/images/products/pants-2.jpg', '/images/products/pants-5.jpg', '/images/products/pants-3.jpg', '/images/products/pants-4.jpg', '/images/products/pants-1.jpg'] },
   ],
 };
 
