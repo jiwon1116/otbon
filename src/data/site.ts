@@ -89,18 +89,18 @@ export const fabricDev = {
   ],
   swatches: [
     // 밝은 컬러 → 어두운 컬러 순 (원단끼리도, 같은 원단의 컬러끼리도)
-    { name: '편직 원단', type: '우븐', color: '', base: '#e9edf2', kind: 'woven', img: '/images/fabric/knit-stripe.jpg' },
+    { name: '몰스킨', type: '우븐', color: '차콜', base: '#3a3936', kind: 'woven', img: '/images/fabric/moleskin-charcoal.jpg' },
+    { name: '몰스킨', type: '우븐', color: '올리브', base: '#5d5f45', kind: 'woven', img: '' },
     { name: '체크 원단', type: '우븐', color: '오렌지', base: '#e2a35c', kind: 'woven', img: '/images/fabric/check-orange.jpg', still: true },
     { name: '체크 원단', type: '우븐', color: '레드', base: '#b3263a', kind: 'woven', img: '/images/fabric/check-red.jpg', still: true },
     { name: '체크 원단', type: '우븐', color: '블루', base: '#1f4e85', kind: 'woven', img: '/images/fabric/check-blue.jpg', still: true },
-    { name: '몰스킨', type: '우븐', color: '차콜', base: '#3a3936', kind: 'woven', img: '/images/fabric/moleskin-charcoal.jpg' },
-    { name: '몰스킨', type: '우븐', color: '올리브', base: '#5d5f45', kind: 'woven', img: '' },
+    { name: '편직 원단', type: '우븐', color: '', base: '#e9edf2', kind: 'woven', img: '/images/fabric/knit-stripe.jpg' },
     { name: '편직 원단', type: '우븐', color: '네이비', base: '#27304a', kind: 'woven', img: '' },
   ] as { name: string; type: string; color: string; base: string; kind: 'woven' | 'knit'; img: string; still?: boolean }[],
   cases: [
-    { name: '편직 원단', type: '우븐', desc: '브랜드 요청 사양에 따라 별도로 개발한 편직 원단' },
-    { name: '체크 원단', type: '우븐', desc: '컬러별로 만나볼 수 있는 체크 원단' },
     { name: '몰스킨', type: '우븐', desc: '촘촘한 조직과 부드러운 기모감이 특징인 면 소재' },
+    { name: '체크 원단', type: '우븐', desc: '컬러별로 만나볼 수 있는 체크 원단' },
+    { name: '편직 원단', type: '우븐', desc: '브랜드 요청 사양에 따라 별도로 개발한 편직 원단' },
   ],
 };
 
@@ -116,11 +116,11 @@ export const products = {
   desc: ['다양한 브랜드와 함께 만들어 온', 'OTBON의 의류 제작 결과물을 담았습니다.'],
   items: [
     // 품목마다 사진은 밝은 옷 → 어두운 옷 순
-    { name: '셔츠', en: 'Shirt', imgs: ['/images/products/shirt-3.jpg', '/images/products/shirt-2.jpg', '/images/products/shirt-1.jpg'] },
-    { name: '재킷', en: 'Jacket', imgs: ['/images/products/jacket-1.jpg', '/images/products/jacket-3.jpg', '/images/products/jacket-2.jpg', '/images/products/jacket-4.jpg', { src: '/images/products/jacket-5.jpg', back: '/images/products/jacket-5-front.jpg' }, { src: '/images/products/jacket-6.jpg', back: '/images/products/jacket-6-back.jpg' }] as ProductImg[] },
-    { name: '점퍼', en: 'Jumper', imgs: ['/images/products/jumper-2.jpg', '/images/products/jumper-3.jpg', '/images/products/jumper-6.jpg', '/images/products/jumper-5.jpg', '/images/products/jumper-1.jpg', '/images/products/jumper-4.jpg'] },
-    { name: '다운', en: 'Down', imgs: ['/images/products/down-1.jpg', '/images/products/down-5.jpg', '/images/products/down-4.jpg', '/images/products/down-3.jpg', '/images/products/down-2.jpg'] },
-    { name: '코트', en: 'Coat', imgs: ['/images/products/coat-3.jpg', '/images/products/coat-2.jpg', '/images/products/coat-1.jpg'] },
+    { name: '셔츠', en: 'Shirt', imgs: ['/images/products/shirt-1.jpg', '/images/products/shirt-3.jpg', '/images/products/shirt-2.jpg'] },
+    { name: '재킷', en: 'Jacket', imgs: ['/images/products/jacket-1.jpg', '/images/products/jacket-3.jpg', '/images/products/jacket-2.jpg', '/images/products/jacket-4.jpg', { src: '/images/products/jacket-5-front.jpg', back: '/images/products/jacket-5.jpg' }, { src: '/images/products/jacket-6.jpg', back: '/images/products/jacket-6-back.jpg' }] as ProductImg[] },
+    { name: '점퍼', en: 'Jumper', imgs: ['/images/products/jumper-1.jpg', '/images/products/jumper-5.jpg', '/images/products/jumper-6.jpg', '/images/products/jumper-4.jpg', '/images/products/jumper-2.jpg', '/images/products/jumper-3.jpg'] },
+    { name: '다운', en: 'Down', imgs: ['/images/products/down-1.jpg', '/images/products/down-4.jpg', '/images/products/down-5.jpg', '/images/products/down-3.jpg', '/images/products/down-2.jpg'] },
+    { name: '코트', en: 'Coat', imgs: ['/images/products/coat-2.jpg', '/images/products/coat-3.jpg', '/images/products/coat-1.jpg'] },
     { name: '팬츠', en: 'Pants', imgs: ['/images/products/pants-2.jpg', '/images/products/pants-5.jpg', '/images/products/pants-3.jpg', '/images/products/pants-4.jpg', '/images/products/pants-1.jpg'] },
   ],
 };
@@ -415,9 +415,9 @@ export const faqGroups = [
     items: [
       { q: '최소 주문 수량은 어떻게 되나요?', a: '컬러당 최소 100장부터 제작 가능합니다. 정확한 생산 가능 수량은 제품 사양에 따라 상담을 통해 안내해 드립니다.' },
       { q: '제작 기간은 얼마나 걸리나요?', a: '샘플 확정 후 본 생산까지 약 8~12주가 소요됩니다. 제품 사양과 생산 일정에 따라 기간은 달라질 수 있습니다.' },
-      { q: '여러 스타일을 동시에 진행할 수 있나요?', a: '네, 가능합니다. 여러 스타일을 동시에 진행할 수 있으며, 각 스타일의 사양과 일정에 맞춰 제작을 진행합니다.' },
-      { q: '기존에 제작했던 제품을 동일하게 재현할 수 있나요?', a: '기존 제품을 기준으로 최대한 유사하게 재현할 수 있습니다. 원단과 부자재 등 제작 조건에 따라 차이가 있을 수 있으나, 약 95% 수준의 완성도를 목표로 구현합니다.' },
-      { q: '생산 과정 중 진행 상황을 확인할 수 있나요?', a: '네, 가능합니다. 제작 진행 상황이 궁금하실 때 언제든 문의해 주시면 현재 진행 단계와 상황을 안내해 드립니다.' },
+      { q: '여러 스타일을 동시에 진행할 수 있나요?', a: '여러 스타일을 동시에 진행할 수 있으며, 각 스타일의 사양과 일정에 맞춰 제작을 진행합니다.' },
+      { q: '기존에 제작했던 제품을 동일하게 재현할 수 있나요?', a: '기존 제품을 기준으로 최대한 유사하게 재현할 수 있습니다. 원단과 부자재 등 제작 조건에 따라 차이가 있을 수 있으나, 95% 수준 이상의 완성도를 목표로 구현합니다.' },
+      { q: '생산 과정 중 진행 상황을 확인할 수 있나요?', a: '제작 진행 상황이 궁금하실 때 언제든 문의해 주시면 현재 진행 단계와 상황을 안내해 드립니다.' },
       { q: '제작 중 사양 변경이 가능한가요?', a: '샘플 제작 단계에서는 사양 변경이 가능합니다. 다만, 메인 생산에 투입된 이후에는 생산 일정과 공정상의 이유로 변경이 어려울 수 있습니다.' },
       { q: '납품은 어떻게 진행되나요?', a: '중국 현지에서 제품 출고 후 한국으로 운송되며, 국내 도착 이후 요청하신 물류지까지 안전하게 배송해 드립니다.' },
     ],
@@ -428,10 +428,10 @@ export const faqGroups = [
     desc: '원단 및 부자재 선택과 적용에 관한 질문',
     items: [
       { q: '동일한 원단을 구하기 어려운 경우 대체 원단을 제안받을 수 있나요?', a: '기존 원단과 100% 동일한 소재를 확보하기는 어려울 수 있으나, 유사한 특성과 질감을 가진 대체 원단을 찾아 제안해 드립니다.' },
-      { q: '원하는 혼용률이나 중량의 원단을 확보할 수 있나요?', a: '원하시는 소재의 스와치를 전달해 주시면, 혼용률과 중량 등 요청하신 조건에 맞는 원단을 찾아드립니다.' },
+      { q: '원하는 혼용률이나 중량의 원단을 확보할 수 있나요?', a: '원하시는 소재의 스와치를 전달해 주시면, 혼용률과 중량 등 요청하신 조건과 비슷한 원단을 찾아드립니다.' },
       { q: '지퍼, 단추, 스냅 등 요청한 부자재를 별도로 소싱할 수 있나요?', a: '원하시는 부자재의 참고 이미지를 전달해 주시면, 유사한 디자인과 사양의 제품을 최대한 찾아 제안해 드립니다.' },
       { q: '원하는 컬러에 맞춰 원단 염색을 진행할 수 있나요?', a: '원단 자체 염색은 최소 진행 수량(MOQ)이 적용됩니다. 원하시는 컬러와 수량을 전달해 주시면 진행 가능 여부를 안내해 드립니다.' },
-      { q: '워싱이나 후가공을 별도로 요청할 수 있나요?', a: '네, 가능합니다. 가먼트 다잉, 바이오 워싱 등 다양한 워싱 및 후가공 경험을 바탕으로 원하는 색감과 질감을 구현합니다. 요청하신 가공 사양에 따라 적용 가능 여부와 세부 조건을 안내해 드립니다.' },
+      { q: '워싱이나 후가공을 별도로 요청할 수 있나요?', a: '가먼트 다잉, 바이오 워싱 등 다양한 워싱 및 후가공 경험을 바탕으로 원하는 색감과 질감을 구현합니다. 요청하신 가공 사양에 따라 적용 가능 여부와 세부 조건을 안내해 드립니다.' },
     ],
   },
   {
@@ -439,9 +439,9 @@ export const faqGroups = [
     title: '패턴 및 샘플',
     desc: '패턴 개발과 샘플 제작에 관한 질문',
     items: [
-      { q: '기존 패턴을 활용해 다른 디자인으로 변경할 수 있나요?', a: '네, 가능합니다. 변경을 원하는 디자인과 세부 사양을 작업지시서 또는 샘플에 표시해 전달해 주시면, 해당 내용을 바탕으로 패턴을 수정할 수 있습니다.' },
-      { q: '사이즈별 패턴 그레이딩도 가능한가요?', a: '네, 가능합니다. 기준 사이즈와 사이즈별 그레이딩 편차를 전달해 주시면, 요청하신 치수에 맞춰 패턴 그레이딩을 진행합니다.' },
-      { q: '샘플 확정 후 패턴을 전달받을 수 있나요?', a: '네, 가능합니다. 최종 확정된 샘플을 기준으로 패턴을 정리하여 전달해 드립니다.' },
+      { q: '기존 패턴을 활용해 다른 디자인으로 변경할 수 있나요?', a: '변경을 원하는 디자인과 세부 사양을 작업지시서 또는 샘플에 표시해 전달해 주시면, 해당 내용을 바탕으로 패턴을 수정할 수 있습니다.' },
+      { q: '사이즈별 패턴 그레이딩도 가능한가요?', a: '기준 사이즈와 사이즈별 그레이딩 편차를 전달해 주시면, 요청하신 치수에 맞춰 패턴 그레이딩을 진행합니다.' },
+      { q: '샘플 확정 후 패턴을 전달받을 수 있나요?', a: '최종 확정된 샘플을 기준으로 패턴을 정리하여 전달해 드립니다.' },
     ],
   },
 ];

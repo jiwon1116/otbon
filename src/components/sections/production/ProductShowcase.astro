@@ -206,7 +206,8 @@ const EMPTY = 5;
   .pd-cursor.is-down { scale: 0.8; }
   @media (hover: hover) and (pointer: fine) {
     .pd-cursor.is-ready { display: block; }
-    .pd-row.is-pin .pd-track, .pd-row.is-pin .pd-track.is-drag { cursor: none; }
+    .pd-row.is-pin .pd-track, .pd-row.is-pin .pd-track.is-drag,
+    .pd-row.is-pin .pd-item.is-zoomable .pd-photo { cursor: none; }
   }
 
   /* 멈추지 않는 모드: 손으로 옆으로 밀어서 봄 */
