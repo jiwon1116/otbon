@@ -173,6 +173,7 @@ export const gallery = [
     { site: 12, factory: '동항 빈흥영 복장공장' },
     { site: 21, factory: '워싱공장' },
     { site: 3, factory: '단동 지사 샘플개발실' },
+    { site: 33, factory: '단동 지사 전경' },
     { site: 13, factory: '동항 빈흥영 복장공장' },
     { site: 22, factory: '워싱공장' },
     { site: 6, factory: '단동 지사 샘플개발실 제2현장' },
@@ -264,6 +265,7 @@ export const branches: { id: string; name: string; en: string; role: string; cit
     id: 'china', name: '중국 단동 지사', en: 'China', role: 'BRANCH 01', city: '랴오닝성 단동',
     desc: '패턴실과 샘플개발실을 직접 운영하며, 인근 협력 봉제 · 워싱 공장과 함께 높은 완성도의 고품질 생산을 맡습니다.',
     places: [
+      { name: '단동 지사 전경', kind: 'office', desc: '지사 건물 외관' },
       { name: '단동 지사 기술 패턴실', kind: 'office', desc: '패턴 설계 · 그레이딩' },
       { name: '단동 지사 샘플개발실', kind: 'office', desc: '샘플 제작 · 수정 보완' },
       { name: '단동 지사 샘플개발실 제2현장', kind: 'office', desc: '샘플 제작' },
