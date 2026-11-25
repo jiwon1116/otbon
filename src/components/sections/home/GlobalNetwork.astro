@@ -55,30 +55,37 @@ const offices = network.offices.map((o) => {
   // 도시마다 점 위치: pin 좌표가 있으면 그곳, 없으면 나라 한가운데
   const cities = o.cities.map((c) => {
     const [x, y] = projection(c.pin ?? geoCentroid(f))!;
-    return { ...c, x, y };
+    // region이 있으면 그 행정구역 모양만 강조, 없으면 나라 전체
+    const r = c.region ? (regions as any).features.find((g: any) => g.id === c.region) : null;
+    return { ...c, x, y, d: (r ? path(r) : path(f)) ?? '' };
   });
-  // 카메라는 그 나라 도시들의 가운데를 비춤
+  // 나라 한가운데 (움직임 없는 전체 화면에서 씀)
   const cx = cities.reduce((s, c) => s + c.x, 0) / cities.length;
   const cy = cities.reduce((s, c) => s + c.y, 0) / cities.length;
   const k = o.zoom ?? clamp(0.42 * Math.min(W / (x1 - x0), H / (y1 - y0)), 1, 2.6);
-  // region이 있으면 그 행정구역 모양만 강조
-  const r = o.region ? (regions as any).features.find((x: any) => x.id === o.region) : null;
-  return { ...o, d: path(f) ?? '', area: r ? path(r) ?? '' : '', cities, cx, cy, k };
+  return { ...o, d: path(f) ?? '', cities, cx, cy, k };
 });
 
-// 이동 경로 곡선: 본사 → 첫 지사 → 다음 지사 순으로 이어짐 (한국 → 단동 → 박지앙)
-// (바로 앞 장소의 첫 도시 → 이번 지사에서 그 도시와 가장 가까운 도시)
-const branches = offices.slice(1);
-const lines = branches.map((b, idx) => {
-  const from = offices[idx].cities[0];
-  const to = [...b.cities].sort((p, q) => Math.hypot(p.x - from.x, p.y - from.y) - Math.hypot(q.x - from.x, q.y - from.y))[0];
+// 정거장: 도시 하나가 장면 하나. 스크롤하면 여기 적힌 순서대로 하나씩 멈춤 (한국 → 단동 → 웨이하이 → 박지앙)
+// 같은 나라의 다음 도시로 갈 땐 카메라를 앞 도시 쪽으로 조금 남겨 둠 (살살 움직이고, 모바일에서 앞 도시 이름이 안 잘리게)
+const stops = offices.flatMap((o, office) =>
+  o.cities.map((c, i) => {
+    const prev = o.cities[i - 1] ?? c;
+    return { ...c, office, cx: c.x + (prev.x - c.x) * 0.4, cy: c.y + (prev.y - c.y) * 0.4, k: o.k };
+  }),
+);
+
+// 이동 경로 곡선: 앞 정거장 → 다음 정거장
+const lines = stops.slice(1).map((to, idx) => {
+  const from = stops[idx];
+  const bend = to.bend ?? 0.25;
   const mx = (from.x + to.x) / 2;
   const my = (from.y + to.y) / 2;
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   // 선 중간을 옆으로 살짝 띄워 곡선으로
-  const qx = mx - dy * 0.25;
-  const qy = my + dx * 0.25;
+  const qx = mx - dy * bend;
+  const qy = my + dx * bend;
   return `M${from.x.toFixed(1)} ${from.y.toFixed(1)} Q${qx.toFixed(1)} ${qy.toFixed(1)} ${to.x.toFixed(1)} ${to.y.toFixed(1)}`;
 });
 
@@ -93,20 +100,22 @@ const overview = {
 const toTransform = (c: { cx: number; cy: number; k: number }) =>
   `translate(${(W / 2 - c.k * c.cx).toFixed(1)} ${(H * 0.42 - c.k * c.cy).toFixed(1)}) scale(${c.k.toFixed(3)})`;
 
-// 장면 순서: 세계 전체 → 한국 → 중국 → 베트남
-const camera = JSON.stringify([worldCam, ...offices.map(({ cx, cy, k }) => ({ cx, cy, k }))]);
+// 장면 순서: 세계 전체 → 한국 → 단동 → 웨이하이 → 베트남
+const camera = JSON.stringify([worldCam, ...stops.map(({ cx, cy, k }) => ({ cx, cy, k }))]);
 const intro = network.intro;
+// 정거장이 어느 나라(offices 순서)인지. 글자 묶음은 나라마다 하나라서, 같은 나라 안에서 옮길 땐 그대로 있음
+const stopOffices = JSON.stringify(stops.map((st) => st.office));
 // 나라마다 지사 소개 페이지 주소 (지도와 같은 순서). 지도를 누르면 지금 보이는 나라로 감
 const hrefs = offices.map((_, i) => (branchInfo[i] ? `/branches#${branchInfo[i].id}` : '/branches'));
 ---
 
 <!--
   본사·지사 지도
-  - 검은 화면에 회색 지도. 처음엔 세계 지도 전체가 보이고, 스크롤하면 한국으로 확대된 뒤 한국 → 중국 → 베트남 순으로 지도가 이동하며 나라가 강조되고,
+  - 검은 화면에 회색 지도. 처음엔 세계 지도 전체가 보이고, 스크롤하면 한국으로 확대된 뒤 한국 → 중국(단동 → 웨이하이) → 베트남 순으로 지도가 이동하며 나라가 강조되고,
     본사에서 지사로 선이 그려짐
   - '동작 줄이기' 사용자나 JS가 꺼진 환경에선 세 나라가 모두 강조된 지도 한 장으로 보임
 -->
-<section id="network" class="net relative bg-ink text-white" data-network data-camera={camera} data-w={W} data-h={H} data-hrefs={JSON.stringify(hrefs)}>
+<section id="network" class="net relative bg-ink text-white" data-network style={`--scenes: ${stops.length + 1}`} data-stop-offices={stopOffices} data-camera={camera} data-w={W} data-h={H} data-hrefs={JSON.stringify(hrefs)}>
   <div class="net-stage relative h-svh min-h-[560px] overflow-hidden">
     <svg
       class="net-map absolute inset-0 h-full w-full"
@@ -123,31 +132,29 @@ const hrefs = offices.map((_, i) => (branchInfo[i] ? `/branches#${branchInfo[i].
         </g>
         <!-- region이 있는 나라는 땅은 회색 그대로 두고, 그 행정구역만 칠함 -->
         <g class="net-land">
-          {offices.map((o) => o.area && <path d={o.d} />)}
+          {offices.map((o) => o.cities.some((c) => c.region) && <path d={o.d} />)}
         </g>
         <g class="net-offices">
-          {offices.map((o) => <path class="net-office" d={o.area || o.d} />)}
+          {stops.map((st) => <path class="net-office" d={st.d} />)}
         </g>
         <g class="net-lines">
           {lines.map((d) => <path class="net-line" d={d} pathLength="1" />)}
         </g>
         <!-- 도시: 점 + 이름. 안쪽 묶음(net-dot-in)은 확대해도 크기가 그대로이게 JS가 1/배율로 줄임 -->
         <g class="net-dots">
-          {offices.map((o, i) =>
-            o.cities.map((c) => {
-              const left = c.side === 'left';
-              return (
-                <g class="net-dot" data-office={i} transform={`translate(${c.x.toFixed(1)} ${c.y.toFixed(1)})`}>
-                  <g class="net-dot-in" transform={`scale(${(1 / overview.k).toFixed(3)})`}>
-                    <circle class="net-pulse" r="5" />
-                    <circle class="net-core" r="5" />
-                    <text class="net-city" x={left ? -14 : 14} y={c.sub ? -2 : 6} text-anchor={left ? 'end' : 'start'}>{c.name}</text>
-                    {c.sub && <text class="net-city-sub" x={left ? -14 : 14} y="15" text-anchor={left ? 'end' : 'start'}>{c.sub}</text>}
-                  </g>
+          {stops.map((c) => {
+            const left = c.side === 'left';
+            return (
+              <g class="net-dot" transform={`translate(${c.x.toFixed(1)} ${c.y.toFixed(1)})`}>
+                <g class="net-dot-in" transform={`scale(${(1 / overview.k).toFixed(3)})`}>
+                  <circle class="net-pulse" r="5" />
+                  <circle class="net-core" r="5" />
+                  <text class="net-city" x={left ? -14 : 14} y={c.sub ? -2 : 6} text-anchor={left ? 'end' : 'start'}>{c.name}</text>
+                  {c.sub && <text class="net-city-sub" x={left ? -14 : 14} y="15" text-anchor={left ? 'end' : 'start'}>{c.sub}</text>}
                 </g>
-              );
-            }),
-          )}
+              </g>
+            );
+          })}
         </g>
         </g>
       </g>
@@ -242,13 +249,13 @@ const hrefs = offices.map((_, i) => (branchInfo[i] ? `/branches#${branchInfo[i].
   .net-panel { display: none; text-shadow: 0 2px 16px rgb(0 0 0 / 0.45); }
 
   /* 움직임 모드: 긴 섹션 안에서 화면이 고정되고, 스크롤로 장면이 넘어감 */
-  .motion .net { height: 500vh; }
+  .motion .net { height: calc((var(--scenes) + 1) * 100vh); } /* 장면 하나에 화면 한 개 길이 */
   .net-world { opacity: 0; }
   .motion .net-stage { position: sticky; top: 0; }
   .motion .net-static { display: none; }
   .motion .net-panel { display: block; opacity: 0; will-change: opacity, transform; }
   .motion .net-cam { will-change: transform; }
-  .motion .net-office { fill: #262626; }
+  .motion .net-office { fill: #3a3a3a; } /* 아직 강조 전엔 주변 땅과 같은 색 (바다처럼 보이지 않게) */
   .motion .net-office.is-active { fill: var(--color-accent); }
   .motion .net-office.is-past { fill: var(--color-accent); opacity: 0.4; }
   .motion .net-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
@@ -301,6 +308,8 @@ const hrefs = offices.map((_, i) => (branchInfo[i] ? `/branches#${branchInfo[i].
     const smooth = (t: number) => t * t * (3 - 2 * t);
 
     let current = -1;
+    // 장면마다 보여줄 글자 묶음 번호 (0 = 첫 장면, 그다음은 나라 순서)
+    const scenePanel = [0, ...(JSON.parse(section.dataset.stopOffices!) as number[]).map((o) => o + 1)];
 
     // 세로로 긴 화면(모바일)에선 세계 지도 양옆이 잘리므로, 첫 장면을 한국 쪽으로 옮겨 한국이 보이게 함
     const world0 = { ...cams[0] };
@@ -340,7 +349,7 @@ const hrefs = offices.map((_, i) => (branchInfo[i] ? `/branches#${branchInfo[i].
       // 점과 도시 이름 크기는 확대와 상관없이 같게
       dotInner.forEach((g) => g.setAttribute('transform', `scale(${1 / k})`));
 
-      // 본사 → 지사 선: 해당 지사로 넘어가는 동안 그려짐 (장면 0은 세계, 1부터 나라)
+      // 앞 정거장 → 다음 정거장 선: 넘어가는 동안 그려짐 (장면 0은 세계, 1부터 정거장)
       // 화면이 확대되며 다가가는 속도에 맞춰 선 끝이 늘 화면 안에서 목적지로 다가가게 함
       // (일정한 속도로 그리면 확대가 빨라서 선 끝이 화면 밖으로 빠져나감)
       lines.forEach((line, j) => {
@@ -348,11 +357,15 @@ const hrefs = offices.map((_, i) => (branchInfo[i] ? `/branches#${branchInfo[i].
         const tt = clamp01(s - 1 - j);
         const u = tt > 0 && tt < 1 ? 1 - (cams[j + 1].k / k) * (1 - tt) : tt;
         line.style.strokeDashoffset = String(1 - clamp01(u));
+        // 끝이 둥근 선은 길이가 0이어도 점으로 보여서 숨김
+        line.style.opacity = u > 0 ? '1' : '0';
       });
 
-      // 글자: 지금 나라와 가까울수록 진하게
+      // 글자: 지금 나라와 가까울수록 진하게 (같은 나라의 정거장 사이에선 그대로)
       panels.forEach((panel, j) => {
-        const d = s - j;
+        const first = scenePanel.indexOf(j);
+        const last = scenePanel.lastIndexOf(j);
+        const d = s - Math.min(last, Math.max(first, s));
         const o = clamp01(1 - Math.abs(d) * 2.5);
         panel.style.opacity = String(o);
         panel.style.transform = `translateY(${d * -40}px)`;
@@ -367,14 +380,14 @@ const hrefs = offices.map((_, i) => (branchInfo[i] ? `/branches#${branchInfo[i].
           c.classList.toggle('is-active', j === active);
           c.classList.toggle('is-past', j < active);
         });
-        dots.forEach((dot) => dot.classList.toggle('is-shown', Number(dot.dataset.office) <= active));
+        dots.forEach((dot, j) => dot.classList.toggle('is-shown', j <= active));
       }
     };
 
     // 지도를 누르면 지금 보이는 나라의 지사 소개로 (첫 장면이면 지사 소개 맨 위)
     const hrefs: string[] = JSON.parse(section.dataset.hrefs!);
     section.querySelector('.net-map')!.addEventListener('click', () => {
-      location.href = current >= 0 ? hrefs[current] : '/branches';
+      location.href = current >= 0 ? hrefs[scenePanel[current + 1] - 1] : '/branches';
     });
 
     onScrollFrame(render, measure);

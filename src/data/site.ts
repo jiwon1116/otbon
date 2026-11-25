@@ -208,13 +208,14 @@ export const gallery = [
 
 // 본사·지사 지도. 스크롤하면 위에서부터 순서대로 지도가 이동하며 나라가 강조됩니다.
 // code = 나라 번호(ISO 3166 숫자 코드). 한국 410, 중국 156, 베트남 704
-// 첫 번째가 본사이고, 적힌 순서대로 선이 이어집니다. (본사 → 첫 지사 → 다음 지사)
+// 첫 번째가 본사이고, 적힌 순서대로 선이 이어집니다. (본사 → 첫 지사 → 다음 지사, 한 지사에 도시가 여럿이면 적힌 순서대로 하나씩 멈추며 거쳐 감)
 // cities = 지도에 점과 이름이 찍히는 도시. pin = [경도, 위도] (비우면 나라 한가운데),
 //   side = 이름을 점의 왼쪽/오른쪽 중 어디에 쓸지, sub = 이름 밑 작은 글씨
-type City = { name: string; sub?: string; pin?: [number, number]; side?: 'left' | 'right' };
-// zoom = 그 장면 확대 배율 (비우면 나라 크기에 맞춰 자동)
-// region = 나라 전체 대신 이 행정구역만 초록으로 칠함 (src/data/regions.json 의 id, 비우면 나라 전체)
-type Office = { code: number; name: string; role: string; caption: string[]; cities: City[]; zoom?: number; region?: string };
+//   bend = 이 도시로 들어오는 선이 휘는 정도 (비우면 0.25, 음수면 반대쪽으로 휨)
+//   region = 나라 전체 대신 이 행정구역만 초록으로 칠함 (src/data/regions.json 의 id, 비우면 나라 전체)
+type City = { name: string; sub?: string; pin?: [number, number]; side?: 'left' | 'right'; bend?: number; region?: string };
+// zoom = 그 장면 확대 배율. 작을수록 멀리서 보임 (비우면 나라 크기에 맞춰 자동. 1.3 아래로는 지도 가장자리가 보일 수 있음)
+type Office = { code: number; name: string; role: string; caption: string[]; cities: City[]; zoom?: number };
 
 // intro = 첫 장면(세계 지도 전체)에 나오는 글자
 export const network: { eyebrow: string; intro: { caption: string[]; name: string }; offices: Office[] } = {
@@ -222,19 +223,22 @@ export const network: { eyebrow: string; intro: { caption: string[]; name: strin
   intro: { caption: ['한국 본사에서 중국, 베트남 지사까지', '옷본의 생산 네트워크 입니다.'], name: 'Network' },
   offices: [
     {
-      code: 410, name: 'Korea', role: 'HEADQUARTERS',
+      code: 410, name: 'Korea', role: 'HEADQUARTERS', zoom: 1.7,
       caption: ['견적부터 납품까지 전 과정을 관리하는', '옷본의 본사, 대한민국 입니다.'],
-      cities: [{ name: '한국', side: 'right' }],
+      cities: [{ name: 'Korea', side: 'right' }],
     },
     {
-      code: 156, name: 'China', role: 'BRANCH 01', zoom: 2.6, region: 'CN-LN', // 중국 전체 말고 랴오닝성만
+      code: 156, name: 'China', role: 'BRANCH 01', zoom: 1.7,
       caption: ['높은 완성도의 고품질 생산을 맡는', '옷본의 중국 단동 지사 입니다.'],
-      cities: [{ name: '단동', sub: '랴오닝성', pin: [124.39, 40.13], side: 'left' }],
+      cities: [
+        { name: 'Dandong', sub: 'Liaoning', pin: [124.39, 40.13], side: 'left', region: 'CN-LN' },
+        { name: 'Weihai', sub: 'Shandong', pin: [122.12, 37.51], side: 'right', bend: 0.05, region: 'CN-SD' },
+      ],
     },
     {
-      code: 704, name: 'Vietnam', role: 'BRANCH 02', zoom: 7, region: 'VN-54', // 베트남 전체 말고 박지앙성만
+      code: 704, name: 'Vietnam', role: 'BRANCH 02', zoom: 3,
       caption: ['균일한 품질과 안정적인 대량 생산을 담당하는', '옷본의 베트남 지사입니다.'],
-      cities: [{ name: '박지앙', sub: '하노이', pin: [106.2, 21.27], side: 'left' }],
+      cities: [{ name: 'Bac Giang', sub: 'Hanoi', pin: [106.2, 21.27], side: 'left', region: 'VN-54' }],
     },
   ],
 };
